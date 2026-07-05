@@ -1,0 +1,3 @@
+This directory is reserved for theme images (logos, team photos, gallery uploads, and icons).
+Please place your png, jpg, svg, or webp assets here.
+File paths will map dynamically as: get_template_directory_uri() . '/assets/images/your-image.png'

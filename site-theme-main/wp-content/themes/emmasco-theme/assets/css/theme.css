@@ -1,0 +1,139 @@
+/**
+ * Emmasco Reinigungsteam Theme Styling Presets
+ * Custom CSS component utility styles complementing Tailwind CSS Play engine.
+ *
+ * @package Emmasco_Theme
+ */
+
+/* Custom Typography & Smooth Scroll */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Poppins', system-ui, -apple-system, sans-serif;
+  --color-primary: #0056D6;
+  --color-secondary: #2FB5FF;
+  --color-bg-clean: #F6FAFF;
+  --shadow-minimal: 0 10px 25px rgba(0, 86, 214, 0.06);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-clean);
+  color: #1A202C;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism Navigation and Rails */
+.glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Minimalism Card structures */
+.card-minimal {
+  background: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 8px 20px rgba(0, 86, 214, 0.03);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .card-minimal {
+  background: #1E293B; /* Slate-800 */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-minimal:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(0, 86, 214, 0.08);
+}
+
+/* Trust Badges and labels */
+.trust-badge-minimal {
+  font-size: 11px;
+  font-weight: 800;
+  color: #0056D6;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  background: rgba(0, 86, 214, 0.05);
+  padding: 6px 14px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dark .trust-badge-minimal {
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+/* Interactive Hover States */
+.btn-primary-glow {
+  background-color: var(--color-primary);
+  box-shadow: 0 4px 15px rgba(0, 86, 214, 0.2);
+  transition: all 0.25s ease;
+}
+
+.btn-primary-glow:hover {
+  background-color: #0047B3;
+  box-shadow: 0 6px 20px rgba(0, 86, 214, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scroll Triggered Reveal Animation */
+.fade-in-up-scroll {
+  opacity: 0;
+  transform: translateY(30px);
+  will-change: opacity, transform;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fade-in-up-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+/* WordPress Native Buttons styling fallback */
+.wp-block-button__link {
+  background-color: var(--color-primary);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.wp-block-button__link:hover {
+  background-color: #0047B3;
+  transform: translateY(-1px);
+}

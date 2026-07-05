@@ -1,0 +1,197 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: Georgia, serif;
+  --color-primary: #0056D6;
+  --color-secondary: #2FB5FF;
+  --color-bg-clean: #F6FAFF;
+  --shadow-minimal: 0 10px 25px rgba(0, 86, 214, 0.06);
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: #F6FAFF;
+    color: #1A202C; /* Clean Minimalism text color */
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Base style overrides for dark mode */
+.dark body {
+  background-color: #0F172A; /* Elegant Slate-900 background */
+  color: #EDF2F7; /* Eye-safe Slate-100 text */
+}
+
+/* Glassmorphism for Header & Floating elements */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .glass {
+  background: rgba(15, 23, 42, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Minimalism Card pattern */
+.card-minimal {
+  background: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0, 86, 214, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .card-minimal {
+  background: #1E293B; /* Slate-800 card */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-minimal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(0, 86, 214, 0.1);
+}
+
+/* Trust Badges */
+.trust-badge-minimal {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0056D6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 86, 214, 0.05);
+  padding: 6px 12px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Elegant custom animations for transition views */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards;
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 4s ease-in-out infinite;
+}
+
+/* Responsive tweaks for touch-friendly dashboard targets */
+@media (max-width: 640px) {
+  button, select, input, textarea {
+    min-height: 44px;
+  }
+}
+
+/* --- Premium Dark Mode Minimalism Overrides --- */
+.dark {
+  --color-primary: #3B82F6;
+  --color-bg-clean: #0F172A;
+  --shadow-minimal: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom spin-slow animation specifically for the Sun icon */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spinSlow 12s linear infinite;
+}
+
+/* Force elegant minimalism text contrast in dark mode */
+.dark h1, .dark h2, .dark h3, .dark h4 {
+  color: #F8FAFC !important;
+}
+
+.dark p, .dark .text-slate-650, .dark .text-slate-600, .dark .text-gray-600 {
+  color: #CBD5E1 !important;
+}
+
+.dark .text-slate-700, .dark .text-gray-700, .dark .text-slate-800, .dark .text-gray-800 {
+  color: #E2E8F0 !important;
+}
+
+.dark .text-slate-900, .dark .text-gray-900, .dark .text-blue-950 {
+  color: #F8FAFC !important;
+}
+
+.dark .text-slate-500, .dark .text-gray-500 {
+  color: #94A3B8 !important;
+}
+
+/* Background overrides for generic sections and custom elements */
+.dark section.bg-white, .dark div.bg-white {
+  background-color: #0F172A !important; /* Elegant black/slate canvas flow */
+}
+
+/* Main hero and highlighted stripes mapping to slate gradients */
+.dark .from-white {
+  --tw-gradient-from: #0F172A !important;
+  --tw-gradient-to: #1E293B !important;
+}
+
+.dark .via-blue-50\/50, .dark .via-slate-50, .dark .via-gray-50 {
+  --tw-gradient-via: #111827 !important;
+}
+
+.dark .to-blue-100\/30 {
+  --tw-gradient-to: #1E293B !important;
+}
+
+.dark .bg-slate-50, .dark .bg-gray-50 {
+  background-color: #1E293B !important;
+}
+
+.dark .bg-[#F6FAFF], .dark .bg-blue-50 {
+  background-color: #0F172A !important;
+}
+
+/* Border color mapping */
+.dark .border-blue-50, 
+.dark .border-slate-100, 
+.dark .border-gray-100, 
+.dark .border-slate-150 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .border-blue-105, 
+.dark .border-gray-200, 
+.dark .border-slate-200 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Styled lists & components indicators */
+.dark .trust-badge-minimal {
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.08);
+}

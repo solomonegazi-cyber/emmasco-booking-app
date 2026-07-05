@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="de" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMMASCO Reinigungsteam - Haushaltshilfe & Alltagsbegleitung Berlin</title>
+
+    <!-- Tailwind Play Engine CDN for immediate graphic rendering -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0056D6',
+                        secondary: '#2FB5FF',
+                        slate: {
+                            850: '#1E293B',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Load Theme styling presets -->
+    <link rel="stylesheet" href="./assets/css/theme.css">
+
+    <!-- Theme Hydration script to prevent flickering -->
+    <script>
+        if (localStorage.getItem('emmasco_theme') === 'dark' || 
+            (!('emmasco_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        if (!localStorage.getItem('emmasco_lang')) {
+            localStorage.setItem('emmasco_lang', 'de');
+        }
+    </script>
+
+    <!-- Load Lucide Icons UMD Build -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#F6FAFF] dark:bg-[#0F172A] text-slate-900 dark:text-slate-100 transition-colors duration-300 antialiased">
+
+    <!-- Header Navigation Bar -->
+    <header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 glass border-b border-blue-50/50 dark:border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <span class="w-11 h-11 bg-gradient-to-tr from-[#0056D6] to-[#2FB5FF] text-white rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-all">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </span>
+                    <div>
+                        <span class="text-lg font-black tracking-tight text-blue-950 dark:text-white block group-hover:text-[#0056D6] dark:group-hover:text-[#2FB5FF] transition-colors leading-none">
+                            EMMASCO
+                        </span>
+                        <span class="text-[10px] font-black tracking-widest text-[#2FB5FF] uppercase block mt-1 leading-none">
+                            REINIGUNGSTEAM
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Desktop Links -->
+                <nav class="hidden md:flex items-center gap-7">
+                    <a href="#services-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navServices">Unsere Leistungen</a>
+                    <a href="#about-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navAbout">Über Uns</a>
+                    <a href="#gallery-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navGallery">Galerie</a>
+                    <a href="#faq-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navFAQ">Häufige Fragen</a>
+                    <a href="#blog-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navBlog">Ratgeber</a>
+                    <a href="#contact-anchor" class="text-sm font-semibold text-slate-650 dark:text-slate-300 hover:text-[#0056D6] dark:hover:text-[#2FB5FF] transition-colors" data-translate="navContact">Kontakt</a>
+                </nav>
+
+                <!-- Actions tray -->
+                <div class="flex items-center gap-3">
+                    
+                    <!-- Language Selection -->
+                    <button id="lang-switch-btn" class="p-2 rounded-xl border border-slate-100 dark:border-slate-800 text-xs font-black tracking-wider text-slate-650 dark:text-slate-300 hover:bg-blue-50/60 dark:hover:bg-slate-880 cursor-pointer select-none transition-all">
+                        DE
+                    </button>
+
+                    <!-- Dark Mode switch -->
+                    <button id="theme-toggle" class="p-2 rounded-xl text-slate-650 dark:text-amber-400 hover:bg-blue-50/60 dark:hover:bg-slate-800 cursor-pointer transition-all" aria-label="Toggle layout theme styling">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Button CTA -->
+                    <a href="#booking-anchor" class="hidden sm:inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#0056D6] hover:bg-[#0047b3] text-white text-xs font-black rounded-xl cursor-pointer shadow-md transform hover:-translate-y-0.5 transition-all">
+                        <span data-translate="btnNavBook">Jetzt Buchen</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+
+                    <!-- Drawer Toggle -->
+                    <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl hover:bg-blue-50/60 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 cursor-pointer">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer menu -->
+        <div id="mobile-drawer" class="hidden md:hidden absolute top-20 left-0 right-0 bg-white dark:bg-[#0F172A] border-b border-blue-50 dark:border-slate-800 p-6 flex flex-col gap-4 animate-fade-in shadow-xl">
+            <a href="#services-anchor" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mobile-drawer-link" data-translate="navServices">Unsere Leistungen</a>
+            <a href="#about-anchor" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mobile-drawer-link" data-translate="navAbout">Über Uns</a>
+            <a href="#gallery-anchor" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mobile-drawer-link" data-translate="navGallery">Galerie</a>
+            <a href="#faq-anchor" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mobile-drawer-link" data-translate="navFAQ">Häufige Fragen</a>
+            <a href="#blog-anchor" class="text-sm font-semibold text-slate-700 dark:text-slate-300 mobile-drawer-link" data-translate="navBlog">Ratgeber</a>
+            <a href="#contact-anchor" class="text-sm font-semibold text-slate-705 dark:text-slate-300 mobile-drawer-link" data-translate="navContact">Kontakt</a>
+            
+            <div class="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
+            
+            <a href="#booking-anchor" class="w-full inline-flex items-center justify-center gap-1.5 py-3 bg-[#0056D6] text-white text-xs font-black rounded-xl mobile-drawer-link" data-translate="btnNavBook">
+                Jetzt Buchen
+            </a>
+        </div>
+    </header>
+
+    <main class="pt-20">
+
+        <!-- HERO SECTION -->
+        <section class="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32 bg-gradient-to-b from-white via-blue-50/20 to-[#F6FAFF] dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 transition-colors duration-300">
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[550px] h-[550px] bg-blue-400/10 dark:bg-blue-500/5 rounded-full blur-[120px] pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <!-- Left Info column -->
+                    <div class="lg:col-span-7 space-y-6 text-left">
+                        <!-- Badge -->
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 dark:bg-blue-400/10 rounded-full border border-blue-500/20 dark:border-blue-400/20">
+                            <span class="w-1.5 h-1.5 bg-[#0056D6] dark:bg-blue-400 rounded-full animate-ping"></span>
+                            <span class="text-[10px] font-black tracking-widest text-[#0056D6] dark:text-blue-400 uppercase" data-translate="heroBadge">Qualifizierte Pflege & Glanz in Berlin</span>
+                        </div>
+
+                        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-850 dark:text-white leading-[1.1] tracking-tight">
+                            <span data-translate="heroTitle1">Haushaltshilfe &</span><br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#0056D6] to-[#2FB5FF] drop-shadow-sm font-black" data-translate="heroTitleAccent">Alltagsbegleitung</span><br>
+                            <span data-translate="heroTitle2">mit Herz und Empathie.</span>
+                        </h1>
+
+                        <p class="text-base sm:text-lg text-slate-600 dark:text-slate-350 max-w-xl font-normal leading-relaxed" data-translate="heroDesc">
+                            Wir entlasten Senioren im Alltag, pflegen Ihr Zuhause glänzend sauber und unterstützen pflegende Angehörige. Staatlich anerkannt – zu 100% über alle Pflegekassen abrechenbar.
+                        </p>
+
+                        <!-- Highlights -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <div class="flex items-center gap-3 bg-white/60 dark:bg-slate-900/60 p-3 rounded-2xl border border-blue-50/50 dark:border-slate-800/80">
+                                <span class="w-10 h-10 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <span class="block text-xs font-black text-slate-700 dark:text-white" data-translate="feature1Title">SGB XI Entlastungsbetrag</span>
+                                    <span class="block text-[10px] text-slate-500" data-translate="feature1Desc">Abrechnung direkt mit allen Kassen</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 bg-white/60 dark:bg-slate-900/60 p-3 rounded-2xl border border-blue-50/50 dark:border-slate-800/80">
+                                <span class="w-10 h-10 bg-[#0056D6]/10 text-[#0056D6] dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <span class="block text-xs font-black text-slate-700 dark:text-white" data-translate="feature2Title">Premium-Reinheit</span>
+                                    <span class="block text-[10px] text-slate-500" data-translate="feature2Desc">Professionell, gründlich & diskret</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CTA Button Array -->
+                        <div class="flex flex-col sm:flex-row items-center gap-4 pt-4">
+                            <a href="#booking-anchor" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-[#0056D6] hover:bg-[#0047b3] text-white font-extrabold text-sm rounded-2xl cursor-pointer shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                <span data-translate="btnBooking">Kostenloses Angebot anfordern</span>
+                            </a>
+                            <a href="#services-anchor" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-[#0056D6] dark:text-blue-400 font-extrabold text-sm rounded-2xl cursor-pointer border border-blue-100 dark:border-slate-800 shadow-sm transition-all">
+                                <span data-translate="btnReadMore">Leistungen entdecken</span>
+                            </a>
+                        </div>
+
+                        <!-- Trust Badge reviews -->
+                        <div class="flex items-center gap-6 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+                            <div class="flex items-center gap-1.5 cursor-pointer">
+                                <div class="flex items-center text-amber-500">
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                    <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+                                </div>
+                                <span class="text-xs font-black text-slate-700 dark:text-white">4.9 / 5.0</span>
+                            </div>
+                            <div class="text-slate-400 text-xs font-semibold">
+                                • <span class="ml-2 font-bold text-slate-600 dark:text-slate-300" data-translate="totalRatings">Über 120+ verifizierte Kundenrezensionen</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Circular Badge -->
+                    <div class="lg:col-span-5 relative w-full flex items-center justify-center">
+                        <div class="relative w-full max-w-[450px] aspect-square rounded-full bg-gradient-to-tr from-[#0056D6]/20 to-[#2FB5FF]/20 dark:from-sky-500/10 dark:to-blue-500/10 p-10 flex items-center justify-center">
+                            <div class="w-full h-full rounded-full bg-white dark:bg-slate-950 shadow-[0_20px_50px_rgba(0,86,214,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col items-center justify-center p-8 border border-blue-50/50 dark:border-slate-800 text-center space-y-4">
+                                <div class="w-16 h-16 bg-blue-50 text-[#0056D6] dark:bg-slate-900 dark:text-blue-400 rounded-3xl flex items-center justify-center relative shadow-sm">
+                                    <i data-lucide="badge-check" class="w-9 h-9"></i>
+                                    <span class="absolute -top-1 -right-1 w-4.5 h-4.5 bg-emerald-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">✓</span>
+                                </div>
+                                <h3 class="text-xl font-extrabold text-slate-800 dark:text-white" data-translate="badgeTitle">Staatlich Anerkannt</h3>
+                                <p class="text-xs text-slate-500 leading-relaxed" data-translate="badgeDesc">
+                                    Wir erfüllen alle gesetzlichen Normen des deutschen Staates für Betreuungs- und Entlastungsleistungen nach § 45a SGB XI.
+                                </p>
+                                <ul class="text-[11px] font-bold text-slate-600 dark:text-slate-350 space-y-1.5 self-start mx-auto">
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> <span data-translate="bullet1">100% pflegekassentauglich</span></li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> <span data-translate="bullet2">Volle Unterstützung ab Pflegegrad 1</span></li>
+                                    <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> <span data-translate="bullet3">Ohne Zuzahlung möglich</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SERVICES SECTION -->
+        <span id="services-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
+                
+                <!-- Section Title -->
+                <div class="max-w-2xl mx-auto space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="sectionServicesLabel">UNSER PROGRAMM</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-850 dark:text-white leading-tight" data-translate="sectionServicesTitle">Maßgeschneiderte Hilfen für Ihr Zuhause</h2>
+                    <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400" data-translate="sectionServicesDesc">
+                        Filtern Sie unsere Leistungen nach Ihren Wünschen. Jede Leistung ist flexibel buchbar und qualifiziert aufbereitet.
+                    </p>
+                </div>
+
+                <!-- Tabs filtering row -->
+                <div class="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
+                    <button class="service-tab-btn px-5 py-2.5 bg-[#0056D6] text-white text-xs font-black rounded-xl cursor-pointer" data-category="all" data-translate="tabAll">Alle</button>
+                    <button class="service-tab-btn px-5 py-2.5 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-350 text-xs font-black rounded-xl cursor-pointer" data-category="household" data-translate="tabHousehold">Haushalt & Alltag</button>
+                    <button class="service-tab-btn px-5 py-2.5 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-350 text-xs font-black rounded-xl cursor-pointer" data-category="cleaning" data-translate="tabCleaning">Reinigung</button>
+                    <button class="service-tab-btn px-5 py-2.5 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-350 text-xs font-black rounded-xl cursor-pointer" data-category="companion" data-translate="tabCompanion">Kassenbegleitung</button>
+                    <button class="service-tab-btn px-5 py-2.5 bg-slate-50 dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-350 text-xs font-black rounded-xl cursor-pointer" data-category="zusatz" data-translate="tabZusatz">Zusatzleistung</button>
+                </div>
+
+                <!-- Services Grid (Populated dynamically by theme.js in production, structured with fallback markup below) -->
+                <div id="services-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left pt-4">
+                    <!-- Cards will be populated with JS -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- PRE-COMPILATION COMPARISON GALLERY -->
+        <span id="gallery-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-[#F6FAFF] dark:bg-slate-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
+                <div class="max-w-2xl mx-auto space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="galLabel">PREMIUM RESULTATE</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-slate-850 dark:text-white leading-tight" data-translate="galTitle">Vorher / Nachher Vergleich</h2>
+                    <p class="text-sm sm:text-base text-slate-500 dark:text-slate-400" data-translate="galDesc">Sehen Sie, welchen Unterschied das EMMASCO-Reinigungsteam in der Praxis macht.</p>
+                </div>
+
+                <!-- Compare cards grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="grid grid-cols-2 h-48 bg-slate-100 relative">
+                            <div class="relative group overflow-hidden">
+                                <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">VORHER / BEFORE</div>
+                            </div>
+                            <div class="relative group overflow-hidden border-l border-white">
+                                <div class="absolute inset-0 bg-emerald-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">NACHHER / AFTER</div>
+                            </div>
+                        </div>
+                        <div class="p-6 text-left">
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="galItem1Title">Badezimmer Sanierung</h4>
+                            <p class="text-[11px] text-slate-500 mt-1" data-translate="galItem1Desc">Beseitigung extremer Kalkflecken und Tiefenschmutz-Versiegelung.</p>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="grid grid-cols-2 h-48 bg-slate-100 relative">
+                            <div class="relative group overflow-hidden">
+                                <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">VORHER / BEFORE</div>
+                            </div>
+                            <div class="relative group overflow-hidden border-l border-white">
+                                <div class="absolute inset-0 bg-emerald-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">NACHHER / AFTER</div>
+                            </div>
+                        </div>
+                        <div class="p-6 text-left">
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="galItem2Title">Küche & Oberflächen</h4>
+                            <p class="text-[11px] text-slate-500 mt-1" data-translate="galItem2Desc">Gründliche Herdreinigung, desinfizierte Schrankfronten.</p>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="grid grid-cols-2 h-48 bg-slate-100 relative">
+                            <div class="relative group overflow-hidden">
+                                <div class="absolute inset-0 bg-red-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">VORHER / BEFORE</div>
+                            </div>
+                            <div class="relative group overflow-hidden border-l border-white">
+                                <div class="absolute inset-0 bg-emerald-500/10 flex items-center justify-center p-2 text-center text-white text-[11px] font-black tracking-widest bg-slate-900/60 font-mono">NACHHER / AFTER</div>
+                            </div>
+                        </div>
+                        <div class="p-6 text-left">
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="galItem3Title">Fenster- & Glasflächen</h4>
+                            <p class="text-[11px] text-slate-500 mt-1" data-translate="galItem3Desc">Streifenfreie Glasreinigung inklusive der äußeren Fensterbänke.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT US SECTION -->
+        <span id="about-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <div class="lg:col-span-6 space-y-6 text-left">
+                        <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="aboutLabel">ÜBER UNS</span>
+                        <h2 class="text-3xl sm:text-4xl font-black text-slate-850 dark:text-white leading-tight" data-translate="aboutTitle">Familiärer Halt in Zeiten des Wandels</h2>
+                        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-350 leading-relaxed" data-translate="aboutDesc">
+                            Wir glauben, dass hervorragende Hauswirtschaftspflege und Alltagsbegleitung auf Vertrauen und Empathie beruhen. Unser Team in Berlin-Mitte und Pankow entlastet Sie zuverlässig im Alltag.
+                        </p>
+
+                        <!-- Values -->
+                        <div class="space-y-4">
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="val1">Respekt & Wärme</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-translate="val1Desc">Wir behandeln Sie wie unsere Familie.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-10 h-10 bg-emerald-50 dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="val2">Vollversichert & Geprüft</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-translate="val2Desc">Sicherheit steht für uns an oberster Stelle.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Card -->
+                    <div class="lg:col-span-6">
+                        <div class="card-minimal p-8 border border-blue-50/50 dark:border-slate-800/80 bg-gradient-to-tr from-white to-blue-50/20 dark:from-slate-850 dark:to-slate-900/60 flex flex-col justify-between text-left space-y-6">
+                            <div class="space-y-2">
+                                <h3 class="text-lg font-black text-slate-800 dark:text-white" data-translate="boxTitle">Unterstützung vom Staat sichern</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed" data-translate="boxDesc">
+                                    Pflegebedürftige aller Pflegegrade haben in Deutschland Anspruch auf einen Entlastungsbetrag von bis zu **125 € pro Monat** (§ 45a SGB XI). Wir übernehmen die Direktabrechnung mit Ihrer Pflegekasse.
+                                </p>
+                            </div>
+                            
+                            <!-- Steps list -->
+                            <div class="space-y-3 pt-2">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-7 h-7 bg-[#0056D6] text-white rounded-lg flex items-center justify-center text-xs font-black">1</span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="steps1">Angebotsgespräch vereinbaren</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-7 h-7 bg-[#0056D6] text-white rounded-lg flex items-center justify-center text-xs font-black">2</span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="steps2">Wir reichen Dokumente ein</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="w-7 h-7 bg-[#0056D6] text-white rounded-lg flex items-center justify-center text-xs font-black">3</span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="steps3">Kostenlose Entlastung im Alltag erhalten</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE BUDGET CALCULATOR -->
+        <section class="py-20 bg-[#F6FAFF] dark:bg-slate-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <div class="lg:col-span-5 text-left space-y-4">
+                        <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="calcBadge">RECHENRECHNER</span>
+                        <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="calcTitle">Transparente Kostenkalkulation</h2>
+                        <p class="text-xs text-slate-500 leading-relaxed" data-translate="calcDesc">
+                            Schätzen Sie die monatlichen Kosten für Ihre gewünschten Leistungen ab. Sie erhalten eine Aufstellung der Pflegekassen-Erstattung und eventueller Eigenanteile.
+                        </p>
+                        
+                        <!-- Mini notice -->
+                        <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-[11px] text-amber-850 dark:text-amber-400 font-semibold">
+                            <i data-lucide="info" class="w-4 h-4 inline-block mr-1 align-text-bottom text-amber-600"></i>
+                            <span data-translate="calcNote">Ab Pflegegrad 1 erstattet die Pflegekasse pauschal 125 € monatlich für Entlastungsleistungen.</span>
+                        </div>
+                    </div>
+
+                    <!-- Calculator widget -->
+                    <div class="lg:col-span-7">
+                        <div class="card-minimal p-6 sm:p-8 border border-blue-50/50 dark:border-slate-800/80 text-left space-y-6">
+                            
+                            <!-- Slider 1 -->
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300">
+                                    <span data-translate="calcSlider1">Wöchentliche Einsatzstunden</span>
+                                    <span id="hours-val" class="text-sm font-extrabold text-[#0056D6] dark:text-[#2FB5FF]">3 Std.</span>
+                                </div>
+                                <input type="range" id="input-hours" min="1" max="15" value="3" class="w-full h-2 bg-blue-105 rounded-lg appearance-none cursor-pointer accent-[#0056D6]">
+                            </div>
+
+                            <!-- Selector 2 -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="calcService">Art der Leistung</label>
+                                <select id="input-rate" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 font-semibold text-slate-850 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                                    <option value="29.90">Haushaltshilfe (§ 45a SGB XI) - 29.90 € / Std.</option>
+                                    <option value="34.90">Unterhaltsreinigung - 34.90 € / Std.</option>
+                                    <option value="29.00">Alltagsbegleitung - 29.00 € / Std.</option>
+                                    <option value="39.90">Büroreinigung (B2B) - 39.90 € / Std.</option>
+                                </select>
+                            </div>
+
+                            <!-- Result table box -->
+                            <div class="p-6 bg-blue-500/5 dark:bg-slate-900/60 rounded-3xl space-y-4 border border-blue-500/10">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-500" data-translate="calcRowTotal">Kosten vor Kassenabzug (Monatlich)</span>
+                                    <span id="res-gross" class="font-extrabold text-slate-800 dark:text-white">358.80 €</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                                    <span data-translate="calcRowKasse">Pflegekassen-Erstattung (SGB XI)</span>
+                                    <span>- <span id="res-refund">125.00 €</span></span>
+                                </div>
+                                <div class="h-px bg-slate-200 dark:bg-slate-800/80"></div>
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <span class="block text-xs font-black text-slate-750 dark:text-slate-300" data-translate="calcRowOwn">Verbleibender Eigenanteil</span>
+                                        <span class="text-[9px] text-slate-400" data-translate="calcRowOwnSub">Oder über Verhinderungspflege abrechenbar</span>
+                                    </div>
+                                    <span id="res-net" class="text-xl font-black text-[#0056D6] dark:text-[#2FB5FF]">233.80 €</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- BOOKING / FORM SECTION -->
+        <span id="booking-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-10">
+                <div class="space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="bookBadge">UNVERBINDLICHES ANGEBOT</span>
+                    <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="bookTitle">Jetzt Entlastung anfordern</h2>
+                    <p class="text-xs text-slate-500 leading-relaxed" data-translate="bookDesc">
+                        Füllen Sie das Formular aus. Unser Team meldet sich innerhalb von 24 Stunden mit einem maßgeschneiderten Angebot bei Ihnen.
+                    </p>
+                </div>
+
+                <!-- Booking Widget -->
+                <div class="card-minimal p-6 sm:p-10 border border-blue-50/50 dark:border-slate-800/80 text-left">
+                    <form id="booking-form-element" class="space-y-6">
+                        
+                        <!-- Grid 1 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="labelName">Ihr Name *</label>
+                                <input type="text" name="customerName" required placeholder="Frau Regina Keller" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">E-Mail-Adresse *</label>
+                                <input type="email" name="customerEmail" required placeholder="regina.keller@web.de" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- Grid 2 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Telefonnummer *</label>
+                                <input type="text" name="customerPhone" required placeholder="z.B. 030 4729103" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Einsatzadresse *</label>
+                                <input type="text" name="customerAddress" required placeholder="Mitte/Pankow, Str., Plz" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- Grid 3 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="space-y-1.5 sm:col-span-1">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="labelService">Gewünschte Leistung</label>
+                                <select name="serviceId" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 cursor-pointer">
+                                    <option value="haushaltshilfe">Haushaltshilfe</option>
+                                    <option value="reinigung">Unterhaltsreinigung</option>
+                                    <option value="einkaufshilfe">Einkaufshilfe</option>
+                                    <option value="alltagsbegleitung">Alltagsbegleitung</option>
+                                    <option value="angehoerige">Entlastung für Angehörige</option>
+                                    <option value="fenster">Fensterreinigung</option>
+                                    <option value="buero">Büroreinigung</option>
+                                    <option value="deepclean">Grundreinigung (Deep Clean)</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-1">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Wunschtermin *</label>
+                                <input type="date" name="bookingDate" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 cursor-pointer">
+                            </div>
+                            <div class="space-y-1.5 sm:col-span-1">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Uhrzeit *</label>
+                                <input type="time" name="bookingTime" required class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300" data-translate="labelMsg">Besondere Wünsche oder Anmerkungen (Pflegegrad, etc.)</label>
+                            <textarea name="customerNotes" rows="3" placeholder="Gibt es bereits einen Pflegegrad? Gibt es Hunde im Haushalt? Wann sind Sie am besten erreichbar?" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-3 px-4 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"></textarea>
+                        </div>
+
+                        <!-- Feedback Box -->
+                        <div id="booking-feedback-msg" class="hidden p-4 rounded-2xl text-xs font-bold text-left leading-relaxed"></div>
+
+                        <button type="submit" id="booking-submit-btn" class="w-full py-4 bg-[#0056D6] hover:bg-[#0047B3] text-white text-xs font-extrabold rounded-2xl cursor-pointer transition-all flex items-center justify-center gap-2 shadow-md">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span data-translate="btnBookingSubmit">Unverbindliche Anfrage senden</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIALS SECTION -->
+        <section class="py-20 bg-[#F6FAFF] dark:bg-slate-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-12">
+                <div class="max-w-2xl mx-auto space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="reviewsLabel">ERFAHRUNGEN</span>
+                    <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="reviewsTitle">Was Kunden über EMMASCO sagen</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                    
+                    <div class="card-minimal p-6 sm:p-8 flex flex-col justify-between fade-in-up-scroll">
+                        <p class="text-xs text-slate-500 leading-relaxed italic" data-translate="review1Text">
+                            "Dank dem Team von EMMASCO kann mein Vater weiterhin eigenständig in seiner Wohnung in Pankow leben. Die Alltagsbegleitung funktioniert hervorragend und wir können die Einsätze direkt über den Entlastungsbetrag abrechnen!"
+                        </p>
+                        <div class="flex items-center gap-3 pt-6 border-t border-slate-100 dark:border-slate-800/80 mt-6">
+                            <span class="w-9 h-9 bg-pink-100 text-pink-700 font-extrabold text-xs rounded-full flex items-center justify-center shrink-0">SK</span>
+                            <div>
+                                <span class="block text-xs font-black text-slate-800 dark:text-white">Sabine Krause</span>
+                                <span class="block text-[10px] text-slate-400">Angehörige, Berlin-Buch</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal p-6 sm:p-8 flex flex-col justify-between fade-in-up-scroll">
+                        <p class="text-xs text-slate-500 leading-relaxed italic" data-translate="review2Text">
+                            "Unkompliziert, professionell und gründlich. Ich nutze den Reinigungsservice für meine Praxis in Mitte. Keine Ausfälle, extrem zuverlässig und sehr freundliche Mitarbeiter. Empfehlung!"
+                        </p>
+                        <div class="flex items-center gap-3 pt-6 border-t border-slate-100 dark:border-slate-800/80 mt-6">
+                            <span class="w-9 h-9 bg-blue-105 text-blue-700 font-extrabold text-xs rounded-full flex items-center justify-center shrink-0">MW</span>
+                            <div>
+                                <span class="block text-xs font-black text-slate-800 dark:text-white">Dr. Michael Wagner</span>
+                                <span class="block text-[10px] text-slate-400">Arzt, Berlin-Mitte</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal p-6 sm:p-8 flex flex-col justify-between fade-in-up-scroll">
+                        <p class="text-xs text-slate-500 leading-relaxed italic" data-translate="review3Text">
+                            "Wir haben kurzfristig eine zuverlässige Haushaltshilfe gesucht und bei EMMASCO gefunden. Frau Egazi ist unglaublich warmherzig und fleißig. Sie zaubert jedes Mal aufs Neue ein Lächeln auf das Gesicht meiner Mutter."
+                        </p>
+                        <div class="flex items-center gap-3 pt-6 border-t border-slate-100 dark:border-slate-800/80 mt-6">
+                            <span class="w-9 h-9 bg-emerald-100 text-emerald-700 font-extrabold text-xs rounded-full flex items-center justify-center shrink-0">TL</span>
+                            <div>
+                                <span class="block text-xs font-black text-slate-800 dark:text-white">Thomas Lehmann</span>
+                                <span class="block text-[10px] text-slate-400">Kunde, Berlin-Prenzlauer Berg</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ SECTION -->
+        <span id="faq-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+                <div class="text-center space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="faqLabel">HÄUFIG GESTELLTE FRAGEN</span>
+                    <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="faqTitle"> Antworten auf Ihre Fragen</h2>
+                </div>
+
+                <!-- Accordions container -->
+                <div class="space-y-4">
+                    
+                    <div class="faq-accordion-item bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200">
+                        <button class="faq-accordion-btn w-full p-5 flex justify-between items-center text-left text-xs font-black text-slate-800 dark:text-white select-none">
+                            <span data-translate="faq1Q">Wie funktioniert die Abrechnung mit der Pflegekasse?</span>
+                            <i data-lucide="chevron-down" class="faq-accordion-icon w-4 h-4 shrink-0 transition-transform text-slate-400"></i>
+                        </button>
+                        <div class="faq-accordion-panel max-h-0 overflow-hidden transition-all duration-300 bg-white dark:bg-slate-950">
+                            <p class="p-5 text-xs text-slate-550 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800" data-translate="faq1A">
+                                Ab Pflegegrad 1 haben Sie in Deutschland einen Anspruch auf 125 € Entlastungsbetrag monatlich. Wir rechnen diesen Betrag im sogenannten Abtretungsverfahren direkt mit der Pflegekasse ab. Sie müssen kein Geld vorstrecken!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="faq-accordion-item bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200">
+                        <button class="faq-accordion-btn w-full p-5 flex justify-between items-center text-left text-xs font-black text-slate-800 dark:text-white select-none">
+                            <span data-translate="faq2Q">Sind Ihre Haushaltshilfen und Betreuer versichert?</span>
+                            <i data-lucide="chevron-down" class="faq-accordion-icon w-4 h-4 shrink-0 transition-transform text-slate-400"></i>
+                        </button>
+                        <div class="faq-accordion-panel max-h-0 overflow-hidden transition-all duration-300 bg-white dark:bg-slate-950">
+                            <p class="p-5 text-xs text-slate-550 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800" data-translate="faq2A">
+                                Ja, alle unsere Mitarbeiter sind fest angestellt, sozialversichert und über unsere Betriebshaftpflichtversicherung vollumfänglich gegen Schäden versichert.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="faq-accordion-item bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200">
+                        <button class="faq-accordion-btn w-full p-5 flex justify-between items-center text-left text-xs font-black text-slate-800 dark:text-white select-none">
+                            <span data-translate="faq3Q">In welchen Bezirken Berlins sind Sie tätig?</span>
+                            <i data-lucide="chevron-down" class="faq-accordion-icon w-4 h-4 shrink-0 transition-transform text-slate-400"></i>
+                        </button>
+                        <div class="faq-accordion-panel max-h-0 overflow-hidden transition-all duration-300 bg-white dark:bg-slate-950">
+                            <p class="p-5 text-xs text-slate-550 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800" data-translate="faq3A">
+                                Wir unterstützen Familien vorwiegend in Berlin-Mitte, Pankow, Prenzlauer Berg, Weißensee, Wedding und Friedrichshain. Kontaktieren Sie uns einfach, um die Verfügbarkeit bei Ihnen zu prüfen!
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOG / ADVISOR SECTION -->
+        <span id="blog-anchor" class="block -mt-20 pt-20"></span>
+        <section class="py-20 bg-[#F6FAFF] dark:bg-slate-900 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 text-center">
+                <div class="max-w-2xl mx-auto space-y-3">
+                    <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="blogLabel">FINANZEN & RATGEBER</span>
+                    <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="blogTitle">Wissenswertes über Pflege & Entlastung</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+                    
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="h-44 bg-blue-105 flex items-center justify-center text-[#0056D6]">
+                            <i data-lucide="book-open" class="w-12 h-12"></i>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <span class="inline-block text-[9px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">Finanzen & SGB XI</span>
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="art1Title">
+                                SGB XI Entlastungsbetrag nutzen: 125 € monatlich verschenkt?
+                            </h4>
+                            <p class="text-xs text-slate-550 leading-relaxed" data-translate="art1Desc">
+                                Viele Senioren wissen nicht, dass ihnen ab Pflegegrad 1 monatlich 125 € zustehen. Unser Leitfaden zeigt Ihnen Schritt für Schritt, wie Sie dieses Budget abrufen.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="h-44 bg-emerald-50 dark:bg-slate-900/65 flex items-center justify-center text-emerald-600">
+                            <i data-lucide="shield-check" class="w-12 h-12"></i>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <span class="inline-block text-[9px] font-black uppercase tracking-wider text-emerald-600">Alltagshilfe Tipps</span>
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="art2Title">
+                                So finden Sie die perfekte Haushaltshilfe in Berlin
+                            </h4>
+                            <p class="text-xs text-slate-550 leading-relaxed" data-translate="art2Desc">
+                                Vertrauen und Sympathie sind entscheidend. Worauf Sie bei der Auswahl eines Dienstleisters achten müssen und welche rechtlichen Aspekte greifen.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card-minimal overflow-hidden shrink-0">
+                        <div class="h-44 bg-indigo-50 dark:bg-slate-900/65 flex items-center justify-center text-indigo-600">
+                            <i data-lucide="handshake" class="w-12 h-12"></i>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <span class="inline-block text-[9px] font-black uppercase tracking-wider text-indigo-600">Angehörigen Entlastung</span>
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white" data-translate="art3Title">
+                                Tipps zur Entlastung pflegender Angehöriger
+                            </h4>
+                            <p class="text-xs text-slate-550 leading-relaxed" data-translate="art3Desc">
+                                Wer Familienmitglieder pflegt, vernachlässigt oft die eigene Gesundheit. Wir zeigen Ihnen finanzielle und personelle Unterstützungsnetzwerke in Berlin.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT SECTION -->
+        <span id="contact-anchor" class="block -mt-10 pt-10"></span>
+        <section class="py-20 bg-white dark:bg-slate-950 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    
+                    <div class="lg:col-span-5 space-y-6 text-left">
+                        <span class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-widest block" data-translate="contactLabel">KONTAKT AUFNEHMEN</span>
+                        <h2 class="text-3xl font-black text-slate-850 dark:text-white" data-translate="contactTitle">Haben Sie Fragen? Wir helfen Ihnen gern!</h2>
+                        <p class="text-xs text-slate-500 leading-relaxed" data-translate="contactDesc">
+                            Sie erreichen uns telefonisch, per E-Mail oder über unser Express-Kontaktformular. Für Besuche vereinbaren Sie bitte vorab telefonisch einen Termin.
+                        </p>
+
+                        <div class="space-y-4 pt-4">
+                            <div class="flex items-center gap-4">
+                                <span class="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <span class="block text-xs font-black text-slate-800 dark:text-white">Büroadresse</span>
+                                    <span class="block text-[11px] text-slate-500">Schönhauser Allee 163, 10435 Berlin</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="phone" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <span class="block text-xs font-black text-slate-800 dark:text-white">Beratungs-Hotline</span>
+                                    <span class="block text-[11px] text-[#0056D6] dark:text-[#2FB5FF] font-bold">0176 21856044</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="w-10 h-10 bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="mail" class="w-5 h-5"></i>
+                                </span>
+                                <div>
+                                    <span class="block text-xs font-black text-slate-800 dark:text-white">E-Mail-Anfragen</span>
+                                    <span class="block text-[11px] text-slate-500">solomonegazi@gmail.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form Card -->
+                    <div class="lg:col-span-7">
+                        <div class="card-minimal p-6 sm:p-8 border border-blue-50/50 dark:border-slate-800/80 text-left">
+                            <form id="contact-form-element" class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Ihr Name *</label>
+                                        <input type="text" name="name" required placeholder="z.B. Sabine Schmidt" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">E-Mail-Adresse *</label>
+                                        <input type="email" name="email" required placeholder="z.B. sabine@web.de" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Telefonnummer</label>
+                                        <input type="text" name="phone" placeholder="z.B. 0176 123456" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Betreff *</label>
+                                        <input type="text" name="subject" required placeholder="z.B. Erstberatung Pflegeleistung" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1">
+                                    <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Ihre Nachricht *</label>
+                                    <textarea name="message" required rows="4" placeholder="Schreiben Sie uns Ihr Anliegen..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2.5 px-3.5 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-500"></textarea>
+                                </div>
+
+                                <!-- Feedback Contact Message Box -->
+                                <div id="contact-feedback-msg" class="hidden p-4 rounded-2xl text-xs font-bold text-left leading-relaxed"></div>
+
+                                <button type="submit" id="contact-submit-btn" class="w-full py-3 bg-[#0056D6] hover:bg-[#0047b3] text-white text-xs font-black rounded-xl cursor-pointer transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span data-translate="btnContactSubmit">Nachricht absenden</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER SECTION -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-blue-50/70 dark:border-slate-800 text-left pt-16 pb-8 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+
+                <!-- Col 1 -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <span class="w-10 h-10 bg-gradient-to-tr from-[#0056D6] to-[#2FB5FF] text-white rounded-2xl flex items-center justify-center shadow-md">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </span>
+                        <div>
+                            <span class="text-base font-black tracking-tight text-blue-950 dark:text-white block leading-none">
+                                EMMASCO
+                            </span>
+                            <span class="text-[9px] font-black tracking-widest text-[#2FB5FF] uppercase block mt-1 leading-none">
+                                REINIGUNGSTEAM
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed" data-translate="footerIntro">
+                        Ihr anerkannter, familiengeführter Dienstleister für liebevolle Alltagsbegleitung, Haushaltshilfe (§45a SGB XI) und erstklassige gewerbliche Reinigung in ganz Berlin.
+                    </p>
+                    <div class="flex items-center gap-2 mt-4 text-emerald-600 dark:text-emerald-400 font-bold text-xs bg-emerald-50/50 dark:bg-emerald-950/20 p-2 rounded-xl border border-emerald-100/50 dark:border-emerald-900/30 w-fit">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                        <span data-translate="certifiedBadge">§ 45a SGB XI Anerkennungsverfahren</span>
+                    </div>
+                </div>
+
+                <!-- Col 2 -->
+                <div>
+                    <h4 class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-wider mb-5" data-translate="footerServicesTitle">Dienstleistungen</h4>
+                    <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-350">
+                        <li><a href="#services-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="service1">Haushaltshilfe SGB XI</a></li>
+                        <li><a href="#services-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="service2">Alltagsbegleitung</a></li>
+                        <li><a href="#services-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="service3">Entlastungsbetrag</a></li>
+                        <li><a href="#services-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="service4">Unterhaltsreinigung</a></li>
+                        <li><a href="#services-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="service5">Büroreinigung (B2B)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3 -->
+                <div>
+                    <h4 class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-wider mb-5" data-translate="footerQuickTitle">Quick Links</h4>
+                    <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-350">
+                        <li><a href="#about-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="navAbout">Über Uns</a></li>
+                        <li><a href="#gallery-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="navGallery">Galerie</a></li>
+                        <li><a href="#faq-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="navFAQ">Häufige Fragen</a></li>
+                        <li><a href="#blog-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="navBlog">Ratgeber & News</a></li>
+                        <li><a href="#booking-anchor" class="hover:text-[#0056D6] hover:underline" data-translate="btnNavBook">Jetzt Buchen</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4 -->
+                <div>
+                    <h4 class="text-xs font-black uppercase text-[#0056D6] dark:text-[#2FB5FF] tracking-wider mb-5" data-translate="footerContactTitle">Kontakt & Büro</h4>
+                    <ul class="space-y-3 text-xs text-slate-600 dark:text-slate-350">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400 shrink-0 mt-0.5"></i>
+                            <span>Schönhauser Allee 163<br>10435 Berlin -- Germany</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="phone" class="w-4 h-4 text-slate-400"></i>
+                            <span>0176 21856044</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="mail" class="w-4 h-4 text-slate-400"></i>
+                            <span>solomonegazi@gmail.com</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i data-lucide="clock" class="w-4 h-4 text-slate-400"></i>
+                            <span>Mo - Fr: 08:00 - 18:00</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="h-px bg-slate-100 dark:bg-slate-800 my-10"></div>
+
+            <!-- Credits -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] text-slate-500 dark:text-slate-400">
+                <div>&copy; 2026 Emmasco Reinigungsteam GmbH. Alle Rechte vorbehalten.</div>
+                <div class="flex items-center gap-4">
+                    <a href="#impressum" class="hover:underline">Impressum</a>
+                    <span>•</span>
+                    <a href="#datenschutz" class="hover:underline">Datenschutz</a>
+                    <span>•</span>
+                    <span class="text-slate-400">Hostinger WordPress Optimized</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WHATSAPP CORNER WIDGET -->
+    <div id="whats-app-floating-container" class="fixed bottom-6 right-6 z-[100] font-sans">
+        <!-- Tooltip -->
+        <div id="wp-wa-tooltip" class="hidden absolute bottom-16 right-2 w-64 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 p-3.5 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.12)] border border-slate-100 dark:border-slate-800 text-xs font-semibold leading-relaxed text-left flex items-start gap-2 select-none">
+            <div class="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0 text-white mt-0.5 animate-pulse">
+                <i data-lucide="sparkles" class="w-3 h-3 fill-current text-white"></i>
+            </div>
+            <div>
+                <p id="wa-tooltip-text" data-translate="waTooltip">Fragen? Schreiben Sie uns direkt auf WhatsApp!</p>
+                <button id="wa-dismiss-btn" class="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-amber-400 mt-1.5 block cursor-pointer underline">Ausblenden</button>
+            </div>
+            <div class="absolute right-5 -bottom-2 w-3.5 h-3.5 bg-white dark:bg-slate-900 border-r border-b border-slate-200 dark:border-slate-800 rotate-45"></div>
+        </div>
+
+        <!-- Chat Box -->
+        <div id="wp-wa-dialog" class="hidden bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 w-[350px] max-w-[calc(100vw-32px)] rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.16)] overflow-hidden flex flex-col mb-18 relative text-left">
+            <!-- Header -->
+            <div class="bg-[#075E54] dark:bg-slate-950 p-4 pb-5 text-white flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 border border-white/20 shadow-md relative">
+                        <i data-lucide="message-circle" class="w-5 h-5 text-white fill-current"></i>
+                        <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[#075E54]"></span>
+                    </div>
+                    <div>
+                        <h4 class="font-extrabold text-sm tracking-wide" data-translate="waTitle">WhatsApp Beratung</h4>
+                        <span class="text-[10px] text-emerald-300 font-bold block mt-0.5 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block"></span>
+                            <span data-translate="waStatus">Online • Antwortet meist sofort</span>
+                        </span>
+                    </div>
+                </div>
+                <button id="wa-close-btn" class="p-1.5 rounded-full hover:bg-white/10 text-white transition cursor-pointer">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="p-4 max-h-[420px] overflow-y-auto space-y-4 bg-[#ECE5DD] dark:bg-slate-900/90">
+                <div class="bg-white dark:bg-slate-800 p-3.5 rounded-2xl rounded-tl-none shadow-sm text-xs leading-relaxed max-w-[90%] text-slate-800 dark:text-slate-100 relative">
+                    <p data-translate="waIntro">Haben Sie Fragen zur Haushaltshilfe, Alltagsbegleitung oder Abrechnung mit der Pflegekasse? Senden Sie uns einfach eine Nachricht!</p>
+                    <span class="block text-[8px] text-slate-400 font-bold text-right mt-1.5">EMMASCO Team</span>
+                    <div class="absolute top-0 -left-2.5 w-3 h-3 bg-white dark:bg-slate-800" style="clipPath: 'polygon(100% 0, 0 0, 100% 100%)'"></div>
+                </div>
+
+                <!-- Form -->
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm space-y-3">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1" data-translate="labelName">Ihr Name</label>
+                        <div class="relative">
+                            <input type="text" id="wa-input-name" placeholder="z.B. Maria Schmidt" class="w-full bg-slate-55 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2 px-3 pl-8 text-slate-800 dark:text-slate-100 font-semibold focus:outline-none focus:border-emerald-500">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1" data-translate="labelService">Dienstleistung</label>
+                        <div class="relative">
+                            <select id="wa-select-service" class="w-full bg-slate-55 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-100 font-semibold appearance-none focus:outline-none focus:border-emerald-500 cursor-pointer">
+                                <option value="haushaltshilfe">Haushaltshilfe</option>
+                                <option value="reinigung">Unterhaltsreinigung</option>
+                                <option value="einkaufshilfe">Einkaufshilfe</option>
+                                <option value="alltagsbegleitung">Alltagsbegleitung</option>
+                                <option value="angehoerige">Entlastung für Angehörige</option>
+                                <option value="fenster">Fensterreinigung</option>
+                                <option value="buero">Büroreinigung</option>
+                                <option value="deepclean">Grundreinigung (Deep Clean)</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-wider mb-1" data-translate="labelMsg">Zusatznachricht (Auskunft)</label>
+                        <textarea id="wa-input-text" rows="2" placeholder="z.B. Wann hätten Sie nächste Woche Zeit?" class="w-full bg-slate-55 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-xs rounded-xl py-2 px-3 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"></textarea>
+                    </div>
+
+                    <div class="bg-emerald-50/50 dark:bg-slate-900 p-3 rounded-xl border border-emerald-100/60 dark:border-slate-700/80">
+                        <span class="block text-[9px] font-black uppercase tracking-wider text-emerald-800 dark:text-emerald-400 mb-1" data-translate="previewTitle">Nachrichten-Vorschau</span>
+                        <p id="wa-msg-preview-paragraph" class="text-[10px] leading-relaxed text-slate-600 dark:text-slate-350 italic text-left select-none"></p>
+                    </div>
+
+                    <button id="wa-submit-trigger" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-xs transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-sm">
+                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                        <span data-translate="waBtnSend">In WhatsApp fortfahren</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Launcher -->
+        <button id="wa-launcher-btn" class="w-14 h-14 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-[0_6px_25px_rgba(16,185,129,0.36)] hover:bg-emerald-600 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer select-none border border-emerald-400 relative">
+            <i data-lucide="message-circle" id="wa-ic-open" class="w-6 h-6 text-white fill-current"></i>
+            <i data-lucide="x" id="wa-ic-close" class="w-6 h-6 text-white hidden"></i>
+            <span class="absolute inset-0 rounded-full border-2 border-emerald-400 animate-ping opacity-25"></span>
+        </button>
+    </div>
+
+    <!-- Load Companion Theme Script -->
+    <script src="./assets/js/theme.js"></script>
+
+    <!-- Run lucide in fallback context in case UMD script finishes loading after theme.js -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# robots.txt für EMMASCO REINIGUNGSTEAM Berlin
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /about
+Allow: /services
+Allow: /blog
+Allow: /contact
+
+# Sensible administrative Verzeichnisse sperren
+Disallow: /admin-dashboard
+Disallow: /customer-dashboard
+Disallow: /hostinger-deploy/
+
+Sitemap: https://www.emmascoreinigungsteam.de/sitemap.xml

@@ -1,0 +1,6 @@
+{
+  "name": "Emmasco Reinigungsteam",
+  "description": "Professionelle haushaltsnahe Dienstleistungen, Alltagsbegleitung und Reinigungsservice in Berlin. Anerkannt nach §45a SGB XI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,6 @@
+# robots.txt für EMMASCO REINIGUNGSTEAM Berlin
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.emmascoreinigungsteam.de/sitemap.xml
