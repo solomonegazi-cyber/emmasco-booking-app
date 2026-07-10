@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Search, Filter, CheckCircle, ArrowRight, Heart, Sparkles, Home, ShoppingCart, 
   HeartHandshake, UserCheck, GlassWater, Briefcase, ShieldAlert, BadgeInfo,
@@ -220,6 +220,7 @@ interface ServicesProps {
 }
 
 export default function Services({ onSelectServiceAndBook, preselectedServiceId, clearPreselection }: ServicesProps) {
+  const reviewsRef = useRef<HTMLDivElement>(null);
   const { language, t, services } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -458,8 +459,9 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
                           setSelectedServiceDetail(service);
                           // Ensures we scroll or show reviews
                           setTimeout(() => {
-                            const el = document.getElementById('reviews-anchor');
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            if (reviewsRef.current) {
+                              reviewsRef.current.scrollIntoView({ behavior: 'smooth' });
+                            }
                           }, 100);
                         }}
                         className="flex items-center gap-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200/50 rounded-md py-0.5 px-2 select-none text-left cursor-pointer transition-all duration-200"
@@ -645,7 +647,7 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
             </div>
 
             {/* Verified Reviews Section inside Modal */}
-            <div id="reviews-anchor" className="border-t border-gray-100 pt-5 mt-4 space-y-4">
+            <div id="reviews-anchor" ref={reviewsRef} className="border-t border-gray-100 pt-5 mt-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-extrabold text-blue-950 text-sm uppercase tracking-wider flex items-center gap-1.5">

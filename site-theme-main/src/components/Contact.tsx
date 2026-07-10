@@ -3,19 +3,221 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, Phone, MapPin, Send, HelpCircle, ShieldCheck, Heart } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+const BERLIN_DISTRICTS = [
+  {
+    nameDe: 'Pankow / Prenzlauer Berg',
+    nameEn: 'Pankow / Prenzlauer Berg',
+    coords: [52.5689, 13.4023] as [number, number],
+    infoDe: '⚡ Hauptgebiet mit über 15 Kräften vor Ort. 100% Abdeckung aller Alltagsleistungen.',
+    infoEn: '⚡ Main operational zone with 15+ staff members. Full cover of helper services.'
+  },
+  {
+    nameDe: 'Berlin Mitte',
+    nameEn: 'Berlin Mitte',
+    coords: [52.5200, 13.4050] as [number, number],
+    infoDe: '⭐ Schnelle Vermittlung unter 24 Stunden. Direktabrechnung mit allen Kassen.',
+    infoEn: '⭐ Immediate booking assignments under 24h. Direct insurance billing.'
+  },
+  {
+    nameDe: 'Friedrichshain-Kreuzberg',
+    nameEn: 'Friedrichshain-Kreuzberg',
+    coords: [52.5134, 13.4382] as [number, number],
+    infoDe: '✔ Regelmäßige Hausreinigung und verlässliche Seniorenbegleitung.',
+    infoEn: '✔ Regular premium house keeping and steady helper visits.'
+  },
+  {
+    nameDe: 'Charlottenburg-Wilmersdorf',
+    nameEn: 'Charlottenburg-Wilmersdorf',
+    coords: [52.5076, 13.2846] as [number, number],
+    infoDe: '✨ Vollversorgtes Einzugsgebiet. Festangestellte, polizeilich geprüfte Kräfte.',
+    infoEn: '✨ Fully active care sector. Highly vetted, certified permanent employees.'
+  },
+  {
+    nameDe: 'Reinickendorf',
+    nameEn: 'Reinickendorf',
+    coords: [52.5937, 13.3156] as [number, number],
+    infoDe: '🌱 Zertifizierte haushaltsnahe Dienste gem. § 45a SGB XI anerkannt.',
+    infoEn: '🌱 Officially recognized companion services under § 45a SGB XI.'
+  },
+  {
+    nameDe: 'Lichtenberg',
+    nameEn: 'Lichtenberg',
+    coords: [52.5323, 13.4910] as [number, number],
+    infoDe: '🏠 Private Hilfe im Haushalt, Grundreinigung und Fensterpflege.',
+    infoEn: '🏠 Comprehensive household help, floor cleaning and window washing.'
+  }
+];
+
+const SERVICE_AREA_OUTLINE: [number, number][] = [
+  [52.615, 13.310], // Reinickendorf North
+  [52.610, 13.430], // Pankow North
+  [52.570, 13.490], // Pankow Outer East
+  [52.535, 13.510], // Lichtenberg East
+  [52.485, 13.440], // Southeast (Neukölln boundary)
+  [52.470, 13.350], // South
+  [52.490, 13.260], // Charlottenburg West
+  [52.540, 13.270], // Northwest (Spandau edge)
+];
+
 
 export default function Contact() {
   const { language, t } = useLanguage();
-  const [contactName, setContactName] = useState('');
-  const [contactEmail, setContactEmail] = useState('');
-  const [contactPhone, setContactPhone] = useState('');
-  const [contactMsg, setContactMsg] = useState('');
+  const [contactName, setContactName] = useState(() => {
+    try {
+      const saved = localStorage.getItem('emmasco_contact_form');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.name || '';
+      }
+    } catch (e) {
+      console.warn('Failed to load contact name from localStorage:', e);
+    }
+    return '';
+  });
+  const [contactEmail, setContactEmail] = useState(() => {
+    try {
+      const saved = localStorage.getItem('emmasco_contact_form');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.email || '';
+      }
+    } catch (e) {
+      console.warn('Failed to load contact email from localStorage:', e);
+    }
+    return '';
+  });
+  const [contactPhone, setContactPhone] = useState(() => {
+    try {
+      const saved = localStorage.getItem('emmasco_contact_form');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.phone || '';
+      }
+    } catch (e) {
+      console.warn('Failed to load contact phone from localStorage:', e);
+    }
+    return '';
+  });
+  const [contactMsg, setContactMsg] = useState(() => {
+    try {
+      const saved = localStorage.getItem('emmasco_contact_form');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.message || '';
+      }
+    } catch (e) {
+      console.warn('Failed to load contact message from localStorage:', e);
+    }
+    return '';
+  });
   const [spamAnswer, setSpamAnswer] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSent, setIsSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidatingEmail, setIsValidatingEmail] = useState(false);
+
+  // Persist contact form changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('emmasco_contact_form', JSON.stringify({
+        name: contactName,
+        email: contactEmail,
+        phone: contactPhone,
+        message: contactMsg
+      }));
+    } catch (e) {
+      console.warn('Failed to save contact form progress to localStorage:', e);
+    }
+  }, [contactName, contactEmail, contactPhone, contactMsg]);
+
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current) return;
+    if (mapInstanceRef.current) return;
+
+    const map = L.map(mapContainerRef.current, {
+      center: [52.5398, 13.4111],
+      zoom: 10.5,
+      scrollWheelZoom: false,
+      zoomControl: true,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
+
+    L.polygon(SERVICE_AREA_OUTLINE, {
+      color: '#0056D6',
+      weight: 2,
+      dashArray: '6, 8',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.12
+    }).addTo(map);
+
+    const isDe = language === 'de';
+
+    BERLIN_DISTRICTS.forEach((district) => {
+      const isHQ = district.nameDe.includes('Pankow');
+      
+      const markerHtml = `
+        <div class="relative flex items-center justify-center">
+          <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full ${isHQ ? 'bg-[#0056D6]' : 'bg-sky-400'} opacity-60"></span>
+          <div class="relative rounded-full h-5.5 w-5.5 ${isHQ ? 'bg-[#0056D6]' : 'bg-sky-500'} hover:scale-110 active:scale-95 transition-all duration-150 shadow-md flex items-center justify-center text-white text-[9px] font-black border border-white">
+            ${isHQ ? '★' : 'E'}
+          </div>
+        </div>
+      `;
+
+      const customIcon = L.divIcon({
+        html: markerHtml,
+        className: 'custom-leaflet-marker',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+
+      const popupHtml = `
+        <div style="font-family: inherit;" class="p-1 text-left text-xs min-w-[210px]">
+          <div class="font-bold text-[#0056D6] border-b border-gray-150 pb-1 mb-1.5 uppercase tracking-wider text-[11px] flex justify-between items-center">
+            <span>${isDe ? district.nameDe : district.nameEn}</span>
+            ${isHQ ? `<span class="bg-blue-100 text-[8px] font-black px-1.5 py-0.5 rounded ml-2 text-[#0056D6] uppercase">HQ</span>` : ''}
+          </div>
+          <p class="text-gray-650 dark:text-gray-200 leading-relaxed font-semibold mb-2">
+            ${isDe ? district.infoDe : district.infoEn}
+          </p>
+          <div class="flex items-center gap-1.5 text-[10px] text-emerald-700 font-extrabold">
+            <span>✓</span>
+            <span>${isDe ? 'Direktabrechnung möglich' : 'Direct insurance billing'}</span>
+          </div>
+        </div>
+      `;
+
+      L.marker(district.coords, { icon: customIcon })
+        .addTo(map)
+        .bindPopup(popupHtml, {
+          closeButton: false,
+          className: 'premium-leaflet-popup'
+        });
+    });
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [language]);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -43,16 +245,53 @@ export default function Contact() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
+    setIsValidatingEmail(true);
+
+    // Dynamic Email Verification API call
+    try {
+      const emailValRes = await fetch('/api/validate-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: contactEmail })
+      });
+      if (emailValRes.ok) {
+        const emailValData = await emailValRes.json();
+        if (emailValData.valid === false) {
+          setErrors(prev => ({
+            ...prev,
+            email: emailValData.message || (language === 'de' ? 'Diese E-Mail ist ungültig.' : 'This email is invalid.')
+          }));
+          setIsValidatingEmail(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Email validation service failed, proceeding with contact form submission', err);
+    } finally {
+      setIsValidatingEmail(false);
+    }
+
+    setIsSubmitting(true);
+    
+    // Simulate short network delay for realism
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
     setIsSent(true);
+    setIsSubmitting(false);
     setContactName('');
     setContactEmail('');
     setContactPhone('');
     setContactMsg('');
     setSpamAnswer('');
+    try {
+      localStorage.removeItem('emmasco_contact_form');
+    } catch (e) {
+      console.warn('Failed to clear contact form from localStorage:', e);
+    }
   };
 
   return (
@@ -130,18 +369,34 @@ export default function Contact() {
           </div>
 
           {/* Map */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-blue-50 shadow-md aspect-video relative">
-            <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2426.653457199432!2d13.411130677587127!3d52.53982267206497!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a851e39a5caad7%3A0x6e9a6132ceee0ff!2sSch%C3%B6nhauser%20Allee%20163%2C%2010435%20Berlin!5e0!3m2!1sde!2sde!4v1718503100000!5m2!1sde!2sde"
-              width="100%" 
-              height="100%" 
-              style={{ border: 0 }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Emmasco Berlin Map"
-              className="w-full h-full"
-            ></iframe>
+          <div className="bg-white rounded-3xl overflow-hidden border border-blue-50 shadow-md flex flex-col p-2 gap-2 text-left">
+            <div className="text-xs font-black text-blue-900 px-2 pt-1.5 flex justify-between items-center">
+              <span>{language === 'de' ? '📍 UNSER EINSATZGEBIET (BERLIN)' : '📍 OUR SERVICE TERRITORY (BERLIN)'}</span>
+              <span className="text-[9px] bg-blue-100 text-[#0056D6] px-2 py-0.5 rounded-full uppercase tracking-widest font-black">
+                {language === 'de' ? 'Aktiv' : 'Active'}
+              </span>
+            </div>
+            
+            <div className="aspect-video w-full rounded-2xl overflow-hidden relative border border-blue-50/50">
+              <div ref={mapContainerRef} className="w-full h-full relative z-0" />
+            </div>
+
+            {/* Quick stats / District Legend below the map */}
+            <div className="px-2 pb-1.5">
+              <span className="text-[10px] text-gray-500 font-bold block mb-1">
+                {language === 'de' ? 'Einsatzbereiche in ganz Berlin (anklicken für Infos):' : 'Active care regions (click for details):'}
+              </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {BERLIN_DISTRICTS.map((d) => (
+                  <span 
+                    key={d.nameDe} 
+                    className="bg-[#F0F7FF] text-[#0056D6] text-[10px] uppercase font-bold px-2 py-1 rounded-lg border border-blue-100/40"
+                  >
+                    {language === 'de' ? d.nameDe.split(' / ')[0] : d.nameEn.split(' / ')[0]}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* SGB Care level box */}
@@ -183,7 +438,17 @@ export default function Contact() {
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative">
+              {(isSubmitting || isValidatingEmail) && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-3 rounded-3xl">
+                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-xs font-black text-blue-900 animate-pulse uppercase tracking-wider">
+                    {isValidatingEmail 
+                      ? (language === 'de' ? 'E-Mail-Adresse wird validiert...' : 'Verifying email address...')
+                      : (language === 'de' ? 'Ihre Nachricht wird gesendet...' : 'Sending your message...')}
+                  </span>
+                </div>
+              )}
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-semibold text-xs text-slate-700">
                 <div className="flex flex-col gap-1.5 text-left">

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, Clock, User, Mail, Phone, MapPin, MessageSquare, Heart, Sparkles, CheckSquare, Info } from 'lucide-react';
 import { SERVICES } from '../data';
 import { Booking } from '../types';
@@ -17,37 +17,77 @@ interface BookingProps {
 }
 
 export default function BookingForm({ selectedServiceId, onBookingSubmit, isLoggedIn, currentUser }: BookingProps) {
+  const bookingCardRootRef = useRef<HTMLDivElement>(null);
   const { language, t, services } = useLanguage();
   
   // Use localized services if available, fallback to original list
   const activeServices = services && services.length > 0 ? services : SERVICES;
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    serviceId: activeServices[0].id,
-    date: '',
-    time: '09:00',
-    message: '',
-    hasPflegegrad: false,
-    frequency: 'einmalig'
+  const [formData, setFormData] = useState(() => {
+    const defaultData = {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      serviceId: activeServices[0]?.id || '',
+      date: '',
+      time: '09:00',
+      message: '',
+      hasPflegegrad: false,
+      frequency: 'einmalig'
+    };
+    try {
+      const saved = localStorage.getItem('emmasco_booking_form');
+      if (saved) {
+        return {
+          ...defaultData,
+          ...JSON.parse(saved)
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to load booking form from localStorage:', e);
+    }
+    return defaultData;
   });
+
+  // Persist booking form changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('emmasco_booking_form', JSON.stringify(formData));
+    } catch (e) {
+      console.warn('Failed to save booking form progress to localStorage:', e);
+    }
+  }, [formData]);
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [createdBooking, setCreatedBooking] = useState<Booking | null>(null);
+  
+  // API Integration States
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidatingEmail, setIsValidatingEmail] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [apiSuccessMsg, setApiSuccessMsg] = useState<string | null>(null);
+  const [isSimulated, setIsSimulated] = useState(false);
+  const [apiDetails, setApiDetails] = useState<string | null>(null);
 
-  // Autofill if logged in
+  const clearBookingStorage = () => {
+    try {
+      localStorage.removeItem('emmasco_booking_form');
+    } catch (e) {
+      console.warn('Failed to clear booking form from localStorage:', e);
+    }
+  };
+
+  // Autofill if logged in and fields are empty
   useEffect(() => {
     if (isLoggedIn && currentUser) {
       setFormData(prev => ({
         ...prev,
-        name: currentUser.name || '',
-        email: currentUser.email || '',
-        phone: currentUser.phone || '',
-        address: currentUser.address || ''
+        name: prev.name || currentUser.name || '',
+        email: prev.email || currentUser.email || '',
+        phone: prev.phone || currentUser.phone || '',
+        address: prev.address || currentUser.address || ''
       }));
     }
   }, [isLoggedIn, currentUser]);
@@ -110,9 +150,41 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
+    setApiError(null);
+    setApiSuccessMsg(null);
+    setIsSimulated(false);
+    setApiDetails(null);
+    setIsValidatingEmail(true);
+
+    // Dynamic Email Verification API call
+    try {
+      const emailValRes = await fetch('/api/validate-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      if (emailValRes.ok) {
+        const emailValData = await emailValRes.json();
+        if (emailValData.valid === false) {
+          setFormErrors(prev => ({
+            ...prev,
+            email: emailValData.message || (language === 'de' ? 'Diese E-Mail ist ungültig.' : 'This email is invalid.')
+          }));
+          setIsValidatingEmail(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Email validation service failed, proceeding with standard registration', err);
+    } finally {
+      setIsValidatingEmail(false);
+    }
+
+    setIsSubmitting(true);
 
     const price = getEstimatedPrice();
     const mockId = `EM-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -133,20 +205,117 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 16)
     };
 
-    onBookingSubmit(newBooking);
-    setCreatedBooking(newBooking);
-    setIsSubmitted(true);
-    
-    // Scroll to top of form
-    const element = document.getElementById('booking-card-root');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    // Check if user is offline, queue instantly to save network timeout wait
+    if (!navigator.onLine) {
+      setIsSubmitting(true);
+      try {
+        const { saveOfflineBooking } = await import('../utils/db');
+        await saveOfflineBooking(newBooking);
+
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            await (reg as any).sync.register('sync-bookings');
+            console.log('[Booking] Registered Background Sync for offline booking.');
+          } catch (syncErr) {
+            console.error('[Booking] SyncManager registration error:', syncErr);
+          }
+        }
+
+        const offlineBooking = { ...newBooking, status: 'offline_queued' as const };
+        onBookingSubmit(offlineBooking);
+        setCreatedBooking(offlineBooking);
+
+        const successMsg = language === 'de'
+          ? 'Offline-Modus aktiv: Ihre Buchungsanfrage wurde sicher auf Ihrem Gerät gespeichert und wird automatisch gesendet, sobald Sie wieder online sind.'
+          : 'Offline mode active: Your booking request has been safely saved offline on your device and will be automatically sent when you are back online.';
+        setApiSuccessMsg(successMsg);
+        setIsSubmitted(true);
+        clearBookingStorage();
+      } catch (dbErr: any) {
+        setApiError(`Offline and failed to save to storage: ${dbErr.message}`);
+      } finally {
+        setIsSubmitting(false);
+        if (bookingCardRootRef.current) {
+          bookingCardRootRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newBooking)
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Success pathway
+        onBookingSubmit({ ...newBooking, id: result.bookingId || mockId });
+        setCreatedBooking({ ...newBooking, id: result.bookingId || mockId });
+        setApiSuccessMsg('Thank you for booking with Emmasco Reinigungsteam. A confirmation email has been sent.');
+        setIsSimulated(!!result.simulated);
+        setApiDetails(result.info || null);
+        setIsSubmitted(true);
+        clearBookingStorage();
+      } else {
+        // Handled server error
+        setApiError(result.error || result.details || 'Email notification delivery failed.');
+        console.error('[API ERROR] Booking server responded with error:', result);
+      }
+    } catch (err: any) {
+      // General communication error (sandbox / network offline)
+      console.error('[CONNECTION ERROR] fetch /api/bookings failed:', err);
+      
+      try {
+        const { saveOfflineBooking } = await import('../utils/db');
+        await saveOfflineBooking(newBooking);
+
+        if ('serviceWorker' in navigator && 'SyncManager' in window) {
+          try {
+            const reg = await navigator.serviceWorker.ready;
+            await (reg as any).sync.register('sync-bookings');
+            console.log('[Booking] Registered Background Sync for offline booking.');
+          } catch (syncErr) {
+            console.error('[Booking] SyncManager registration error:', syncErr);
+          }
+        }
+
+        const offlineBooking = { ...newBooking, status: 'offline_queued' as const };
+        onBookingSubmit(offlineBooking);
+        setCreatedBooking(offlineBooking);
+
+        const successMsg = language === 'de'
+          ? 'Ihre Buchungsanfrage wurde sicher auf Ihrem Gerät gespeichert! Sie wird automatisch gesendet, sobald Sie wieder online sind.'
+          : 'Your booking request has been safely saved offline on your device! It will be sent automatically as soon as as you are back online.';
+        setApiSuccessMsg(successMsg);
+        setIsSubmitted(true);
+        clearBookingStorage();
+      } catch (dbErr: any) {
+        setApiError(`Could not connect to the booking API server and failed to save offline: ${dbErr.message}`);
+      }
+    } finally {
+      setIsSubmitting(false);
+      
+      // Scroll to top of form to see status
+      if (bookingCardRootRef.current) {
+        bookingCardRootRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
   const handleReset = () => {
     setIsSubmitted(false);
     setCreatedBooking(null);
+    setApiSuccessMsg(null);
+    setApiError(null);
+    setApiDetails(null);
+    setIsSimulated(false);
     setFormData(prev => ({
       ...prev,
       date: '',
@@ -156,7 +325,7 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
   };
 
   return (
-    <div id="booking-card-root" className="max-w-7xl mx-auto px-4 py-16 text-left">
+    <div id="booking-card-root" ref={bookingCardRootRef} className="max-w-7xl mx-auto px-4 py-16 text-left">
       
       <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2 mb-12">
         <span className="text-blue-600 font-extrabold uppercase text-xs tracking-widest bg-blue-50 px-3 py-1 rounded-full">
@@ -177,16 +346,41 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
         {/* Left Side: Interactive Booking Form */}
         <div className="lg:col-span-7">
           {isSubmitted && createdBooking ? (
-            <div className="bg-white p-8 md:p-10 rounded-3xl border border-green-150 shadow-xl text-center flex flex-col items-center gap-6 animate-scale-up">
-              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center animate-bounce">
-                ✔
+            <div className="bg-white p-8 md:p-10 rounded-3xl border border-blue-100 shadow-xl text-center flex flex-col items-center gap-6 animate-scale-up">
+              <div className={`w-16 h-16 ${createdBooking.status === 'offline_queued' ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center text-2xl font-black`}>
+                {createdBooking.status === 'offline_queued' ? '⏳' : '✔'}
               </div>
+              
+              {/* Premium Green or Orange highlight for the confirmation message */}
+              {createdBooking.status === 'offline_queued' ? (
+                <div id="booking-notif-success-alert" className="bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 w-full text-center">
+                  <span className="text-orange-800 font-extrabold text-sm flex flex-col items-center justify-center gap-1.5">
+                    <span className="text-base flex items-center gap-1.5 justify-center">📶 {language === 'de' ? 'Offline-Sicherung Aktiv' : 'Offline Mode Active'}</span>
+                    <span className="font-medium text-xs text-orange-700 leading-relaxed">{apiSuccessMsg}</span>
+                  </span>
+                </div>
+              ) : apiSuccessMsg && (
+                <div id="booking-notif-success-alert" className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 w-full text-center">
+                  <span className="text-emerald-800 font-extrabold text-sm flex items-center justify-center gap-2">
+                    🛡️ {apiSuccessMsg}
+                  </span>
+                </div>
+              )}
+
               <div className="flex flex-col gap-2">
                 <h2 className="text-2xl font-black text-blue-900">
-                  {language === 'de' ? 'Termin erfolgreich angefragt!' : 'Booking requested successfully!'}
+                  {createdBooking.status === 'offline_queued' 
+                    ? (language === 'de' ? 'Termin offline gesichert!' : 'Booking saved offline!')
+                    : (language === 'de' ? 'Termin erfolgreich angefragt!' : 'Booking requested successfully!')}
                 </h2>
                 <p className="text-gray-500 font-semibold text-xs leading-relaxed max-w-md mx-auto">
-                  {language === 'de' ? (
+                  {createdBooking.status === 'offline_queued' ? (
+                    language === 'de' ? (
+                      <>Ihre Daten für den <strong>{createdBooking.date} ({createdBooking.time} Uhr)</strong> wurden sicher im lokalen Speicher Ihres Browsers hinterlegt. Sie müssen nichts weiter tun.</>
+                    ) : (
+                      <>Your booking data for <strong>{createdBooking.date} ({createdBooking.time} Hrs)</strong> has been safely saved in your browser's offline storage. No further action is required.</>
+                    )
+                  ) : language === 'de' ? (
                     <>Vielen Dank, <strong>{createdBooking.customerName}</strong>. Eine automatische Bestätigung Ihres Termins für den <strong>{createdBooking.date} ({createdBooking.time} Uhr)</strong> wurde an Ihre E-Mail <strong>{createdBooking.email}</strong> gesendet.</>
                   ) : (
                     <>Many thanks, <strong>{createdBooking.customerName}</strong>. An automatic review ticket for <strong>{createdBooking.date} ({createdBooking.time} Hrs)</strong> has been sent to your mail <strong>{createdBooking.email}</strong>.</>
@@ -194,18 +388,37 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
                 </p>
               </div>
 
-              {/* Simulated Client Notification Info Box */}
+              {/* Simulated/SMTP Deliver status debug console */}
+              {apiDetails && (
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left w-full">
+                  <span className="text-[10px] font-black uppercase text-slate-500 block mb-1">
+                    System Delivery Logs:
+                  </span>
+                  <p className="text-[11px] font-mono font-semibold text-slate-650 leading-relaxed whitespace-pre-line bg-white border border-slate-100 p-2.5 rounded-xl">
+                    {apiDetails}
+                  </p>
+                </div>
+              )}
+
+              {/* Client Notification Info Box */}
               <div className="bg-blue-50/70 border border-blue-100 p-5 rounded-2xl w-full text-left flex flex-col gap-3 font-semibold text-xs">
                 <div className="flex justify-between items-center text-xs font-black text-blue-900">
                   <span>{language === 'de' ? 'ANFRAGE-ID:' : 'TICKET-ID:'} {createdBooking.id}</span>
-                  <span className="bg-yellow-100 border border-yellow-200 text-yellow-700 font-semibold px-2 py-0.5 rounded uppercase font-mono tracking-wider">
-                    {language === 'de' ? 'In Prüfung (Standby)' : 'Under Review (Pending)'}
-                  </span>
+                  {createdBooking.status === 'offline_queued' ? (
+                    <span className="bg-orange-100 border border-orange-200 text-orange-700 font-semibold px-2 py-0.5 rounded uppercase font-mono tracking-wider animate-pulse flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping"></span>
+                      {language === 'de' ? 'Warteschlange' : 'Offline Queued'}
+                    </span>
+                  ) : (
+                    <span className="bg-yellow-100 border border-yellow-200 text-yellow-700 font-semibold px-2 py-0.5 rounded uppercase font-mono tracking-wider">
+                      {language === 'de' ? 'In Prüfung (Standby)' : 'Under Review (Pending)'}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs space-y-1.5 font-semibold text-gray-700">
                   <p>■ <strong>{language === 'de' ? 'Gewählte Leistung:' : 'Domestic service:'}</strong> {createdBooking.serviceName}</p>
                   <p>■ <strong>{language === 'de' ? 'Einsatzort:' : 'Service Location:'}</strong> {createdBooking.address}</p>
-                  <p>■ <strong>{language === 'de' ? 'Geschätzte Kosten:' : 'Estimated Costs:'}</strong> {createdBooking.totalPrice.toFixed(2)} € ({language === 'de' ? 'oder über Kasse' : 'or care fund'})</p>
+                  <p>■ <strong>{language === 'de' ? 'Geschätzte Kosten:' : 'Estimated Costs:'}</strong> {createdBooking.totalPrice?.toFixed(2) || '0.00'} € ({language === 'de' ? 'oder über Kasse' : 'or care fund'})</p>
                 </div>
                 <p className="text-[10px] text-gray-400 mt-2">
                   {language === 'de' 
@@ -226,7 +439,29 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
 
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-3xl border border-blue-50 shadow-lg flex flex-col gap-6">
+            <form onSubmit={handleSubmit} className="bg-white p-6 md:p-8 rounded-3xl border border-blue-50 shadow-lg flex flex-col gap-6 relative">
+              {(isSubmitting || isValidatingEmail) && (
+                <div className="absolute inset-0 bg-white/70 backdrop-blur-xs z-10 flex flex-col items-center justify-center gap-3 rounded-3xl">
+                  <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-xs font-black text-blue-900 animate-pulse uppercase tracking-wider">
+                    {isValidatingEmail 
+                      ? (language === 'de' ? 'E-Mail-Adresse wird validiert...' : 'Verifying email address...')
+                      : (language === 'de' ? 'Ihre Anfrage wird gesendet...' : 'Sending request to Emmasco...')}
+                  </span>
+                </div>
+              )}
+
+              {apiError && (
+                <div id="booking-notif-error-alert" className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-2xl text-xs font-semibold">
+                  <p className="font-extrabold mb-1">🚨 Booking notification failed to send!</p>
+                  <p className="font-mono text-[11px] bg-white text-red-800 p-2 rounded-lg border border-red-100">{apiError}</p>
+                  <p className="text-[10px] text-red-500 mt-2">
+                    {language === 'de' 
+                      ? 'Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie es gleich erneut.' 
+                      : 'Please verify server connectivity or attempt submission again.'}
+                  </p>
+                </div>
+              )}
               
               <h2 className="text-sm font-black text-[#0056D6] uppercase tracking-wider border-b border-gray-100 pb-2">
                 {language === 'de' ? 'Schritt 1: Kontaktdaten des Kunden' : 'Step 1: Contact Information'}

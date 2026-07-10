@@ -1,15 +1,19 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from 'react';
 import { 
   User, Lock, Mail, Phone, MapPin, Calendar, FileText, Download, 
-  Upload, MessageSquare, Send, CheckCircle, Clock, Trash, Key, PencilLine 
+  Upload, MessageSquare, Send, CheckCircle, Clock, Trash, Key, 
+  PencilLine, ShieldAlert, ArrowRight, RefreshCw, ChevronDown, 
+  ChevronUp, Check, Play, UserCheck, Shield, Bell
 } from 'lucide-react';
 import { Booking, UserDocument, ChatMessage } from '../types';
 import { jsPDF } from 'jspdf';
+import { useLanguage } from '../LanguageContext';
+import { 
+  isNotificationSupported, 
+  requestNotificationPermission, 
+  getNotificationPermissionState, 
+  sendBookingStatusNotification 
+} from '../utils/notificationService';
 
 interface CustomerDashboardProps {
   bookings: Booking[];
@@ -22,6 +26,35 @@ interface CustomerDashboardProps {
   documents: UserDocument[];
   onUpdateProfile: (name: string, phone: string, address: string) => void;
   currentUser: { name: string; email: string; phone: string; address: string } | null;
+  activeTab?: 'bookings' | 'documents' | 'profile' | 'support';
+  onTabChange?: (tab: 'bookings' | 'documents' | 'profile' | 'support') => void;
+  initialAuthMode?: 'login' | 'register' | 'verify' | 'forgot' | 'reset';
+  onAuthModeChange?: (mode: 'login' | 'register' | 'verify' | 'forgot' | 'reset') => void;
+  onNavigateToBooking?: (serviceId?: string) => void;
+}
+
+// Helper component for logging component mount/unmount lifecycles
+function LifecycleLogger({ name }: { name: string }) {
+  React.useEffect(() => {
+    if (name === 'VerifyForm') {
+      console.log('[STEP] Before Verify mount');
+      console.log(`[LIFECYCLE] +++ ${name} component MOUNTED (Verify mount)`);
+      console.log('[STEP] After Verify mount');
+    } else {
+      console.log(`[LIFECYCLE] +++ ${name} component MOUNTED`);
+    }
+
+    return () => {
+      if (name === 'RegisterForm') {
+        console.log('[STEP] Before Register unmount');
+        console.log(`[LIFECYCLE] --- ${name} component UNMOUNTED (Register unmount)`);
+        console.log('[STEP] After Register unmount');
+      } else {
+        console.log(`[LIFECYCLE] --- ${name} component UNMOUNTED`);
+      }
+    };
+  }, [name]);
+  return null;
 }
 
 export default function CustomerDashboard({
@@ -34,49 +67,363 @@ export default function CustomerDashboard({
   onUploadDocument,
   documents,
   onUpdateProfile,
-  currentUser
+  currentUser,
+  activeTab: controlledActiveTab,
+  onTabChange,
+  initialAuthMode,
+  onAuthModeChange,
+  onNavigateToBooking
 }: CustomerDashboardProps) {
+
+  const { language } = useLanguage();
+  const isDe = language === 'de';
+
+  // Authentication Flow states
+  // 'login' | 'register' | 'verify' | 'forgot' | 'reset'
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'verify' | 'forgot' | 'reset'>(initialAuthMode || 'login');
+
+  React.useEffect(() => {
+    if (initialAuthMode && initialAuthMode !== authMode) {
+      setAuthMode(initialAuthMode);
+    }
+  }, [initialAuthMode]);
+
+  React.useEffect(() => {
+    if (onAuthModeChange) {
+      onAuthModeChange(authMode);
+    }
+  }, [authMode, onAuthModeChange]);
+
+  // Extract registered email from location query string, history state, or localStorage fallback
+  React.useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const emailParam = params.get('email');
+      const historyEmail = window.history.state && (window.history.state as any).email;
+      const storedEmail = localStorage.getItem("pendingVerificationEmail");
+
+      const resolvedEmail = emailParam || historyEmail || storedEmail || "";
+
+      if (resolvedEmail) {
+        setNeedsVerificationEmail(resolvedEmail);
+        setAuthEmail(resolvedEmail);
+      } else if (authMode === 'verify') {
+        // No email exists, redirect back to Register mode
+        setAuthMode('register');
+        setAuthError(isDe ? 'Bitte registrieren Sie sich zuerst.' : 'Please register first.');
+        if (window.location.pathname !== '/register') {
+          window.history.replaceState({}, '', '/register');
+        }
+      }
+    } catch (err) {
+      console.error('[Dashboard] Error parsing email from route state:', err);
+    }
+  }, [authMode, initialAuthMode, isDe]);
   
-  // Login State
-  const [loginEmail, setLoginEmail] = useState('w.schmidt@gmail.com');
-  const [loginPassword, setLoginPassword] = useState('••••••••');
-  const [loginName, setLoginName] = useState('Waltraud Schmidt');
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [loginError, setLoginError] = useState('');
+  // Registration and Authentication inputs
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authConfirmPassword, setAuthConfirmPassword] = useState('');
+  const [authName, setAuthName] = useState('');
+  const [authPhone, setAuthPhone] = useState('');
+  const [authAddress, setAuthAddress] = useState('');
+  
+  // Validation Codes
+  const [typedCode, setTypedCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  
+  // Dynamic errors or successes
+  const [authError, setAuthError] = useState('');
+  const [authSuccess, setAuthSuccess] = useState('');
+  const [needsVerificationEmail, setNeedsVerificationEmail] = useState('');
+  const [devCodeHint, setDevCodeHint] = useState('');
 
   // Active Tab state inside customer dashboard
   // "bookings" | "documents" | "profile" | "support"
-  const [activeTab, setActiveTab] = useState<'bookings' | 'documents' | 'profile' | 'support'>('bookings');
+  const [activeTab, setActiveTab] = useState<'bookings' | 'documents' | 'profile' | 'support'>(controlledActiveTab || 'bookings');
+
+  // Sync active tab state from props if controlled
+  React.useEffect(() => {
+    if (controlledActiveTab) {
+      setActiveTab(controlledActiveTab);
+    }
+  }, [controlledActiveTab]);
+
+  const handleTabChange = (tab: 'bookings' | 'documents' | 'profile' | 'support') => {
+    setActiveTab(tab);
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
+
+  // Notification Permission state
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission>(() => {
+    return getNotificationPermissionState();
+  });
+
+  const handleEnableNotifications = async () => {
+    const perm = await requestNotificationPermission();
+    if (perm) {
+      setNotifPermission(perm);
+      if (perm === 'granted') {
+        // Trigger a friendly welcome notification
+        sendBookingStatusNotification(
+          language === 'de' ? 'Ihr Kundenportal' : 'Your Customer Portal',
+          'assigned',
+          language === 'de' ? 'Mitteilungen aktiv' : 'Notifications active',
+          language
+        );
+      }
+    }
+  };
+
+  const handleTestNotification = () => {
+    sendBookingStatusNotification(
+      language === 'de' ? 'Haushaltsreinigung (Muster)' : 'Household Cleaning (Sample)',
+      'completed',
+      undefined,
+      language
+    );
+  };
 
   // New Chat Message State
   const [chatInput, setChatInput] = useState('');
   
   // Edit Profile States
-  const [profileName, setProfileName] = useState(currentUser?.name || 'Waltraud Schmidt');
-  const [profilePhone, setProfilePhone] = useState(currentUser?.phone || '0176 94857391');
-  const [profileAddress, setProfileAddress] = useState(currentUser?.address || 'Kollwitzstraße 14, 10435 Berlin');
+  const [profileName, setProfileName] = useState(currentUser?.name || '');
+  const [profilePhone, setProfilePhone] = useState(currentUser?.phone || '');
+  const [profileAddress, setProfileAddress] = useState(currentUser?.address || '');
   const [profileSavedMsg, setProfileSavedMsg] = useState('');
 
-  // Upload States
+  // Expandable Booking details row tracker
+  const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+
+  // File Upload States
   const [uploadFileName, setUploadFileName] = useState('');
   const [uploadFileNameError, setUploadFileNameError] = useState('');
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginEmail.trim() || !/\S+@\S+\.\S+/.test(loginEmail)) {
-      setLoginError('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
-      return;
+  // Sync profile editing when currentUser loads
+  React.useEffect(() => {
+    if (currentUser) {
+      setProfileName(currentUser.name);
+      setProfilePhone(currentUser.phone);
+      setProfileAddress(currentUser.address);
     }
-    
-    // Auto-login with appropriate names
-    const displayName = isRegisterMode ? loginName : (loginEmail.includes('schmidt') ? 'Waltraud Schmidt' : 'Gast-Kunde');
-    onLogin(loginEmail, displayName);
-    setLoginError('');
-    
-    // Set profile field defaults
-    setProfileName(displayName);
+  }, [currentUser]);
+
+  // Auth Handler: LOGIN
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+    setDevCodeHint('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authEmail, password: authPassword })
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        onLogin(result.user.email, result.user.name);
+      } else if (response.status === 403 && result.needsVerification) {
+        // Needs verification setup code input
+        setNeedsVerificationEmail(authEmail);
+        setAuthMode('verify');
+        setAuthError(language === 'de' ? 'E-Mail-Adresse ist noch nicht verifiziert.' : 'Email address is not verified yet.');
+        if (result.tempCode) {
+          setDevCodeHint(`[TEST ENVIRONMENT HINT] Verification Code: ${result.tempCode}`);
+        }
+      } else {
+        const msg = language === 'de' ? 'E-Mail oder Passwort falsch.' : 'Incorrect email or password.';
+        setAuthError(msg);
+      }
+    } catch (err: any) {
+      const msg = language === 'de' ? 'E-Mail oder Passwort falsch.' : 'Incorrect email or password.';
+      setAuthError(msg);
+    }
   };
 
+  // Auth Handler: REGISTER Account Creation
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+    setDevCodeHint('');
+
+    console.log('[REGISTRATION] Form submitted. Email:', authEmail, 'Name:', authName);
+
+    if (!authEmail || !authPassword || !authName || !authConfirmPassword) {
+      console.warn('[REGISTRATION] Missing required fields');
+      setAuthError(language === 'de' ? 'Bitte füllen Sie alle erforderlichen Felder aus.' : 'Please fill out all required fields.');
+      return;
+    }
+
+    if (authPassword !== authConfirmPassword) {
+      console.warn('[REGISTRATION] Passwords do not match');
+      setAuthError(language === 'de' ? 'Die Passwörter stimmen nicht überein.' : 'Passwords do not match.');
+      return;
+    }
+
+    try {
+      console.log('[REGISTRATION] Sending POST request to /api/auth/register...');
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: authName,
+          email: authEmail,
+          password: authPassword
+        })
+      });
+
+      let result: any = {};
+      try {
+        result = await response.json();
+      } catch (jsonErr) {
+        console.error('[REGISTRATION] Failed to parse response JSON:', jsonErr);
+      }
+
+      if (response.ok && result && result.success) {
+        const registeredEmail = authEmail;
+        console.log('[STEP] Before Registration API success handler');
+        console.log('[REGISTRATION SUCCESS] Registration API success. Succeeded for email:', registeredEmail);
+        console.log('[STEP] After Registration API success handler');
+
+        console.log('[STEP] Before Email sent handling');
+        console.log('[EMAIL SENDING] Backend has successfully dispatched the 6-digit confirmation email to:', registeredEmail);
+        console.log('[STEP] After Email sent handling');
+
+        console.log('[STEP] Before State update');
+        setNeedsVerificationEmail(registeredEmail);
+        setAuthSuccess(language === 'de' ? 'Registrierung erfasst! Ein 6-stelliger Verifizierungscode wurde gesendet.' : 'Registration received! A 6-digit verification code has been sent.');
+        
+        if (result.tempCode) {
+          console.log('[REGISTRATION SUCCESS] devCodeHint found in response:', result.tempCode);
+          setDevCodeHint(`[TEST ENVIRONMENT HINT] Verification Code: ${result.tempCode}`);
+        }
+        
+        // Save to localStorage so verification page has fallback
+        console.log('[REGISTRATION SUCCESS] Saving pending verification email to localStorage:', registeredEmail);
+        localStorage.setItem("pendingVerificationEmail", registeredEmail);
+        console.log('[STEP] After State update');
+        
+        console.log('[STEP] Before Navigate to Verify');
+        // Single synchronous navigation update with history state
+        const targetPath = `/verify?email=${encodeURIComponent(registeredEmail)}`;
+        console.log('[NAVIGATION] Updating history path state to:', targetPath);
+        if (window.location.pathname !== '/verify') {
+          window.history.pushState({ email: registeredEmail }, '', targetPath);
+        }
+        console.log('[STEP] After Navigate to Verify');
+        
+        console.log('[STEP] Before setting authMode State update');
+        console.log('[STATE UPDATE] setting authMode to: verify');
+        setAuthMode('verify');
+        console.log('[STEP] After setting authMode State update (authMode set to verify)');
+      } else {
+        console.error('[REGISTRATION FAILED] Error response:', result);
+        setAuthError(result?.error || (language === 'de' ? 'Registrierung fehlgeschlagen.' : 'Registration failed.'));
+      }
+    } catch (err: any) {
+      console.error('[REGISTRATION] Error during registration network call:', err);
+      setAuthError(language === 'de' ? 'Netzwerkfehler bei der Registrierung.' : 'Network error during registration.');
+    }
+  };
+
+  // Auth Handler: VERIFICATION Code confirming
+  const handleVerifySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: needsVerificationEmail || authEmail, code: typedCode })
+      });
+
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setAuthSuccess('Verifizierung erfolgreich! Sie können sich jetzt anmelden.');
+        setAuthMode('login');
+        setDevCodeHint('');
+        // Autofill password credentials
+        setTypedCode('');
+      } else {
+        setAuthError(result.error || 'Ungültiger Verifizierungscode.');
+      }
+    } catch (err: any) {
+      setAuthError('Code-Verifizierung fehlgeschlagen.');
+    }
+  };
+
+  // Auth Handler: FORGOT Password
+  const handleForgotSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+    setDevCodeHint('');
+
+    try {
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: authEmail })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setNeedsVerificationEmail(authEmail);
+        setAuthMode('reset');
+        setAuthSuccess('Sicherheitscode zum Zurücksetzen wurde versendet.');
+        if (result.tempCode) {
+          setDevCodeHint(`[TEST ENVIRONMENT HINT] Reset Code: ${result.tempCode}`);
+        }
+      } else {
+        setAuthError(result.error || 'Zurücksetzen fehlgeschlagen.');
+      }
+    } catch (err) {
+      setAuthError('Zahlungsanbieter offline.');
+    }
+  };
+
+  // Auth Handler: RESET Password with code
+  const handleResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+
+    try {
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: needsVerificationEmail || authEmail,
+          code: typedCode,
+          newPassword
+        })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setAuthSuccess('Passwort erfolgreich zurückgesetzt! Bitte loggen Sie sich ein.');
+        setAuthMode('login');
+        setDevCodeHint('');
+        setTypedCode('');
+        setNewPassword('');
+      } else {
+        setAuthError(result.error || 'Passwort-Zurücksetzung fehlgeschlagen.');
+      }
+    } catch (err) {
+      setAuthError('Netzwerk-Kommunikationsfehler.');
+    }
+  };
+
+  // Profile data saver
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateProfile(profileName, profilePhone, profileAddress);
@@ -84,6 +431,7 @@ export default function CustomerDashboard({
     setTimeout(() => setProfileSavedMsg(''), 3000);
   };
 
+  // Support dispatch chatting
   const handleSendChat = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
@@ -111,32 +459,21 @@ export default function CustomerDashboard({
   };
 
   const handleMockPdfDownload = (invoiceName: string) => {
-    // Elegant mocked browser triggers
     const link = document.createElement('a');
     link.href = '#';
     link.setAttribute('download', invoiceName);
-    document.body.appendChild(link);
-    
-    // Visual alert to user for immersive feel
-    alert(`📥 PDF-Download gestartet:\nDatei: "${invoiceName}" wird simuliert heruntergeladen.`);
-    document.body.removeChild(link);
+    link.click();
   };
 
   const generateInvoicePdf = (booking: Booking) => {
     try {
-      const doc = new jsPDF({
-        orientation: 'p',
-        unit: 'mm',
-        format: 'a4'
-      });
-
-      // Coordinates helper and branding colors
+      const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
       const primaryColor = [0, 86, 214]; // #0056D6
       const accentColor = [47, 181, 255]; // #2FB5FF
       const textColor = [30, 41, 59]; // Slate-800
       const lightLineColor = [226, 232, 240];
 
-      // Draw Top branding colored bar
+      // Top branding colored bar
       doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.rect(0, 0, 210, 8, 'F');
 
@@ -158,12 +495,11 @@ export default function CustomerDashboard({
       doc.text('Emmasco Reinigungsteam GmbH • Kollwitzstraße 14 • 10435 Berlin', 20, 35);
       doc.text('Tel: 0176 21856044 • Web: www.emmasco-reinigungsteam.de', 20, 39);
 
-      // Top Divider Line
       doc.setDrawColor(lightLineColor[0], lightLineColor[1], lightLineColor[2]);
       doc.setLineWidth(0.3);
       doc.line(20, 42, 190, 42);
 
-      // Address & Invoice Metadata Header Info
+      // Customer section
       doc.setTextColor(148, 163, 184);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(7.5);
@@ -185,7 +521,7 @@ export default function CustomerDashboard({
         doc.text(wrappedAddress, 20, 61.5);
       }
 
-      // Metadata Box (Right)
+      // Metadata
       const invoiceNo = `RE-2026-${booking.id.toUpperCase()}`;
       const todayString = new Date().toLocaleDateString('de-DE');
       const dueDate = new Date();
@@ -202,7 +538,6 @@ export default function CustomerDashboard({
       doc.setFontSize(9);
       
       doc.text('Rechnungs-Nr:', 125, 56);
-      doc.setFont('Helvetica', 'bold');
       doc.text(invoiceNo, 162, 56);
 
       doc.setFont('Helvetica', 'normal');
@@ -216,7 +551,6 @@ export default function CustomerDashboard({
       doc.setFont('Helvetica', 'bold');
       doc.text(dueDateString, 162, 72.5);
 
-      // Invoice Title Header
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(15);
@@ -225,24 +559,20 @@ export default function CustomerDashboard({
       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(9);
-      const textIntro = `Sehr geehrte(r) ${booking.customerName},\n\nwir bedanken uns für den erteilten Reinigungs- und Betreuungsauftrag im Raum Berlin-Pankow. Hiermit stellen wir Ihnen die vertragsgemäß erbrachte Dienstleistung ordnungsgemäß in Rechnung.`;
+      const textIntro = `Sehr geehrte(r) ${booking.customerName},\n\nwir bedanken uns für den erteilten Reinigungs- und Betreuungsauftrag im Raum Berlin. Hiermit stellen wir Ihnen die vertragsgemäß erbrachte Dienstleistung ordnungsgemäß in Rechnung.`;
       const wrappedIntro = doc.splitTextToSize(textIntro, 170);
       doc.text(wrappedIntro, 20, 94);
 
-      // TABLE OF ITEMS
+      // Table items
       const tableTopY = 118;
-      
-      // Header rect
       doc.setFillColor(248, 250, 252);
       doc.rect(20, tableTopY, 170, 7.5, 'F');
       
-      // Header line
       doc.setDrawColor(203, 213, 225);
       doc.setLineWidth(0.3);
       doc.line(20, tableTopY, 190, tableTopY);
       doc.line(20, tableTopY + 7.5, 190, tableTopY + 7.5);
 
-      // Header titles
       doc.setTextColor(100, 116, 139);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(8);
@@ -251,7 +581,6 @@ export default function CustomerDashboard({
       doc.text('MENGE', 148, tableTopY + 5);
       doc.text('BETRAG (NETTO)', 166, tableTopY + 5);
 
-      // Item Row Value
       const rowY = tableTopY + 14;
       doc.setTextColor(textColor[0], textColor[1], textColor[2]);
       doc.setFont('Helvetica', 'bold');
@@ -266,7 +595,7 @@ export default function CustomerDashboard({
       if (booking.notes) {
         doc.setFont('Helvetica', 'italic');
         doc.setTextColor(115, 115, 115);
-        const wrappedNotes = doc.splitTextToSize(`Kundenhinweis: "${booking.notes}"`, 85);
+        const wrappedNotes = doc.splitTextToSize(`Hinweis: "${booking.notes}"`, 85);
         doc.text(wrappedNotes, 23, rowY + 9);
       }
 
@@ -277,22 +606,18 @@ export default function CustomerDashboard({
       doc.text('1,00 Psch.', 148, rowY);
       doc.text(`${booking.totalPrice.toFixed(2)} €`, 166, rowY);
 
-      // Row divider
       const bottomRowY = booking.notes ? rowY + 16 : rowY + 10;
       doc.setDrawColor(226, 232, 240);
       doc.line(20, bottomRowY, 190, bottomRowY);
 
-      // Calculation Breakdown Box
       const calcY = bottomRowY + 8;
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.text('Zwischensumme (Netto):', 118, calcY);
       doc.text(`${booking.totalPrice.toFixed(2)} €`, 166, calcY);
-
       doc.text('Umsatzsteuer (0% / Befreit):', 118, calcY + 5.5);
       doc.text('0,00 €', 166, calcY + 5.5);
 
-      // Bold Gross Total Line
       doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setLineWidth(0.4);
       doc.line(115, calcY + 9, 190, calcY + 9);
@@ -303,7 +628,6 @@ export default function CustomerDashboard({
       doc.text('RECHNUNGSBETRAG:', 118, calcY + 14.5);
       doc.text(`${booking.totalPrice.toFixed(2)} €`, 166, calcY + 14.5);
 
-      // TAX BREAKDOWN INFO & LEGAL STUFF
       doc.setTextColor(51, 65, 85);
       doc.setFont('Helvetica', 'bold');
       doc.setFontSize(7.5);
@@ -311,50 +635,33 @@ export default function CustomerDashboard({
       
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(7);
-      doc.text('Als haushaltsnahe Dienstleistung nach § 35a Absatz 2 EStG steuerlich begünstigt (20% der Lohnkosten absetzbar).', 20, calcY + 26);
-      doc.text('Umsatzsteuerbefreite Pflegesachleistung nach § 4 Nr. 16 SGB XI. Registrierter Anbieter für Entlastungsbetrag.', 20, calcY + 30);
+      doc.text('Als haushaltsnahe Dienstleistung nach § 35a Absatz 2 EStG steuerlich begünstigt (20% absetzbar).', 20, calcY + 26);
+      doc.text('Umsatzsteuerbefreite Pflegesachleistung nach § 4 Nr. 16 SGB XI.', 20, calcY + 30);
 
-      // Signature/Stamp Placeholders
-      doc.setTextColor(148, 163, 184);
-      doc.setDrawColor(203, 213, 225);
-      doc.rect(20, calcY + 38, 45, 18);
-      doc.setFont('Helvetica', 'italic');
-      doc.setFontSize(6.5);
-      doc.text('Cynthia Osei', 22, calcY + 52);
-      doc.text('Geschäftsführung Emmasco', 22, calcY + 54);
-
-      // Payment details footer
       const footerY = 245;
       doc.setDrawColor(203, 213, 225);
-      doc.setLineWidth(0.3);
       doc.line(20, footerY, 190, footerY);
 
       doc.setTextColor(115, 115, 115);
       doc.setFont('Helvetica', 'normal');
       doc.setFontSize(7);
-      doc.text('Bitte überweisen Sie den Betrag unter Angabe des Verwendungszwecks (Rechnungs-Nr) innerhalb der Zahlungsfrist.', 20, footerY + 5);
-      
+      doc.text('Bitte überweisen Sie den Betrag unter Angabe des Verwendungszwecks innerhalb der Zahlungsfrist.', 20, footerY + 5);
       doc.setFont('Helvetica', 'bold');
-      doc.text('Bankdaten für Überweisung:', 20, footerY + 10);
+      doc.text('Bankdaten:', 20, footerY + 10);
       doc.setFont('Helvetica', 'normal');
       doc.text('Berliner Volksbank • IBAN: DE78 1009 0000 1234 5678 90 • BIC: BEVO DE BB XXX', 20, footerY + 14);
-
-      doc.setTextColor(100, 116, 139);
-      doc.setFont('Helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.text('Herzlichen Dank für Ihre Buchung bei EMMASCO!', 20, footerY + 23);
 
       doc.save(`Rechnung_${invoiceNo}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
-      alert('Der PDF-Download ist fehlgeschlagen. Bitte laden Sie die Seite neu.');
+      alert('Der PDF-Download ist fehlgeschlagen.');
     }
   };
 
   const handleDocumentUpload = (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadFileName.trim()) {
-      setUploadFileNameError('Bitte wählen Sie ein Dokument (bzw. tragen Sie einen Dateinamen ein).');
+      setUploadFileNameError('Bitte tragen Sie einen Dateinamen oder Pfad ein.');
       return;
     }
 
@@ -373,109 +680,413 @@ export default function CustomerDashboard({
     alert('📄 Dokument erfolgreich hochgeladen! Status ist nun "In Prüfung" durch unser Team.');
   };
 
+  // Rebooking trigger
+  const handleRebookService = (b: Booking) => {
+    // Show visual confirmation
+    alert(`🔁 Rebooking initialisiert:\nDienstleistung: "${b.serviceName}" wird übernommen. Wir leiten Sie nun zur Buchungsseite weiter, wo Ihre Adress- & Kontaktdaten bereits vorbelegt sind.`);
+    if (onNavigateToBooking) {
+      onNavigateToBooking(b.serviceId);
+    }
+  };
+
   // Filter Bookings relative to customer
-  const clientBookings = bookings.filter(b => b.email === (currentUser?.email || 'w.schmidt@gmail.com'));
+  const clientBookings = bookings.filter(b => b.email.toLowerCase() === (currentUser?.email || 'w.schmidt@gmail.com').toLowerCase());
 
-  // Render Login Panel as default
+  // Split bookings into upcoming vs historical
+  const upcomingBookings = clientBookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled');
+  const pastBookings = clientBookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
+
+  // Render Authentication Views
+  // Render Authentication Views
   if (!isLoggedIn) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-20 text-left">
-        <div className="bg-white p-8 rounded-3xl border border-blue-50 shadow-xl flex flex-col gap-6">
-          
-          <div className="text-center flex flex-col items-center">
-            <span className="text-3xl">🏠</span>
-            <h1 className="text-2xl font-black text-blue-900 mt-2">EMMASCO Kundenportal</h1>
-            <p className="text-gray-500 font-semibold text-xs mt-1 leading-relaxed">
-              Verwalten Sie Ihre Buchungen, laden Sie Genehmigungen hoch und laden Sie Rechnungen direkt auf einen Klick herunter.
-            </p>
-          </div>
-
-          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-4">
-            {isRegisterMode && (
+    const renderAuthForm = () => {
+      switch (authMode) {
+        case 'login':
+          return (
+            <form key="login-form" onSubmit={handleLoginSubmit} className="flex flex-col gap-4">
+              <LifecycleLogger name="LoginForm" />
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-extrabold text-gray-750">Ihr Name *</label>
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'E-Mail-Adresse *' : 'Email Address *'}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="name@domain.com"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'Ihr Passwort *' : 'Password *'}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                id="customer-login-submit"
+                className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition whitespace-nowrap cursor-pointer mt-2 shadow-sm"
+              >
+                {isDe ? 'Einloggen' : 'Sign In'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="flex justify-between items-center text-xs mt-3 pt-3 border-t border-gray-100 font-extrabold px-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('register');
+                    setAuthError('');
+                    setAuthSuccess('');
+                  }}
+                  className="text-[#0056D6] hover:text-blue-800 transition cursor-pointer"
+                >
+                  {isDe ? 'Konto erstellen' : 'Create Account'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('forgot');
+                    setAuthError('');
+                    setAuthSuccess('');
+                  }}
+                  className="text-[#0056D6] hover:text-blue-800 transition cursor-pointer"
+                >
+                  {isDe ? 'Passwort vergessen?' : 'Forgot Password?'}
+                </button>
+              </div>
+            </form>
+          );
+
+        case 'register':
+          return (
+            <form key="register-form" onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
+              <LifecycleLogger name="RegisterForm" />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'Ihr vollständiger Name *' : 'Full Name *'}
+                </label>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
                   <input
                     type="text"
                     required
-                    value={loginName}
-                    onChange={(e) => setLoginName(e.target.value)}
+                    value={authName}
+                    onChange={(e) => setAuthName(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Waltraud Schmidt"
+                    placeholder={isDe ? 'z.B. Waltraud Schmidt' : 'e.g. Waltraud Schmidt'}
                   />
                 </div>
               </div>
-            )}
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-extrabold text-gray-750">E-Mail-Adresse *</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'E-Mail-Adresse *' : 'Email *'}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="name@domain.com"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'Wählen Sie ein Passwort *' : 'Password *'}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={authPassword}
+                    onChange={(e) => setAuthPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'Passwort bestätigen *' : 'Confirm Password *'}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="password"
+                    required
+                    value={authConfirmPassword}
+                    onChange={(e) => setAuthConfirmPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                id="customer-register-submit"
+                className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer mt-2 shadow-sm"
+              >
+                {isDe ? 'Konto erstellen' : 'Create Account'}
+                <CheckCircle className="w-4 h-4" />
+              </button>
+
+              <div className="text-center text-xs mt-3 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setAuthError('');
+                    setAuthSuccess('');
+                  }}
+                  className="text-gray-500 hover:text-gray-800 transition font-bold"
+                >
+                  {isDe ? 'Zurück zum Login' : 'Back to Login'}
+                </button>
+              </div>
+            </form>
+          );
+
+        case 'verify':
+          return (
+            <form key="verify-form" onSubmit={handleVerifySubmit} className="flex flex-col gap-4 text-center">
+              <LifecycleLogger name="VerifyForm" />
+              <span className="text-3xl mx-auto">📧</span>
+              <div className="flex flex-col gap-1 text-center">
+                <h3 className="font-extrabold text-blue-900 text-sm">
+                  {isDe ? 'Überprüfungscode eingeben' : 'Enter Verification Code'}
+                </h3>
+                <p className="text-[11px] text-gray-500 leading-normal">
+                  {isDe 
+                    ? `Wir haben Ihnen einen 6-stelligen Code an geschickt.` 
+                    : `We have sent a 6-digit confirmation code.`}
+                </p>
+              </div>
+
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={typedCode}
+                onChange={(e) => setTypedCode(e.target.value)}
+                className="w-full py-3 bg-[#F6FAFF] border-2 border-blue-200 text-center text-xl tracking-widest font-black rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase"
+                placeholder="123456"
+              />
+
+              <button
+                type="submit"
+                id="customer-verify-submit"
+                className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs transition cursor-pointer"
+              >
+                {isDe ? 'Verifizierung abschließen' : 'Complete Verification'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAuthMode('login')}
+                className="text-xs text-gray-500 hover:text-gray-800 font-bold underline animate-pulse"
+              >
+                {isDe ? 'Zurück zum Login' : 'Back to Login'}
+              </button>
+            </form>
+          );
+
+        case 'forgot':
+          return (
+            <form key="forgot-form" onSubmit={handleForgotSubmit} className="flex flex-col gap-4">
+              <LifecycleLogger name="ForgotForm" />
+              <div className="text-center flex flex-col items-center">
+                <span className="text-3xl">🔑</span>
+                <h3 className="font-extrabold text-blue-900 text-sm mt-1">
+                  {isDe ? 'Passwort vergessen?' : 'Forgot Password?'}
+                </h3>
+                <p className="text-[11px] text-gray-500 mt-0.5 text-center leading-normal">
+                  {isDe 
+                    ? 'Wir senden Ihnen einen Code per E-Mail, um Ihr Passwort zurückzusetzen.' 
+                    : 'We will send a code to your email in order to reset your password.'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1.5 text-left">
+                <label className="text-xs font-extrabold text-gray-750">
+                  {isDe ? 'Ihre E-Mail-Adresse *' : 'Email Address *'}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    value={authEmail}
+                    onChange={(e) => setAuthEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="name@domain.com"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                id="customer-forgot-submit"
+                className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs cursor-pointer shadow-sm"
+              >
+                {isDe ? 'Code anfordern' : 'Request Code'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAuthMode('login')}
+                className="text-xs text-gray-500 hover:text-gray-800 font-bold text-center mt-1 underline"
+              >
+                {isDe ? 'Abbrechen' : 'Cancel'}
+              </button>
+            </form>
+          );
+
+        case 'reset':
+          return (
+            <form key="reset-form" onSubmit={handleResetSubmit} className="flex flex-col gap-4">
+              <LifecycleLogger name="ResetForm" />
+              <div className="flex flex-col gap-1 text-center">
+                <span className="text-3xl mx-auto">🛡️</span>
+                <h3 className="font-extrabold text-blue-900 text-sm">
+                  {isDe ? 'Sicherheitscode eingeben' : 'Enter Security Code'}
+                </h3>
+                <p className="text-[11px] text-gray-500 leading-normal">
+                  {isDe 
+                    ? 'Tragen Sie den erhaltenen Code und Ihr neues Passwort ein.' 
+                    : 'Insert the received code and your new password.'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-750">
+                  {isDe ? '6-stelliger Reset-Code' : '6-digit Reset Code'}
+                </label>
                 <input
-                  type="email"
+                  type="text"
                   required
-                  value={loginEmail}
-                  onChange={(e) => setLoginEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="name@portal.de"
+                  maxLength={6}
+                  value={typedCode}
+                  onChange={(e) => setTypedCode(e.target.value)}
+                  className="w-full py-2 bg-[#F6FAFF] border border-blue-105 text-center text-md tracking-wider font-extrabold rounded-xl"
+                  placeholder="123456"
                 />
               </div>
-            </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-extrabold text-gray-750">Passwort *</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-2.5 w-4.5 h-4.5 text-gray-400" />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-gray-750">
+                  {isDe ? 'Neues Wunsch-Passwort' : 'New Password'}
+                </label>
                 <input
                   type="password"
                   required
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#F6FAFF] border border-blue-50 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2 bg-[#F6FAFF] border border-blue-105 text-sm font-bold rounded-xl"
+                  placeholder={isDe ? 'Neues Passwort festlegen' : 'Define password'}
                 />
               </div>
-            </div>
 
-            {loginError && <p className="text-xs text-red-600 font-bold">{loginError}</p>}
+              <button
+                type="submit"
+                id="customer-reset-submit"
+                className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-2.5 rounded-xl text-xs transition cursor-pointer shadow-sm"
+              >
+                {isDe ? 'Neues Passwort speichern' : 'Save New Password'}
+              </button>
+            </form>
+          );
 
-            <button
-              type="submit"
-              id="customer-login-submit"
-              className="w-full bg-[#0056D6] hover:bg-blue-700 text-white font-black py-3 rounded-xl text-sm shadow cursor-pointer text-center"
-            >
-              {isRegisterMode ? 'Konto anlegen' : 'Im Kundenportal einloggen'}
-            </button>
-          </form>
+        default:
+          return null;
+      }
+    };
 
-          {/* Quick Sandbox Guide for testing */}
-          <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-left text-[11px] font-semibold text-blue-900 leading-relaxed">
-            <span className="font-extrabold block mb-0.5">💡 Demo-Testkonto:</span>
-            <span>
-              Verwenden Sie die E-Mail <strong>w.schmidt@gmail.com</strong> und ein beliebiges Passwort, um sich als unser Muster-Senior anzumelden und bereits bestehende Buchungen zu sehen!
-            </span>
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-left">
+        <div className="bg-white p-8 rounded-3xl border border-blue-105 shadow-xl flex flex-col gap-6">
+          
+          <div className="text-center flex flex-col items-center">
+            <span className="text-4xl">🔐</span>
+            <h1 className="text-2xl font-black text-blue-900 mt-2">
+              {authMode === 'login' && (isDe ? 'Kunden-Login' : 'Client Login')}
+              {authMode === 'register' && (isDe ? 'Konto erstellen' : 'Create Account')}
+              {authMode === 'forgot' && (isDe ? 'Passwort vergessen?' : 'Forgot Password?')}
+              {authMode === 'verify' && (isDe ? 'Code eingeben' : 'Enter Code')}
+              {authMode === 'reset' && (isDe ? 'Passwort ändern' : 'Change Password')}
+            </h1>
+            <p className="text-gray-500 font-semibold text-xs mt-1 leading-relaxed">
+              {authMode === 'login' && (isDe ? 'Melden Sie sich an, um Ihr sicheres Portal zu betreten.' : 'Log in to access your secure client portal.')}
+              {authMode === 'register' && (isDe ? 'Registrieren Sie ein neues Kundenkonto.' : 'Create a new customer account.')}
+              {authMode === 'forgot' && (isDe ? 'Geben Sie Ihre E-Mail-Adresse ein, um einen Reset-Code anzufordern.' : 'Provide your email in order to request a reset code.')}
+              {authMode === 'verify' && (isDe ? 'Bitte verifizieren Sie Ihre E-Mail-Adresse.' : 'Please verify your email address.')}
+              {authMode === 'reset' && (isDe ? 'Legen Sie ein neues Wunschpasswort fest.' : 'Define a secure new password.')}
+            </p>
           </div>
 
-          <button
-            id="toggle-auth-mode-btn"
-            onClick={() => {
-              setIsRegisterMode(!isRegisterMode);
-              setLoginError('');
-            }}
-            className="text-xs text-blue-600 hover:text-blue-800 underline font-bold"
-          >
-            {isRegisterMode ? 'Bereits registriert? Hier einloggen' : 'Noch kein Konto? Hier registrieren'}
-          </button>
+          {/* Feedback alerts - housed in a stable child block to prevent sibling reordering bugs */}
+          <div className="flex flex-col gap-2 empty:hidden">
+            {authError && (
+              <div key="auth-error-alert" className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 font-bold text-xs flex items-start gap-2 animate-fade-in">
+                <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{authError}</span>
+              </div>
+            )}
+
+            {authSuccess && (
+              <div key="auth-success-alert" className="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 font-extrabold text-xs flex items-start gap-2 animate-fade-in">
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{authSuccess}</span>
+              </div>
+            )}
+
+            {devCodeHint && (
+              <div key="dev-code-hint" className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-yellow-800 font-mono text-[10px] break-all leading-normal animate-fade-in">
+                <strong>{devCodeHint}</strong>
+              </div>
+            )}
+          </div>
+
+          {/* Render exactly one active form dynamically */}
+          <div className="w-full">
+            {renderAuthForm()}
+          </div>
 
         </div>
       </div>
     );
   }
 
+  // PORTAL LOGGED IN VIEWS
   return (
     <div className="max-w-7xl mx-auto px-4 py-10 text-left">
       
-      {/* Welcome banner */}
+      {/* Welcome Banner Header */}
       <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-6 md:p-8 rounded-3xl shadow-lg border border-blue-800 text-left flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <span className="text-[10px] bg-blue-600 border border-blue-500 rounded-full px-2.5 py-1 uppercase font-black text-blue-100">
@@ -483,7 +1094,7 @@ export default function CustomerDashboard({
           </span>
           <h1 className="text-2xl md:text-3xl font-black mt-2">Herzlich Willkommen, {currentUser?.name}!</h1>
           <p className="text-xs font-semibold text-blue-200 mt-1">
-            Hier verwalten Sie Ihren Haushaltsplan und den Schriftverkehr mit Ihrer Pflegekasse.
+            Hier verwalten Sie Ihren Haushaltsplan und den Schriftverkehr mit Ihrem Pflegeteam.
           </p>
         </div>
         <div className="bg-blue-800 px-4 py-3 rounded-2xl border border-blue-600 font-extrabold text-xs">
@@ -491,18 +1102,18 @@ export default function CustomerDashboard({
         </div>
       </div>
 
-      {/* Dashboard container layout */}
+      {/* Grid container layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-10 items-start">
         
-        {/* Left Side: Sidebar navigation options */}
+        {/* Left Sidebar Menu */}
         <div className="lg:col-span-3 flex flex-col gap-2.5">
           <button
             id="tab-btn-bookings"
-            onClick={() => setActiveTab('bookings')}
+            onClick={() => handleTabChange('bookings')}
             className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold transition-all cursor-pointer ${
               activeTab === 'bookings'
                 ? 'bg-[#0056D6] text-white shadow-md'
-                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-50'
+                : 'bg-white hover:bg-blue-50/50 text-gray-700 border border-blue-100 shadow-sm'
             }`}
           >
             <Calendar className="w-5 h-5 shrink-0" />
@@ -511,24 +1122,24 @@ export default function CustomerDashboard({
 
           <button
             id="tab-btn-documents"
-            onClick={() => setActiveTab('documents')}
+            onClick={() => handleTabChange('documents')}
             className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold transition-all cursor-pointer ${
               activeTab === 'documents'
                 ? 'bg-[#0056D6] text-white shadow-md'
-                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-50'
+                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-100 shadow-sm'
             }`}
           >
             <FileText className="w-5 h-5 shrink-0" />
-            Kassendokumente & Rechnungen
+            Nachweise & Rechnungen
           </button>
 
           <button
             id="tab-btn-profile"
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleTabChange('profile')}
             className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold transition-all cursor-pointer ${
               activeTab === 'profile'
                 ? 'bg-[#0056D6] text-white shadow-md'
-                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-50'
+                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-100 shadow-sm'
             }`}
           >
             <User className="w-5 h-5 shrink-0" />
@@ -537,116 +1148,292 @@ export default function CustomerDashboard({
 
           <button
             id="tab-btn-support"
-            onClick={() => setActiveTab('support')}
+            onClick={() => handleTabChange('support')}
             className={`w-full flex items-center gap-2.5 px-4 py-3.5 rounded-2xl text-sm font-extrabold transition-all cursor-pointer ${
               activeTab === 'support'
                 ? 'bg-[#0056D6] text-white shadow-md'
-                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-50'
+                : 'bg-white hover:bg-blue-50/50 text-gray-750 border border-blue-100 shadow-sm'
             }`}
           >
             <MessageSquare className="w-5 h-5 shrink-0" />
-            Live-Hilfe & Beistand
+            Live-Hilfe & Unterstützung
             {chatMessages.length > 0 && (
-              <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+              <span className="ml-auto w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
             )}
           </button>
-        </div>
 
-        {/* Right Side: Tab panel rendering details */}
-        <div className="lg:col-span-9 bg-white p-6 md:p-8 rounded-3xl border border-blue-50 shadow-md">
-          
-          {/* TAB 1: MY BOOKINGS LIST */}
-          {activeTab === 'bookings' && (
-            <div className="flex flex-col gap-6 animate-fade-in text-left">
-              <div className="border-b border-gray-100 pb-3">
-                <h2 className="text-xl font-black text-blue-900">Aktuelle & geplante Einsätze</h2>
-                <p className="text-xs text-gray-400 mt-1">Hier finden Sie alle gebuchten Termine für Ihre Haushaltshilfe.</p>
+          {/* Push Notification Panel */}
+          {isNotificationSupported() && (
+            <div className="bg-slate-50 p-4 rounded-2xl border border-blue-50 mt-4 text-left shadow-sm">
+              <div className="flex items-center gap-2">
+                <Bell className="w-4 h-4 text-[#0056D6] shrink-0" />
+                <span className="text-xs font-bold text-gray-800">
+                  {isDe ? 'Browser-Mitteilungen' : 'Push Notifications'}
+                </span>
               </div>
-
-              <div className="flex flex-col gap-4">
-                {clientBookings.map((b) => (
-                  <div 
-                    key={b.id} 
-                    id={`client-booking-row-${b.id}`}
-                    className="border border-blue-50 rounded-2xl p-5 hover:bg-[#F6FAFF]/60 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#F6FAFF]"
+              <p className="text-[10px] text-gray-500 mt-1">
+                {isDe 
+                  ? 'Erhalten Sie Echtzeit-Meldungen bei Zuweisung oder Fertigstellung Ihrer Einsätze.' 
+                  : 'Get instant browser alerts when your cleaning visits are assigned or completed.'}
+              </p>
+              <div className="mt-3">
+                {notifPermission === 'granted' ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-600">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                      {isDe ? 'Aktiviert' : 'Active'}
+                    </div>
+                    <button
+                      onClick={handleTestNotification}
+                      className="w-full text-center bg-white border border-blue-200 hover:bg-blue-50 text-[10px] text-[#0056D6] font-bold py-1.5 px-3 rounded-lg transition cursor-pointer"
+                    >
+                      {isDe ? 'Testen' : 'Test Notification'}
+                    </button>
+                  </div>
+                ) : notifPermission === 'denied' ? (
+                  <div className="text-[10px] font-bold text-red-500 bg-red-50/50 p-2 rounded-lg border border-red-100">
+                    {isDe ? 'Mitteilungen blockiert. Bitte im Browser freischalten.' : 'Notifications blocked. Please enable in settings.'}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleEnableNotifications}
+                    className="w-full text-center bg-[#0056D6] hover:bg-blue-700 text-white text-[11px] font-extrabold py-2 px-3 rounded-xl transition shadow-sm cursor-pointer"
                   >
-                    <div className="flex-1 flex flex-col gap-1 text-left">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-blue-950 text-sm">{b.serviceName}</span>
-                        <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded border ${
-                          b.status === 'confirmed' 
-                            ? 'bg-green-50 border-green-200 text-green-700' 
-                            : b.status === 'cancelled'
-                            ? 'bg-red-50 border-red-200 text-red-700'
-                            : 'bg-yellow-50 border-yellow-200 text-yellow-700'
-                        }`}>
-                          {b.status === 'confirmed' && '✔ Bestätigt'}
-                          {b.status === 'pending' && '⌚ In Prüfung'}
-                          {b.status === 'cancelled' && '✕ Storniert'}
-                        </span>
-                      </div>
-                      
-                      <p className="text-xs text-slate-505 leading-relaxed mt-1 font-semibold">
-                        📍 <strong>Ort:</strong> {b.address}
-                      </p>
-                      
-                      {b.notes && (
-                        <p className="text-xs text-gray-500 italic mt-1 font-semibold">
-                          📝 "{b.notes}"
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col md:items-end text-left md:text-right shrink-0">
-                      <span className="text-xs font-black text-blue-900 block">{b.date} um {b.time} Uhr</span>
-                      <span className="text-[11px] font-bold text-gray-500 mt-0.5">Budgetbetrag: {b.totalPrice.toFixed(2)} €</span>
-                      
-                      {b.status !== 'cancelled' && (
-                        <>
-                          <button
-                            id={`download-invoice-pdf-btn-${b.id}`}
-                            onClick={() => generateInvoicePdf(b)}
-                            className="mt-2 text-[11px] font-extrabold text-blue-700 hover:text-blue-900 bg-blue-50/75 hover:bg-blue-105/90 dark:text-blue-400 dark:hover:text-amber-100 dark:bg-slate-800/80 dark:hover:bg-slate-700 px-3 py-1.5 rounded-xl border border-blue-100 dark:border-slate-700 flex items-center gap-1 cursor-pointer transition-all duration-200"
-                            title="Rechnung als PDF herunterladen"
-                          >
-                            <Download className="w-3.5 h-3.5" />
-                            Rechnung (PDF)
-                          </button>
-
-                          <button
-                            id={`cancel-booking-btn-${b.id}`}
-                            onClick={() => {
-                              if (confirm('Möchten Sie diesen Termin wirklich stornieren? Unser Team wird sofort benachrichtigt.')) {
-                                onUpdateBookingStatus(b.id, 'cancelled');
-                              }
-                            }}
-                            className="mt-3.5 text-[10px] text-red-600 hover:text-red-800 font-extrabold hover:underline block text-left md:text-right"
-                          >
-                            ✕ Termin absagen
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-
-                {clientBookings.length === 0 && (
-                  <div className="p-8 text-center border-2 border-dashed border-gray-150 rounded-2xl flex flex-col items-center gap-3">
-                    <span className="text-3xl">📅</span>
-                    <div>
-                      <h4 className="font-extrabold text-[#0056D6] text-sm">Aktuell keine aktiven Einsätze</h4>
-                      <p className="text-xs text-gray-400 mt-1">Sie haben bislang noch keinen Termin für diese E-Mail-Adresse angefragt.</p>
-                    </div>
-                  </div>
+                    {isDe ? 'Aktivieren' : 'Enable'}
+                  </button>
                 )}
               </div>
             </div>
           )}
+        </div>
 
-          {/* TAB 2: DOCUMENTS UPLOADER & INVOICES DOWNLOADER */}
+        {/* Right Panel Main Panel */}
+        <div className="lg:col-span-9 bg-white p-6 md:p-8 rounded-3xl border border-blue-50 shadow-md">
+          
+          {/* TAB 1: MEIN HAUSHALTSPLAN (UPCOMING & HISTORY) */}
+          {activeTab === 'bookings' && (
+            <div className="flex flex-col gap-6 animate-fade-in text-left">
+              <div>
+                <h2 className="text-xl font-black text-blue-900">Aktuelle & geplante Einsätze</h2>
+                <p className="text-xs text-gray-400 mt-1">Planen Sie Ihre Haushaltsbegleitung und verfolgen Sie den Einsatzfortschritt live.</p>
+              </div>
+
+              {/* Upcoming Bookings lists */}
+              <div className="flex flex-col gap-4">
+                <h3 className="font-extrabold text-blue-950 text-sm">Ausstehende & Aktive Termine</h3>
+                {upcomingBookings.map((b) => {
+                  const isExpanded = expandedBookingId === b.id;
+                  
+                  // Visual Progress Stepper Step value
+                  let stepValue = 1; // pending
+                  if (b.status === 'confirmed') stepValue = 2;
+                  if (b.status === 'assigned') stepValue = 3;
+                  if (b.status === 'in_progress') stepValue = 4;
+                  if (b.status === 'completed') stepValue = 5;
+
+                  return (
+                    <div 
+                      key={b.id}
+                      className="border border-blue-100 rounded-2xl overflow-hidden shadow-sm"
+                    >
+                      {/* Summary Row clickable for Expand details */}
+                      <div 
+                        onClick={() => setExpandedBookingId(isExpanded ? null : b.id)}
+                        className={`p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer transition-colors ${
+                          isExpanded ? 'bg-blue-50/20' : 'bg-[#F6FAFF]/40 hover:bg-[#F6FAFF]/80'
+                        }`}
+                      >
+                        <div className="flex-1 flex flex-col gap-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-extrabold text-blue-900 text-sm">{b.serviceName}</span>
+                            <span className={`text-[9px] uppercase font-black px-2 py-0.5 rounded border ${
+                              b.status === 'confirmed' 
+                                ? 'bg-emerald-50 border-emerald-200 text-emerald-700' 
+                                : b.status === 'assigned'
+                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                                : b.status === 'in_progress'
+                                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                : 'bg-blue-50 border-blue-200 text-blue-700'
+                            }`}>
+                              {b.status === 'pending' && '⌚ In Prüfung'}
+                              {b.status === 'confirmed' && '✔ Bestätigt'}
+                              {b.status === 'assigned' && '👤 Kraft Zugewiesen'}
+                              {b.status === 'in_progress' && '⏳ Einsatz läuft'}
+                            </span>
+                          </div>
+                          <span className="text-xs font-black text-slate-800">{b.date} um {b.time} Uhr</span>
+                        </div>
+
+                        <div className="flex items-center gap-3 w-full sm:w-auto mt-2 sm:mt-0 justify-between">
+                          <span className="text-xs font-bold text-gray-500">{b.totalPrice.toFixed(2)} €</span>
+                          <span className="p-1 rounded-full bg-blue-50 text-blue-600">
+                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Expandable Booking Details Page section */}
+                      {isExpanded && (
+                        <div className="p-5 border-t border-blue-50 bg-white flex flex-col gap-6 animate-fade-in">
+                          
+                          {/* Visual Progress Stepper bar */}
+                          <div className="flex flex-col gap-3">
+                            <span className="text-[10px] lowercase uppercase font-black tracking-wider text-slate-400">Einsatz Statusfortschritt:</span>
+                            
+                            <div className="relative flex justify-between items-center w-full max-w-lg mx-auto py-2">
+                              {/* Horizontal Background bar */}
+                              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -translate-y-1/2 z-0"></div>
+                              <div 
+                                className="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500"
+                                style={{ width: `${(stepValue - 1) * 25}%` }}
+                              ></div>
+
+                              {/* Stepper Nodes */}
+                              {[
+                                { step: 1, label: 'Eingereicht' },
+                                { step: 2, label: 'Bestätigt' },
+                                { step: 3, label: 'Kraft eingeteilt' },
+                                { step: 4, label: 'Haushalt läuft' },
+                                { step: 5, label: 'Abgeschlossen' }
+                              ].map((node) => {
+                                const active = stepValue >= node.step;
+                                return (
+                                  <div key={node.step} className="flex flex-col items-center gap-1 z-10 relative">
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold border transition-colors ${
+                                      active 
+                                        ? 'bg-blue-600 border-blue-700 text-white' 
+                                        : 'bg-white border-gray-200 text-gray-400'
+                                    }`}>
+                                      {stepValue > node.step ? <Check className="w-3 h-3" /> : node.step}
+                                    </div>
+                                    <span className={`text-[9px] font-black text-center whitespace-nowrap hidden sm:block ${
+                                      active ? 'text-blue-900' : 'text-gray-400'
+                                    }`}>
+                                      {node.label}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Detail Grid */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs border-y border-dashed border-gray-150 py-4">
+                            <div className="flex flex-col gap-1 text-left">
+                              <span className="text-gray-400 lowercase uppercase font-black tracking-wider text-[9px]">Dienstleistung / Service:</span>
+                              <span className="font-extrabold text-slate-800 text-sm">{b.serviceName}</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1 text-left">
+                              <span className="text-gray-400 lowercase uppercase font-black tracking-wider text-[9px]">Termin und Startzeit:</span>
+                              <span className="font-extrabold text-[#0056D6]">{b.date} um {b.time} Uhr</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1 text-left">
+                              <span className="text-gray-400 lowercase uppercase font-black tracking-wider text-[9px]">Einsatzadresse (Berlin):</span>
+                              <span className="font-extrabold text-slate-800">{b.address}</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1 text-left">
+                              <span className="text-gray-400 lowercase uppercase font-black tracking-wider text-[9px]">Satz / Preis (Haushaltsbudget):</span>
+                              <span className="font-extrabold text-emerald-650">{b.totalPrice.toFixed(2)} € (Abrechenbar nach §45a)</span>
+                            </div>
+
+                            <div className="flex flex-col gap-1 text-left md:col-span-2">
+                              <span className="text-gray-400 lowercase uppercase font-black tracking-wider text-[9px]">Zugewiesene Haushaltshilfe:</span>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded font-black text-[10px]">
+                                  {b.cleanerName || (b.status === 'assigned' || b.status === 'in_progress' ? 'M. Becker' : 'Wird eingeteilt')}
+                                </span>
+                                <span className="text-gray-400 text-[10px]">(zertifizierte Haushaltskraft der Emmasco GmbH)</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-3 justify-end flex-wrap">
+                            <button
+                              onClick={() => generateInvoicePdf(b)}
+                              className="px-4 py-2 bg-blue-50 text-[#0056D6] border border-blue-200 hover:bg-[#0056D6] hover:text-white rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Download className="w-4 h-4" />
+                              Voranschlag PDF laden
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                if (confirm('Möchten Sie diesen Termin wirklich stornieren? Unser Team wird sofort benachrichtigt.')) {
+                                  onUpdateBookingStatus(b.id, 'cancelled');
+                                }
+                              }}
+                              className="px-4 py-2 hover:bg-red-50 text-red-650 border border-red-200/50 rounded-xl text-xs font-extrabold cursor-pointer"
+                            >
+                              Einsatz absagen
+                            </button>
+                          </div>
+
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {upcomingBookings.length === 0 && (
+                  <p className="text-xs text-gray-400 italic">Keine ausstehenden geplanten Haushaltstermine.</p>
+                )}
+              </div>
+
+              {/* Booking History & Previous bookings list */}
+              <div className="flex flex-col gap-4 mt-6">
+                <h3 className="font-extrabold text-blue-950 text-sm border-t border-gray-100 pt-6">Abgeschlossene oder stornierte Termine (Historie)</h3>
+                <div className="flex flex-col gap-3">
+                  {pastBookings.map((b) => (
+                    <div 
+                      key={b.id}
+                      className="border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/50 text-xs"
+                    >
+                      <div className="text-left flex flex-col gap-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-gray-800">{b.serviceName}</span>
+                          <span className={`text-[8px] uppercase font-black px-1.5 py-0.2 rounded border ${
+                            b.status === 'completed' 
+                              ? 'bg-neutral-100 border-neutral-200 text-neutral-600' 
+                              : 'bg-red-50 border-red-150 text-red-650'
+                          }`}>
+                            {b.status === 'completed' ? 'Abgeschlossen' : 'Storniert'}
+                          </span>
+                        </div>
+                        <span className="text-gray-400">{b.date} um {b.time} Uhr | {b.totalPrice.toFixed(2)} €</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {/* Quick Rebook Trigger */}
+                        <button
+                          id={`rebook-btn-${b.id}`}
+                          onClick={() => handleRebookService(b)}
+                          className="px-3 py-1.5 rounded-xl border border-blue-100 hover:border-blue-300 text-blue-700 bg-white shadow-xs font-black text-[10px] flex items-center gap-1 cursor-pointer"
+                          title="Gleichen Service erneut anfragen"
+                        >
+                          <RefreshCw className="w-3 h-3 text-blue-500 animate-spin-hover" />
+                          Erneut buchen
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {pastBookings.length === 0 && (
+                    <p className="text-xs text-gray-400 italic">Noch keine historischen Termine abgeschlossen.</p>
+                  )}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* TAB 2: INVOICES AND KASSENDOKUMENTE */}
           {activeTab === 'documents' && (
-            <div className="flex flex-col gap-8 animate-fade-in">
-              {/* Document upload form (care grad approvals) */}
+            <div className="flex flex-col gap-8 animate-fade-in text-left">
+              
               <div className="text-left flex flex-col gap-4">
                 <div className="border-b border-gray-100 pb-3 flex justify-between items-center">
                   <div>
@@ -657,10 +1444,10 @@ export default function CustomerDashboard({
 
                 <form onSubmit={handleDocumentUpload} className="bg-[#F6FAFF] p-5 rounded-2xl border border-blue-50/50 flex flex-col sm:flex-row gap-4 items-end">
                   <div className="flex-1 flex flex-col gap-1.5 w-full">
-                    <label className="text-xs font-extrabold text-blue-900">Dateiname für Upload eintragen *</label>
+                    <label className="text-xs font-extrabold text-blue-900">Dateiname oder Pfad des Dokuments *</label>
                     <input
                       type="text"
-                      placeholder="z.B. Bescheid_Pflegegrad3_Schmidt.pdf"
+                      placeholder="z.B. Bescheid_Pflegegrad3.pdf"
                       value={uploadFileName}
                       onChange={(e) => setUploadFileName(e.target.value)}
                       className="w-full bg-white border border-blue-105 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -677,7 +1464,7 @@ export default function CustomerDashboard({
                   </button>
                 </form>
 
-                {/* Document Status List */}
+                {/* State documents */}
                 <div className="flex flex-col gap-3 mt-2">
                   <h3 className="font-extrabold text-blue-950 text-sm">Status Ihrer Dokumente:</h3>
                   {documents.length > 0 ? (
@@ -705,7 +1492,7 @@ export default function CustomerDashboard({
                 </div>
               </div>
 
-              {/* PDF Invoices List */}
+              {/* Invoices List */}
               <div className="text-left flex flex-col gap-4 border-t border-gray-150 pt-6">
                 <div>
                   <h2 className="text-xl font-black text-blue-900">Abrechnungen & Monatsrechnungen</h2>
@@ -721,38 +1508,23 @@ export default function CustomerDashboard({
                     <button
                       id="download-re-may"
                       onClick={() => handleMockPdfDownload('RE-2026-05_Emmasco.pdf')}
-                      className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition cursor-pointer"
+                      className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-605 hover:text-white transition cursor-pointer"
                       title="Herunterladen"
                     >
                       <Download className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="border border-blue-50 bg-white p-4 rounded-2xl flex justify-between items-center transition shadow-xs">
-                    <div className="text-left">
-                      <span className="block font-extrabold text-blue-950 text-xs">Rechnung April 2026</span>
-                      <span className="block text-[10px] text-gray-400 mt-0.5">RE-2026-04 | 145,00 €</span>
-                    </div>
-                    <button
-                      id="download-re-apr"
-                      onClick={() => handleMockPdfDownload('RE-2026-04_Emmasco.pdf')}
-                      className="p-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition cursor-pointer"
-                      title="Herunterladen"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  {clientBookings.filter(b => b.status === 'confirmed').map((b) => (
-                    <div key={`inv-${b.id}`} className="border border-blue-200/60 dark:border-slate-800 bg-blue-50/15 dark:bg-slate-900/40 p-4 rounded-2xl flex justify-between items-center transition shadow-xs">
+                  {clientBookings.map((b) => (
+                    <div key={`inv-${b.id}`} className="border border-blue-200/60 bg-blue-50/15 p-4 rounded-2xl flex justify-between items-center transition shadow-xs">
                       <div className="text-left">
-                        <span className="block font-extrabold text-blue-950 dark:text-slate-200 text-xs">Rechnung {b.serviceName}</span>
-                        <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">RE-2026-{b.id.toUpperCase()} | {b.date} | {b.totalPrice.toFixed(2)} €</span>
+                        <span className="block font-extrabold text-blue-950 text-xs text-ellipsis">Rechnung {b.serviceName}</span>
+                        <span className="block text-[10px] text-slate-500 mt-0.5">RE-2026-{b.id.toUpperCase()} | {b.date} | {b.totalPrice.toFixed(2)} €</span>
                       </div>
                       <button
                         id={`download-re-dynamic-${b.id}`}
                         onClick={() => generateInvoicePdf(b)}
-                        className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 transition cursor-pointer"
+                        className="p-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition cursor-pointer"
                         title="Rechnung PDF generieren & herunterladen"
                       >
                         <Download className="w-4 h-4" />
@@ -761,10 +1533,11 @@ export default function CustomerDashboard({
                   ))}
                 </div>
               </div>
+
             </div>
           )}
 
-          {/* TAB 3: EDIT PROFILE DETAILS */}
+          {/* TAB 3: PROFILE CONTROLS */}
           {activeTab === 'profile' && (
             <div className="flex flex-col gap-6 animate-fade-in text-left">
               <div className="border-b border-gray-100 pb-3">
@@ -775,7 +1548,7 @@ export default function CustomerDashboard({
               <form onSubmit={handleProfileSave} className="flex flex-col gap-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-gray-750">Name des Pflegebedürftigen</label>
+                    <label className="text-xs font-extrabold text-gray-750">Name des Pflegebedürftigen (Kunde) *</label>
                     <input
                       type="text"
                       value={profileName}
@@ -785,7 +1558,7 @@ export default function CustomerDashboard({
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-extrabold text-gray-750">Telefon für Rückfragen</label>
+                    <label className="text-xs font-extrabold text-gray-750">Telefon für Rückfragen *</label>
                     <input
                       type="text"
                       value={profilePhone}
@@ -796,7 +1569,7 @@ export default function CustomerDashboard({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-extrabold text-gray-750">Einsatzadresse (Berlin)</label>
+                  <label className="text-xs font-extrabold text-gray-750">Einsatzadresse (Berlin) *</label>
                   <input
                     type="text"
                     value={profileAddress}
@@ -806,7 +1579,7 @@ export default function CustomerDashboard({
                 </div>
 
                 {profileSavedMsg && (
-                  <p className="text-xs text-green-700 font-extrabold flex items-center gap-1">
+                  <p className="text-xs text-green-750 font-extrabold flex items-center gap-1">
                     ✔ {profileSavedMsg}
                   </p>
                 )}
@@ -831,9 +1604,9 @@ export default function CustomerDashboard({
               </div>
 
               {/* Chat Thread */}
-              <div className="bg-[#F6FAFF] border border-blue-50 rounded-2xl p-4 h-64 overflow-y-auto flex flex-col gap-3">
+              <div className="bg-[#F6FAFF] border border-blue-55 rounded-2xl p-4 h-64 overflow-y-auto flex flex-col gap-3">
                 
-                <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 p-3 rounded-2xl text-[11px] font-semibold text-blue-900 leading-normal mb-1">
+                <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-105 p-3 rounded-2xl text-[11px] font-semibold text-blue-900 leading-normal mb-1">
                   <span>ℹ</span>
                   <span>
                     Unser Support ist Montag bis Freitag von 08:30 bis 18:00 Uhr besetzt. Für dringliche Pflegenotfälle am Wochenende wählen Sie bitte direkt unser Notruftelefon: 0176 21856044.
@@ -869,7 +1642,7 @@ export default function CustomerDashboard({
                   placeholder="Ihre Frage an Frau Osei oder Herrn Becker..."
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  className="flex-1 border border-blue-50 rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1 border border-blue-50 rounded-xl px-4 py-3 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
                 <button
                   type="submit"

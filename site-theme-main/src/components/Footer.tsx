@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Phone, Mail, MapPin, Heart, Clock, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { Phone, Mail, MapPin, Heart, Clock, ShieldCheck, X, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 interface FooterProps {
@@ -14,6 +14,7 @@ interface FooterProps {
 
 export default function Footer({ setCurrentPage, onOpenBooking }: FooterProps) {
   const { language } = useLanguage();
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   const handleLinkClick = (pageId: string) => {
     setCurrentPage(pageId);
@@ -186,19 +187,102 @@ export default function Footer({ setCurrentPage, onOpenBooking }: FooterProps) {
                 : '* Reimbursable services according to German Care Law (Care levels 1 to 5) directly invoiced to the competent care funds.'}
             </p>
           </div>
-          <div className="flex flex-wrap justify-center gap-4">
-            <a href="#impressum" className="hover:text-slate-300 hover:underline">{language === 'de' ? 'Impressum' : 'Legal Notice'}</a>
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            <button 
+              onClick={() => handleLinkClick('imprint')} 
+              className="hover:text-slate-300 hover:underline cursor-pointer transition-colors"
+            >
+              {language === 'de' ? 'Impressum' : 'Imprint (Impressum)'}
+            </button>
             <span>•</span>
-            <a href="#datenschutz" className="hover:text-slate-300 hover:underline">{language === 'de' ? 'Datenschutz' : 'Privacy Policy'}</a>
+            <button 
+              onClick={() => setIsPrivacyOpen(true)} 
+              className="hover:text-slate-300 hover:underline cursor-pointer transition-colors"
+            >
+              {language === 'de' ? 'Datenschutzerklärung' : 'Privacy Policy'}
+            </button>
             <span>•</span>
-            <a href="#agb" className="hover:text-slate-300 hover:underline">{language === 'de' ? 'AGB' : 'Terms (AGB)'}</a>
+            <button 
+              onClick={() => handleLinkClick('contact')} 
+              className="hover:text-slate-300 hover:underline cursor-pointer transition-colors"
+            >
+              {language === 'de' ? 'Kontakt' : 'Contact'}
+            </button>
             <span>•</span>
-            <span className="text-blue-500 border border-slate-800 px-2 py-0.5 rounded uppercase font-bold text-[10px]">
+            <span className="text-blue-500 border border-slate-800 px-2 py-0.5 rounded uppercase font-bold text-[10px] select-none">
               Hostinger Business Verified
             </span>
           </div>
         </div>
       </div>
+
+      {/* Privacy Policy Modal */}
+      {isPrivacyOpen && (
+        <div id="privacy-policy-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-blue-50 dark:border-slate-800 flex flex-col max-h-[85vh]">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-950">
+              <div className="flex items-center gap-2.5">
+                <ShieldAlert className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  {language === 'de' ? 'Datenschutzerklärung' : 'Privacy Policy'}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsPrivacyOpen(false)}
+                className="p-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-6 text-left">
+              <div>
+                <h4 className="font-bold text-slate-850 dark:text-slate-200 mb-1.5">1. Datenschutz auf einen Blick</h4>
+                <p>Der Schutz Ihrer persönlichen Daten ist uns ein großes Anliegen. Nachfolgend informieren wir Sie über die Verarbeitung personenbezogener Daten auf unserer Website.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-850 dark:text-slate-200 mb-1.5">2. Verantwortliche Stelle</h4>
+                <p className="font-semibold text-slate-850 dark:text-slate-300">
+                  EMMASCO Reinigungsteam<br />
+                  Inhaber: Emmanuel Isodje<br />
+                  Schönhauser Allee 163, 10435 Berlin<br />
+                  E-Mail: info@emmascoreinigungsteam.de
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-850 dark:text-slate-200 mb-1.5">3. Datenerfassung auf unserer Website</h4>
+                <p>Wir erfassen Daten, die Sie uns aktiv übermitteln (z.B. im Rahmen einer Buchungsanfrage oder Kontaktaufnahme). Dazu gehören Name, Telefonnummer, E-Mail-Adresse sowie Angaben zum gewünschten Service.</p>
+                <p className="mt-2">Rechtsgrundlage der Verarbeitung ist Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung oder vorvertragliche Maßnahmen) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer schnellen und effizienten Bearbeitung von Anfragen).</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-850 dark:text-slate-200 mb-1.5">4. Abrechnung mit Pflegekassen</h4>
+                <p>Als nach § 45a SGB XI anerkannter Betrieb übermitteln wir für Kunden mit Pflegegrad abrechnungsrelevante Leistungsnachweise direkt an die zuständigen Pflegekassen. Dies erfolgt ausschließlich mit Ihrer expliziten Zustimmung.</p>
+              </div>
+
+              <div>
+                <h4 className="font-bold text-slate-850 dark:text-slate-200 mb-1.5">5. Ihre Rechte</h4>
+                <p>Sie haben jederzeit das Recht auf unentgeltliche Auskunft über Herkunft, Empfänger und Zweck Ihrer gespeicherten personenbezogenen Daten. Sie haben außerdem ein Recht auf Berichtigung, Sperrung oder Löschung dieser Daten. Bitte wenden Sie sich hierzu an info@emmascoreinigungsteam.de.</p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-right">
+              <button
+                type="button"
+                onClick={() => setIsPrivacyOpen(false)}
+                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition cursor-pointer"
+              >
+                {language === 'de' ? 'Schließen' : 'Close'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </footer>
   );
 }

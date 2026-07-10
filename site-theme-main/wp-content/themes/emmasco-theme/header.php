@@ -3,6 +3,8 @@
 <head>
     <meta charset="<?php bloginfo( 'charset' ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png">
+    <link rel="apple-touch-icon" href="https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png">
     <?php wp_head(); ?>
 
     <!-- Load Tailwind CSS Play Engine for instant performance and styling -->
@@ -55,18 +57,13 @@
         <div class="flex items-center justify-between h-20">
             
             <!-- Logo Section -->
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center gap-3 group">
-                <span class="w-11 h-11 bg-gradient-to-tr from-[#0056D6] to-[#2FB5FF] text-white rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-all">
-                    <i data-lucide="sparkles" class="w-6 h-6"></i>
-                </span>
-                <div>
-                    <span class="text-lg font-black tracking-tight text-blue-950 dark:text-white block group-hover:text-[#0056D6] dark:group-hover:text-[#2FB5FF] transition-colors leading-none">
-                        EMMASCO
-                    </span>
-                    <span class="text-[10px] font-black tracking-widest text-[#2FB5FF] uppercase block mt-1 leading-none">
-                        REINIGUNGSTEAM
-                    </span>
-                </div>
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="flex items-center select-none cursor-pointer transition transform hover:opacity-95" id="header-logo-btn">
+                <img 
+                    src="https://emmascoreinigungsteam.de/wp-content/uploads/2026/06/cropped-emmascoreinigungsteam-logo-200x89.png" 
+                    alt="ERT EMMASCO REINIGUNGSTEAM Logo" 
+                    class="h-[42px] md:h-[56px] w-auto object-contain bg-transparent"
+                    referrerPolicy="no-referrer"
+                />
             </a>
 
             <!-- Navigation Links -->

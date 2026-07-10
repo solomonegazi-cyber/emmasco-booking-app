@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMMASCO Reinigungsteam - Haushaltshilfe & Alltagsbegleitung Berlin</title>
+    <title>Emmasco Reinigungsteam</title>
+    <link rel="icon" type="image/png" href="https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png">
+    <link rel="apple-touch-icon" href="https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png">
 
     <!-- Tailwind Play Engine CDN for immediate graphic rendering -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,18 +58,13 @@
             <div class="flex items-center justify-between h-20">
                 
                 <!-- Logo -->
-                <a href="#" class="flex items-center gap-3 group">
-                    <span class="w-11 h-11 bg-gradient-to-tr from-[#0056D6] to-[#2FB5FF] text-white rounded-2xl flex items-center justify-center shadow-lg transform group-hover:scale-105 transition-all">
-                        <i data-lucide="sparkles" class="w-6 h-6"></i>
-                    </span>
-                    <div>
-                        <span class="text-lg font-black tracking-tight text-blue-950 dark:text-white block group-hover:text-[#0056D6] dark:group-hover:text-[#2FB5FF] transition-colors leading-none">
-                            EMMASCO
-                        </span>
-                        <span class="text-[10px] font-black tracking-widest text-[#2FB5FF] uppercase block mt-1 leading-none">
-                            REINIGUNGSTEAM
-                        </span>
-                    </div>
+                <a href="#" class="flex items-center select-none cursor-pointer transition transform hover:opacity-95" id="header-logo-btn">
+                    <img 
+                        src="https://emmascoreinigungsteam.de/wp-content/uploads/2026/06/cropped-emmascoreinigungsteam-logo-200x89.png" 
+                        alt="ERT EMMASCO REINIGUNGSTEAM Logo" 
+                        class="h-[42px] md:h-[56px] w-auto object-contain bg-transparent"
+                        referrerPolicy="no-referrer"
+                    />
                 </a>
 
                 <!-- Desktop Links -->
@@ -473,6 +470,11 @@
                 <!-- Booking Widget -->
                 <div class="card-minimal p-6 sm:p-10 border border-blue-50/50 dark:border-slate-800/80 text-left">
                     <form id="booking-form-element" class="space-y-6">
+                        <!-- Honeypot field for bot protection -->
+                        <div class="absolute opacity-0 -z-10 w-0 h-0 pointer-events-none overflow-hidden" aria-hidden="true">
+                            <label for="booking-website-honeypot">Website (Bitte nicht ausfüllen / Do not fill)</label>
+                            <input type="text" id="booking-website-honeypot" name="website" tabindex="-1" autocomplete="off">
+                        </div>
                         
                         <!-- Grid 1 -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -753,6 +755,11 @@
                     <div class="lg:col-span-7">
                         <div class="card-minimal p-6 sm:p-8 border border-blue-50/50 dark:border-slate-800/80 text-left">
                             <form id="contact-form-element" class="space-y-4">
+                                <!-- Honeypot field for bot protection -->
+                                <div class="absolute opacity-0 -z-10 w-0 h-0 pointer-events-none overflow-hidden" aria-hidden="true">
+                                    <label for="contact-website-honeypot">Website (Bitte nicht ausfüllen / Do not fill)</label>
+                                    <input type="text" id="contact-website-honeypot" name="website" tabindex="-1" autocomplete="off">
+                                </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div class="space-y-1">
                                         <label class="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Ihr Name *</label>
@@ -990,11 +997,313 @@
     <!-- Load Companion Theme Script -->
     <script src="./assets/js/theme.js"></script>
 
-    <!-- Run lucide in fallback context in case UMD script finishes loading after theme.js -->
+    <!-- CENTRALIZED VALIDATION METHODOLOGY AND REALTIME INTERACTIVE FEEDBACK SCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
+            }
+
+            // Centralized multi-lingual message mapping
+            const getTranslation = (key) => {
+                const lang = window.activeLang || localStorage.getItem('emmasco_lang') || 'de';
+                const tMap = {
+                    de: {
+                        req_name: 'Name ist erforderlich (Mindestens 3 Buchstaben).',
+                        req_email: 'Eine gültige E-Mail-Adresse ist erforderlich (z.B. name@domain.de).',
+                        req_phone: 'Gültige Handynummer oder Festnetznummer ist erforderlich (7-20 Zeichen, z.B. 0176 1234567).',
+                        req_address: 'Die vollständige Einsatzadresse ist erforderlich.',
+                        req_date: 'Ein gewünschter Termin ist erforderlich.',
+                        req_time: 'Eine Uhrzeit ist erforderlich.',
+                        req_subject: 'Ein aussagekräftiger Betreff ist erforderlich.',
+                        req_message: 'Die Nachricht ist ein Pflichtfeld (min. 10 Zeichen).',
+                        date_future: 'Das Datum muss in der Zukunft (ab morgen) liegen.',
+                        submitting: 'Verbindung wird hergestellt...',
+                        success_booking: '✓ <strong>Unverbindliche Anfrage registriert!</strong><br>Vielen Dank für Ihr Vertrauen. Unser Team wird Ihre Anfrage prüfen und sich binnen 24 Stunden bei Ihnen melden.',
+                        success_contact: '✓ <strong>Kontaktanfrage erfolgreich übermittelt!</strong><br>Vielen Dank für Ihre Nachricht. Ein WordPress-Berater meldet sich in Kürze telefonisch oder per E-Mail bei Ihnen.',
+                        general_error: 'Bitte füllen Sie alle erforderlichen Felder korrekt aus.'
+                    },
+                    en: {
+                        req_name: 'Your full name is required (Min. 3 characters).',
+                        req_email: 'A valid email address is required (e.g., name@domain.com).',
+                        req_phone: 'A valid phone number is required (7-20 characters, e.g., +49 176 1234567).',
+                        req_address: 'The complete service address is required.',
+                        req_date: 'A chosen preferred date is required.',
+                        req_time: 'A specific clock time is required.',
+                        req_subject: 'A subject title is required.',
+                        req_message: 'The message body is required (min. 10 characters).',
+                        date_future: 'The chosen date must be in the future.',
+                        submitting: 'Transmitting details securely...',
+                        success_booking: '✓ <strong>Inquiry successfully received!</strong><br>Thank you. We have registered your request and our dispatcher will contact you within 24 hours.',
+                        success_contact: '✓ <strong>Message successfully transmitted!</strong><br>Thank you for getting in touch. One of our service managers will respond shortly.',
+                        general_error: 'Please correct the highlighted fields before submitting.'
+                    }
+                };
+                return tMap[lang][key] || tMap['de'][key] || '';
+            };
+
+            // Analytics / Mock conversion rate tracker mapping
+            const trackFormConversion = (formType, eventType, metadata = {}) => {
+                const lang = window.activeLang || localStorage.getItem('emmasco_lang') || 'de';
+                const payload = {
+                    event: 'emmasco_conversion_rate',
+                    form: formType,
+                    status: eventType,
+                    language: lang,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href,
+                    ...metadata
+                };
+                
+                // Distinctive themed console logging
+                console.log(
+                    `%c[Analytics conversion rate tracker] %c${formType.toUpperCase()} Form -> ${eventType.toUpperCase()}`,
+                    "color: #0056D6; font-weight: bold;",
+                    "color: #0f172a; font-weight: bold; background: #e0f2fe; padding: 2px 6px; border-radius: 4px;",
+                    payload
+                );
+
+                // Here is where we would trigger third party tracking scripts
+                // Example: window.gtag && window.gtag('event', 'form_conversion', payload);
+                // Example: window.fbq && window.fbq('track', 'Lead', { content_category: formType });
+            };
+
+            // Form validations helper
+            const setErrorState = (inputEl, errorMsg) => {
+                inputEl.classList.add('border-red-500', 'dark:border-red-500', 'ring-2', 'ring-red-100', 'dark:ring-red-950/40');
+                inputEl.classList.remove('border-slate-100', 'dark:border-slate-850', 'border-slate-100/50', 'dark:border-slate-800/80');
+
+                // Check for existing error text
+                let parent = inputEl.parentElement;
+                let existingError = parent.querySelector('.err-hint-text');
+                if (!existingError) {
+                    existingError = document.createElement('p');
+                    existingError.className = 'err-hint-text text-red-500 text-[10px] uppercase tracking-wider mt-1 font-bold';
+                    parent.appendChild(existingError);
+                }
+                existingError.innerText = errorMsg;
+            };
+
+            const clearErrorState = (inputEl) => {
+                inputEl.classList.remove('border-red-500', 'dark:border-red-500', 'ring-2', 'ring-red-100', 'dark:ring-red-950/40');
+                inputEl.classList.add('border-slate-100', 'dark:border-slate-850');
+
+                let parent = inputEl.parentElement;
+                let existingError = parent.querySelector('.err-hint-text');
+                if (existingError) {
+                    existingError.remove();
+                }
+            };
+
+            const validateEmail = (email) => {
+                return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,12}$/.test(email);
+            };
+
+            const validatePhone = (phone) => {
+                // Allows international format or domestic, spaces, hyphens, and braces. Needs at least 7 chars.
+                const cleaned = phone.replace(/[\s\-()]/g, '');
+                return /^\+?[0-9]{7,20}$/.test(cleaned);
+            };
+
+            const validateField = (inputEl) => {
+                const name = inputEl.name;
+                const value = inputEl.value.trim();
+
+                if (name === 'website') {
+                    // Do not run standard validation on the honeypot
+                    return true;
+                }
+
+                if (inputEl.hasAttribute('required') && !value) {
+                    let key = 'general_error';
+                    if (name === 'customerName' || name === 'name') key = 'req_name';
+                    else if (name === 'customerEmail' || name === 'email') key = 'req_email';
+                    else if (name === 'customerPhone' || name === 'phone') key = 'req_phone';
+                    else if (name === 'customerAddress') key = 'req_address';
+                    else if (name === 'bookingDate') key = 'req_date';
+                    else if (name === 'bookingTime') key = 'req_time';
+                    else if (name === 'subject') key = 'req_subject';
+                    else if (name === 'message') key = 'req_message';
+                    
+                    setErrorState(inputEl, getTranslation(key));
+                    return false;
+                }
+
+                // Email validation
+                if (value && (inputEl.type === 'email' || name === 'customerEmail' || name === 'email')) {
+                    if (!validateEmail(value)) {
+                        setErrorState(inputEl, getTranslation('req_email'));
+                        return false;
+                    }
+                }
+
+                // Phone validation 
+                if (value && (inputEl.type === 'tel' || name === 'customerPhone' || name === 'phone')) {
+                    if (!validatePhone(value)) {
+                        setErrorState(inputEl, getTranslation('req_phone'));
+                        return false;
+                    }
+                }
+
+                // Future date validation for booking
+                if (value && name === 'bookingDate') {
+                    const selected = new Date(value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (selected < today) {
+                        setErrorState(inputEl, getTranslation('date_future'));
+                        return false;
+                    }
+                }
+
+                // Length constraints
+                if (value && (name === 'customerName' || name === 'name') && value.length < 3) {
+                    setErrorState(inputEl, getTranslation('req_name'));
+                    return false;
+                }
+                if (value && name === 'message' && value.length < 10) {
+                    setErrorState(inputEl, getTranslation('req_message'));
+                    return false;
+                }
+
+                clearErrorState(inputEl);
+                return true;
+            };
+
+            // Setup real-time listener for live borders and error clearances
+            const setupRealtimeListeners = (formEl) => {
+                const inputs = formEl.querySelectorAll('input, textarea, select');
+                inputs.forEach(input => {
+                    ['input', 'change', 'blur'].forEach(evtName => {
+                        input.addEventListener(evtName, () => {
+                            validateField(input);
+                        });
+                    });
+                });
+            };
+
+            // Bind Booking Form
+            const bookingForm = document.getElementById('booking-form-element');
+            if (bookingForm) {
+                setupRealtimeListeners(bookingForm);
+                bookingForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const feedbackBox = document.getElementById('booking-feedback-msg');
+                    const submitBtn = document.getElementById('booking-submit-btn');
+
+                    // Anti-bot honeypot check
+                    const honeypot = bookingForm.querySelector('input[name="website"]');
+                    if (honeypot && honeypot.value) {
+                        trackFormConversion('booking', 'bot_submission_discarded');
+                        console.warn("[Anti-Bot] Bot interaction detected via honeypot. Quiet disposal initiated.");
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-100';
+                            feedbackBox.innerHTML = getTranslation('success_booking');
+                        }
+                        bookingForm.reset();
+                        return;
+                    }
+
+                    let isValid = true;
+                    const inputs = bookingForm.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => {
+                        if (!validateField(input)) {
+                            isValid = false;
+                        }
+                    });
+
+                    if (!isValid) {
+                        trackFormConversion('booking', 'validation_error');
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-red-50 text-red-800 border border-red-100';
+                            feedbackBox.innerText = getTranslation('general_error');
+                        }
+                        return;
+                    }
+
+                    // Simulated secure submission for visual high-fidelity fallback demo
+                    trackFormConversion('booking', 'submission_initiated');
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (feedbackBox) {
+                        feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-blue-50 text-blue-800 border border-blue-100 animate-pulse';
+                        feedbackBox.innerHTML = `⏳ ${getTranslation('submitting')}`;
+                    }
+
+                    const startTime = Date.now();
+                    setTimeout(() => {
+                        const durationMs = Date.now() - startTime;
+                        trackFormConversion('booking', 'submission_success', { durationMs: durationMs });
+                        if (submitBtn) submitBtn.disabled = false;
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-100';
+                            feedbackBox.innerHTML = getTranslation('success_booking');
+                        }
+                        bookingForm.reset();
+                    }, 1200);
+                });
+            }
+
+            // Bind Contact Form
+            const contactForm = document.getElementById('contact-form-element');
+            if (contactForm) {
+                setupRealtimeListeners(contactForm);
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+
+                    const feedbackBox = document.getElementById('contact-feedback-msg');
+                    const submitBtn = document.getElementById('contact-submit-btn');
+
+                    // Anti-bot honeypot check
+                    const honeypot = contactForm.querySelector('input[name="website"]');
+                    if (honeypot && honeypot.value) {
+                        trackFormConversion('contact', 'bot_submission_discarded');
+                        console.warn("[Anti-Bot] Bot interaction detected via honeypot. Quiet disposal initiated.");
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-100';
+                            feedbackBox.innerHTML = getTranslation('success_contact');
+                        }
+                        contactForm.reset();
+                        return;
+                    }
+
+                    let isValid = true;
+                    const inputs = contactForm.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => {
+                        if (!validateField(input)) {
+                            isValid = false;
+                        }
+                    });
+
+                    if (!isValid) {
+                        trackFormConversion('contact', 'validation_error');
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-red-50 text-red-800 border border-red-100';
+                            feedbackBox.innerText = getTranslation('general_error');
+                        }
+                        return;
+                    }
+
+                    // Simulated visual fallback demo
+                    trackFormConversion('contact', 'submission_initiated');
+                    if (submitBtn) submitBtn.disabled = true;
+                    if (feedbackBox) {
+                        feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-blue-50 text-blue-800 border border-blue-100 animate-pulse';
+                        feedbackBox.innerHTML = `⏳ ${getTranslation('submitting')}`;
+                    }
+
+                    const startTime = Date.now();
+                    setTimeout(() => {
+                        const durationMs = Date.now() - startTime;
+                        trackFormConversion('contact', 'submission_success', { durationMs: durationMs });
+                        if (submitBtn) submitBtn.disabled = false;
+                        if (feedbackBox) {
+                            feedbackBox.className = 'p-4 rounded-2xl text-xs font-bold text-left leading-relaxed bg-emerald-50 text-emerald-800 border border-emerald-100';
+                            feedbackBox.innerHTML = getTranslation('success_contact');
+                        }
+                        contactForm.reset();
+                    }, 1200);
+                });
             }
         });
     </script>

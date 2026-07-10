@@ -200,32 +200,48 @@ export default function Home({ setCurrentPage, onOpenBooking, onSelectService }:
         </div>
       </section>
 
-      {/* 2. TRUST BADGES / ACCREDITATION SECTION */}
-      <section className="-mt-6 relative z-10 max-w-7xl mx-auto px-4 mb-16">
-        <div className="bg-white rounded-3xl shadow-[0_10px_30px_rgba(0,86,214,0.04)] border border-blue-50/50 py-10 px-6 md:px-12 grid grid-cols-2 lg:grid-cols-4 gap-6 text-center divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+      {/* 2. SPECIFIC TRUST BADGES SECTION */}
+      <section className="-mt-8 relative z-10 max-w-7xl mx-auto px-4 mb-16">
+        <div className="bg-white rounded-3xl shadow-[0_12px_35px_rgba(0,86,214,0.06)] border border-blue-100/50 py-10 px-6 md:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y sm:divide-y-0 sm:divide-x divide-blue-50">
           
-          <div className="flex flex-col items-center gap-2 pt-4 lg:pt-0">
-            <div className="text-3xl text-[#0056D6] mb-1">🛡️</div>
-            <h3 className="font-extrabold text-sm md:text-base text-slate-800">{t('trust.accreditation_title')}</h3>
-            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">{t('trust.accreditation_desc')}</p>
+          <div className="flex flex-col items-center gap-2 pt-4 sm:pt-0">
+            <div className="text-4xl text-[#0056D6] mb-1">🛡️</div>
+            <h3 className="font-extrabold text-sm md:text-base text-slate-800">
+              ✓ {language === 'de' ? '100% Versichert' : '100% Insured'}
+            </h3>
+            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">
+              {language === 'de' ? 'Voller Schutz und Sicherheit bei jedem Einsatz – 100% Haftpflichtversichert.' : 'Complete protection and liability coverage for all cleaning situations in Berlin.'}
+            </p>
           </div>
 
-          <div className="flex flex-col items-center gap-2 pt-4 lg:pt-0">
-            <div className="text-3xl text-[#0056D6] mb-1">💼</div>
-            <h3 className="font-extrabold text-sm md:text-base text-slate-800">{t('trust.insured_title')}</h3>
-            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">{t('trust.insured_desc')}</p>
+          <div className="flex flex-col items-center gap-2 pt-4 sm:pt-0">
+            <div className="text-4xl text-[#0056D6] mb-1">✨</div>
+            <h3 className="font-extrabold text-sm md:text-base text-slate-800">
+              ✓ {language === 'de' ? 'Professionelle Reinigung' : 'Professional Cleaning'}
+            </h3>
+            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">
+              {language === 'de' ? 'Ausgebildete Servicekräfte sorgen für strahlenden und hygienischen Glanz.' : 'Zertifiziertes personal with extensive sanitization and housekeeping competence.'}
+            </p>
           </div>
 
-          <div className="flex flex-col items-center gap-2 pt-4 lg:pt-0">
-            <div className="text-3xl text-[#0056D6] mb-1">🏆</div>
-            <h3 className="font-extrabold text-sm md:text-base text-slate-800">{t('trust.certified_title')}</h3>
-            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">{t('trust.certified_desc')}</p>
+          <div className="flex flex-col items-center gap-2 pt-4 sm:pt-0">
+            <div className="text-4xl text-[#0056D6] mb-1">📅</div>
+            <h3 className="font-extrabold text-sm md:text-base text-slate-800">
+              ✓ {language === 'de' ? 'Flexible Einsatzplanung' : 'Flexible Scheduling'}
+            </h3>
+            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">
+              {language === 'de' ? 'Termine ganz nach Wunsch buchen und unkompliziert anpassen.' : 'Schedule tailored service hours and match your regular preferred cleaner.'}
+            </p>
           </div>
 
-          <div className="flex flex-col items-center gap-2 pt-4 lg:pt-0">
-            <div className="text-3xl text-[#0056D6] mb-1">👥</div>
-            <h3 className="font-extrabold text-sm md:text-base text-slate-800">{t('trust.team_title')}</h3>
-            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">{t('trust.team_desc')}</p>
+          <div className="flex flex-col items-center gap-2 pt-4 sm:pt-0">
+            <div className="text-4xl text-[#0056D6] mb-1">📍</div>
+            <h3 className="font-extrabold text-sm md:text-base text-slate-800">
+              ✓ {language === 'de' ? 'Berliner Abdeckung' : 'Berlin Coverage'}
+            </h3>
+            <p className="text-xs text-slate-500 font-semibold max-w-[200px]">
+              {language === 'de' ? 'Ganz Berlin wird von unseren freundlichen Teams zuverlässig betreut.' : 'We provide local trusted household care in every Berlin district.'}
+            </p>
           </div>
 
         </div>

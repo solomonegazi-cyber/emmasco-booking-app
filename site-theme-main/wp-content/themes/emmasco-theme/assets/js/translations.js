@@ -1,0 +1,312 @@
+/**
+ * Emmasco Theme Companion - Translations Module
+ * Bilingual Dictionary definitions and active translation hooks.
+ */
+
+window.langDicts = {
+    de: {
+        navServices: 'Unsere Leistungen',
+        navAbout: 'Über Uns',
+        navGallery: 'Galerie',
+        navFAQ: 'Häufige Fragen',
+        navBlog: 'Ratgeber',
+        navContact: 'Kontakt',
+        btnNavBook: 'Jetzt Buchen',
+        heroBadge: 'Qualifizierte Pflege & Glanz in Berlin',
+        heroTitle1: 'Haushaltshilfe &',
+        heroTitleAccent: 'Alltagsbegleitung',
+        heroTitle2: 'mit Herz und Empathie.',
+        heroDesc: 'Wir entlasten Senioren im Alltag, pflegen Ihr Zuhause glänzend sauber und unterstützen pflegende Angehörige. Staatlich anerkannt – zu 100% über alle Pflegekassen abrechenbar.',
+        feature1Title: 'SGB XI Entlastungsbetrag',
+        feature1Desc: 'Abrechnung direkt mit allen Kassen',
+        feature2Title: 'Premium-Reinheit',
+        feature2Desc: 'Professionell, gründlich & diskret',
+        btnBooking: 'Kostenloses Angebot anfordern',
+        btnReadMore: 'Leistungen entdecken',
+        totalRatings: 'Über 120+ verifizierte Kundenrezensionen',
+        badgeTitle: 'Staatlich Anerkannt',
+        badgeDesc: 'Wir erfüllen alle gesetzlichen Normen des deutschen Staates für Betreuungs- und Entlastungsleistungen nach § 45a SGB XI.',
+        bullet1: '100% pflegekassentauglich',
+        bullet2: 'Volle Unterstützung ab Pflegegrad 1',
+        bullet3: 'Ohne Zuzahlung möglich',
+        sectionServicesLabel: 'UNSER PROGRAMM',
+        sectionServicesTitle: 'Maßgeschneiderte Hilfen für Ihr Zuhause',
+        sectionServicesDesc: 'Filtern Sie unsere Leistungen nach Ihren Wünschen. Jede Leistung ist flexibel buchbar und qualifiziert aufbereitet.',
+        tabAll: 'Alle',
+        tabHousehold: 'Haushalt & Alltag',
+        tabCleaning: 'Reinigung',
+        tabCompanion: 'Kassenbegleitung',
+        tabZusatz: 'Zusatzleistung',
+        galLabel: 'PREMIUM RESULTATE',
+        galTitle: 'Vorher / Nachher Vergleich',
+        galDesc: 'Sehen Sie, welchen Unterschied das EMMASCO-Reinigungsteam in der Praxis macht.',
+        galItem1Title: 'Badezimmer Sanierung',
+        galItem1Desc: 'Beseitigung extremer Kalkflecken und Tiefenschmutz-Versiegelung.',
+        galItem2Title: 'Küche & Oberflächen',
+        galItem2Desc: 'Gründliche Herdreinigung, desinfizierte Schrankfronten.',
+        galItem3Title: 'Fenster- & Glasflächen',
+        galItem3Desc: 'Streifenfreie Glasreinigung inklusive der äußeren Fensterbänke.',
+        aboutLabel: 'ÜBER UNS',
+        aboutTitle: 'Familiärer Halt in Zeiten des Wandels',
+        aboutDesc: 'Wir glauben, dass hervorragende Hauswirtschaftspflege und Alltagsbegleitung auf Vertrauen und Empathie beruhen. Unser Team in Berlin-Mitte und Pankow entlastet Sie zuverlässig im Alltag.',
+        val1: 'Respekt & Wärme',
+        val1Desc: 'Wir behandeln Sie wie unsere Familie.',
+        val2: '101% Verlässlichkeit',
+        val2Desc: 'Vereinbarte Termine halten wir pünktlich.',
+        val3: 'Volle Transparenz',
+        val3Desc: 'Stundengenaue Abrechnung.',
+        val4: 'Professionelle Reinigung',
+        val4Desc: 'Rückstandsfreie, ökologische Reinigung.',
+        evt1Title: 'Gründung in Berlin',
+        evt1Desc: 'Beginn der Geschäftstätigkeit mit Spezialisierung auf anspruchsvolle Haushalte im Raum Pankow.',
+        evt2Title: 'Präqualifizierung & Anerkennung',
+        evt2Desc: 'Erfolgreiches Anerkennungsverfahren nach § 45a SGB XI für den monatlichen Entlastungsbetrag der Pflegekassen.',
+        evt3Title: 'Aufbau Alltagsbegleitung',
+        evt3Desc: 'Ausbau der Angebote auf anerkannte Senioren- und Alltagsbetreuungen mit Herz.',
+        evt4Title: 'Über 500 aktive Kunden',
+        evt4Desc: 'Etablierung als eine der führenden, familiengeführten privaten Dienstleisteragenturen im Berliner Norden.',
+        bookLabel: 'ONLINE RESERVIERUNG',
+        bookTitle: 'Stellen Sie Ihre Buchungsanfrage ein',
+        bookDesc: 'Geben Sie Ihre Wünsche ein. Unser Team berechnet Ihr Budget und kontaktiert Sie umgehend mit einer Vorlage.',
+        formName: 'Ihr Name *',
+        formEmail: 'Ihr E-Mail-Adresse *',
+        formPhone: 'Telefonnummer *',
+        formService: 'Wählen Sie Dienstleistung',
+        formAddress: 'Adresse Berlin (Pankow / Mitte / Wedding) *',
+        formDate: 'Wunschtermin Datum *',
+        formTime: 'Wunsch Uhrzeit *',
+        formNotes: 'Spezielle Notizen (optional)',
+        btnSubmitBooking: 'Anfrage senden & digital verarbeiten',
+        calcTitle: 'Budget-Kalkulator (Live)',
+        calcDesc: 'Ihr transparenter Kostenvoranschlag im Rahmen des Entlastungsbetrags.',
+        calcLineService: 'Gewählte Leistung:',
+        calcLineTerm: 'Termingrösse (Basis):',
+        calcLineVat: 'Umsatzsteuer:',
+        exempt: '0% (§4 UStG befreit)',
+        calcLineRefund: 'Kostenerstattung (§45a):',
+        refundVal: 'Bis zu 100% Kasse',
+        hoursEstLabel: 'GESAMTKOSTEN (EST.)',
+        coveredText: '100% Kasse',
+        invoiceTitle: 'Ihre Rechnungen & Belege',
+        invoiceDesc: 'Laden Sie Ihre Rechnungen direkt als PDF für die Pflegekasse herunter.',
+        noInvoices: 'Noch keine Buchung getätigt. Rechnungen erscheinen nach Ihrer ersten Buchungsanfrage.',
+        reviewLabel: 'DANKBARE STIMMEN',
+        reviewTitle: 'Kundenberichte aus ganz Berlin',
+        reviewDesc: 'Wir pflegen mit Stolz und Freude. Erfahren Sie, was Senioren und deren Angehörige über uns schreiben.',
+        t1Text: '"Die Alltagsbegleitung des Emmasco Teams ist ein Segen für uns. Frau Schmidt kommt wöchentlich, hilft im Haushalt und geht mit meiner Mutter spazieren. Die Abrechnung läuft direkt über die Pflegekasse nach §45a."',
+        t2Text: '"Wir buchen EMMASCO für unsere Praxisreinigung in der Schönhauser Allee. Die Pünktlichkeit, Gründlichkeit und Hygiene nach gesetzlichen Vorgaben sind absolut tadellos. Sehr zu empfehlen!"',
+        t3Text: '"Nach der Geburt unserer Zwillinge hat uns die Haushaltshilfe von Emmasco sehr entlastet. Wäsche bügeln, aufräumen, gründlich saugen – sie waren pünktlich da und machten einen super Job."',
+        faqLabel: 'WISSENSWERTES',
+        faqTitle: 'Häufig gestellte Fragen',
+        faqDesc: 'Alles Wichtige zu Abrechnung, Anerkennung nach SGB XI und Haftpflichtschutz.',
+        blogLabel: 'RATGEBER & TIpps',
+        blogTitle: 'Frische Beiträge aus unserem Team',
+        blogDesc: 'Wissenswertes rund um Wäschepflege, SGB XI Entlastungsbeträge und effiziente Haushaltsorganisation.',
+        artTitle1: 'Frühjahrsputz leicht gemacht: Tipps vom Profiteam',
+        artExcerpt1: 'Erfahren Sie, wie Sie strukturiert vorgehen, um Spinnweben zu bekämpfen, Kalk zu beseitigen und streifenfreie Fensterergebnisse zu erzielen.',
+        artTitle2: 'Gesundes Altern & psychische Aktivierung',
+        artExcerpt2: 'Soziale Isolation ist im Rentenalter gefährlich. Wie qualifizierte Alltagsbegleitung und Unterstützung Lebensfreude zurückbringen können.',
+        artTitle3: 'Wäschepflege & faserschonende Reinigung',
+        artExcerpt3: 'Weiße Wäsche richtig bleichen, Essig statt Weichspüler verwenden und die Waschmitteldosierung für ein weiches Ergebnis präzise anpassen.',
+        cntLabel: 'KONTAKTIERE UNS',
+        cntTitle: 'Haben Sie Fragen? Sprechen Sie uns an!',
+        cntDesc: 'Unser Innendienst an der Schönhauser Allee in Prenzlauer Berg berät Sie gerne unverbindlich zu Budgets, Kassenabrechnungspfaden und Kooperationsmöglichkeiten.',
+        cfSubject: 'Betreff *',
+        cfMsg: 'Ihre Nachricht *',
+        cfSubmitBtn: 'Nachricht absenden',
+        footerIntro: 'Ihr anerkannter, familiengeführter Dienstleister für liebevolle Alltagsbegleitung, Haushaltshilfe (§45a SGB XI) und erstklassige gewerbliche Reinigung in ganz Berlin.',
+        certifiedBadge: '§ 45a SGB XI Anerkennungsverfahren',
+        footerServicesTitle: 'Dienstleistungen',
+        footerQuickTitle: 'Quick Links',
+        footerContactTitle: 'Kontakt & Büro',
+        noPageContent: 'Keine Inhalte für diese Seite gefunden.',
+        waTooltip: 'Fragen? Schreiben Sie uns direkt auf WhatsApp!',
+        waTitle: 'WhatsApp Beratung',
+        waStatus: 'Online • Antwortet meist sofort',
+        waIntro: 'Haben Sie Fragen zur Haushaltshilfe, Alltagsbegleitung oder Abrechnung mit der Pflegekasse? Senden Sie uns einfach eine Nachricht!',
+        waBtnSend: 'In WhatsApp fortfahren',
+        previewTitle: 'Nachrichten-Vorschau',
+        service1: 'Haushaltshilfe SGB XI',
+        service2: 'Alltagsbegleitung',
+        service3: 'Entlastungsbetrag',
+        service4: 'Unterhaltsreinigung',
+        service5: 'Büroreinigung (B2B)'
+    },
+    en: {
+        navServices: 'Our Services',
+        navAbout: 'About Us',
+        navGallery: 'Gallery',
+        navFAQ: 'Common FAQs',
+        navBlog: 'Advisor Articles',
+        navContact: 'Contact Us',
+        btnNavBook: 'Book Appt',
+        heroBadge: 'Qualified Care Assistance & Sparkling Homes',
+        heroTitle1: 'Housekeeping &',
+        heroTitleAccent: 'Care Companion',
+        heroTitle2: 'with Grace and Empathy.',
+        heroDesc: 'We ease senior citizens\' chores, keep homes hygienically clean, and support loving relatives. Officially certified – direct 100% reimbursement by all German nursing insurance funds.',
+        feature1Title: 'SGB XI Covered Allowance',
+        feature1Desc: 'Direct-billing with all insurance carriers',
+        feature2Title: 'Premium Cleanliness',
+        feature2Desc: 'Professional, detailed & confidential care',
+        btnBooking: 'Receive Custom Offer',
+        btnReadMore: 'Explore Packages',
+        totalRatings: 'Over 120+ authentic client testimonials',
+        badgeTitle: 'Staatlich Anerkannt',
+        badgeDesc: 'Officially approved by Berlin medical registries for relief as well as companion care SGB XI § 45a.',
+        bullet1: '100% insurance compatible',
+        bullet2: 'Full support beginning with Care Level 1',
+        bullet3: 'Zero net out-of-pocket costs options',
+        sectionServicesLabel: 'OUR SERVICES',
+        sectionServicesTitle: 'Bespoke Services for Your Comfort',
+        sectionServicesDesc: 'Easily filter by program topic. Every package is fully customizable and professionally delivered.',
+        tabAll: 'All',
+        tabHousehold: 'Home Chores',
+        tabCleaning: 'Cleaning',
+        tabCompanion: 'Assisted Companionship',
+        tabZusatz: 'Extra services',
+        galLabel: 'PREMIUM RESULTS',
+        galTitle: 'Before / After Transforms',
+        galDesc: 'Inspect actual results from EMMASCO cleaning sessions in Berlin.',
+        galItem1Title: 'Deep Bathroom Polish',
+        galItem1Desc: 'Eradicated persistent lime deposits and water stains.',
+        galItem2Title: 'Kitchen Deep Treatment',
+        galItem2Desc: 'Complete stovetop and cabinetry polish.',
+        galItem3Title: 'Streak-Free Windows',
+        galItem3Desc: 'Window frame and exterior glass deep wipe.',
+        aboutLabel: 'ABOUT US',
+        aboutTitle: 'Trust and Empathy in Changing Times',
+        aboutDesc: 'We believe outstanding care is built on true respect and deep connection. Our certified staff takes care of homes and senior citizens wth professional dedication.',
+        val1: 'Warmth & Respect',
+        val1Desc: 'We treat our clients like family members.',
+        val2: '101% Security',
+        val2Desc: 'We never miss or reschedule bookings.',
+        val3: 'Full Clarity',
+        val3Desc: 'Billing is documented hour by hour.',
+        val4: 'Elite Cleanliness',
+        val4Desc: 'We use premium non-toxic eco cleansers.',
+        evt1Title: 'Gründung in Berlin',
+        evt1Desc: 'Began business operations focused on family households in Pankow district.',
+        evt2Title: 'Accreditation SGB XI',
+        evt2Desc: 'Formally recognized for Entlastungsbetrag reimbursement services in Germany.',
+        evt3Title: 'Companionship Addition',
+        evt3Desc: 'Established specialized companionship support with emotional training.',
+        evt4Title: '500+ Active Clients',
+        evt4Desc: 'Grown to be the premium family-run care and cleaning provider in Berlin-North.',
+        bookLabel: 'ONLINE RESERVATION',
+        bookTitle: 'Create Your Service Request',
+        bookDesc: 'Input details. Our administrative office calculates standard rates and replies instantly.',
+        formName: 'Full Name *',
+        formEmail: 'E-mail Address *',
+        formPhone: 'Phone Number *',
+        formService: 'Select Service Line',
+        formAddress: 'Berlin Service Address *',
+        formDate: 'Requested Appointment Date *',
+        formTime: 'Requested Slot Time *',
+        formNotes: 'Special Instructions (optional)',
+        btnSubmitBooking: 'Submit Request & Download Copy',
+        calcTitle: 'Live Budget Estimator',
+        calcDesc: 'Transparent estimates formatted directly for insurance submittals.',
+        calcLineService: 'Chosen Service:',
+        calcLineTerm: 'Length (Standard):',
+        calcLineVat: 'VAT Rate:',
+        exempt: '0% (Exempt per §4 UStG)',
+        calcLineRefund: 'Reimbursement Coverage:',
+        refundVal: 'Up to 100% eligible',
+        hoursEstLabel: 'ESTIMATED TOTAL BUDGET',
+        coveredText: '100% Covered',
+        invoiceTitle: 'Invoices & Receipts',
+        invoiceDesc: 'Instantly download PDF files formatted for your insurance file.',
+        noInvoices: 'No booking made yet. Receipts populate here as soon as you submit.',
+        reviewLabel: 'HAPPY VOICES',
+        reviewTitle: 'Client Stories from Berlin',
+        reviewDesc: 'We care for citizens with absolute pride. Read reviews from clients and children.',
+        t1Text: '"The companion service is a godsend. Ms. Schmidt arrives weekly, helps tidy, and goes on walks with my mom. Direct billing to insurance fund is incredibly smooth."',
+        t2Text: '"We employ EMMASCO for clinical cleaning in Schönhauser Allee. Punctuality, hygiene standards and documentation are absolutely flawless. Highest recommendation!"',
+        t3Text: '"After our twins were born, EMMASCO housekeeping was a savior. Ironing, cleanups, detailed vacuums – they delivered amazing outputs right on time."',
+        faqLabel: 'KNOWLEDGE BASE',
+        faqTitle: 'Frequently Asked Questions',
+        faqDesc: 'Everything you need to know about Care Level funding, coverage limits and insurance.',
+        blogLabel: 'TIPS & STRATEGIES',
+        blogTitle: 'Latest Posts from our Experts',
+        blogDesc: 'Helpful advice about laundry care, caregiver relief allowances, and home tidiness.',
+        artTitle1: 'Spring Cleanings: Professional Strategical Tips',
+        artExcerpt1: 'Tackle heavy dust, scrub calcified bathroom spots, and wipe tricky window rims to create pristine atmospheres.',
+        artTitle2: 'Caregiver Mental Health and Social Activities',
+        artExcerpt2: 'Combat senior isolation. How loving companion care stimulates spirits, keeps brains active, and aids families.',
+        artTitle3: 'Five-Star Laundry Operations & Care',
+        artExcerpt3: 'Maintain bright white fabrics, replace heavy softener with eco alternatives, and adjust doses for soft touch.',
+        cntLabel: 'CONTACT US',
+        cntTitle: 'Send a Message directly to our Office',
+        cntDesc: 'Our central office staff at Schönhauser Allee in Prenzlauer Berg stands ready to assist you regarding nursing budgets.',
+        cfSubject: 'Inquiry Subject *',
+        cfMsg: 'Detailed Message *',
+        cfSubmitBtn: 'Submit Inquiry',
+        footerIntro: 'Your certified family cleaning and support companion agency across Berlin. Highly accredited, fully insured.',
+        certifiedBadge: 'Authorized per § 45a SGB XI',
+        footerServicesTitle: 'Services',
+        footerQuickTitle: 'Quick Links',
+        footerContactTitle: 'Contact details',
+        noPageContent: 'No content found for this search.',
+        waTooltip: 'Have questions? Chat with our team live!',
+        waTitle: 'WhatsApp Support',
+        waStatus: 'Online • Average reply immediate',
+        waIntro: 'Need clarification on budget limits or scheduling? Text us on WhatsApp right away!',
+        waBtnSend: 'Chat in WhatsApp',
+        previewTitle: 'Message Live Preview',
+        service1: 'Housekeeping SGB XI',
+        service2: 'Assisted Companion',
+        service3: 'Care Allowance (Entlastung)',
+        service4: 'Residential Cleaning',
+        service5: 'Office Cleaning (B2B)'
+    }
+};
+
+window.activeLang = localStorage.getItem('emmasco_lang') || 'de';
+
+window.applyTranslation = function () {
+    const langToggleBtn = document.getElementById('lang-switch-btn');
+    if (langToggleBtn) {
+        langToggleBtn.innerText = window.activeLang === 'de' ? 'EN' : 'DE';
+    }
+
+    const elements = document.querySelectorAll('[data-translate]');
+    elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (window.langDicts[window.activeLang] && window.langDicts[window.activeLang][key]) {
+            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                element.setAttribute('placeholder', window.langDicts[window.activeLang][key]);
+            } else {
+                element.innerHTML = window.langDicts[window.activeLang][key];
+            }
+        }
+    });
+
+    // Notify modules to update their translation-dependent values
+    if (typeof window.renderServices === 'function') {
+        const activeTab = document.querySelector('.service-tab-btn.active');
+        const cat = activeTab ? activeTab.getAttribute('data-cat') : 'all';
+        window.renderServices(cat);
+    }
+    if (typeof window.updateBudgetCalculator === 'function') {
+        window.updateBudgetCalculator();
+    }
+    if (typeof window.triggerWhatsAppPreview === 'function') {
+        window.triggerWhatsAppPreview();
+    }
+    if (typeof window.renderLocalInvoices === 'function') {
+        window.renderLocalInvoices();
+    }
+};
+
+window.initTranslations = function() {
+    const langToggleBtn = document.getElementById('lang-switch-btn');
+    if (langToggleBtn) {
+        langToggleBtn.addEventListener('click', function () {
+            window.activeLang = window.activeLang === 'de' ? 'en' : 'de';
+            localStorage.setItem('emmasco_lang', window.activeLang);
+            window.applyTranslation();
+        });
+    }
+    window.applyTranslation();
+};

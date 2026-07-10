@@ -25,10 +25,11 @@ export interface Booking {
   serviceName: string;
   date: string;
   time: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'assigned' | 'in_progress' | 'completed' | 'cancelled' | 'offline_queued';
   notes: string;
   totalPrice: number;
   createdAt: string;
+  cleanerName?: string;
 }
 
 export interface BlogArticle {
