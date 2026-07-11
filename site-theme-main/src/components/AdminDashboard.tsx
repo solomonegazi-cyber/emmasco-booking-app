@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Booking, Service, BlogArticle } from '../types';
+import { useToast } from '../ToastContext';
 
 interface AdminDashboardProps {
   bookings: Booking[];
@@ -34,6 +35,8 @@ export default function AdminDashboard({
   onUpdateBookingStatus,
   onDeleteBooking
 }: AdminDashboardProps) {
+
+  const { success, error, warning, info } = useToast();
 
   // Login variables
   const [adminEmail, setAdminEmail] = useState('admin@emmascoreinigungsteam.de');
@@ -104,7 +107,7 @@ export default function AdminDashboard({
   const handleAddServiceSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newServiceName.trim() || !newServiceDesc.trim()) {
-      alert('Bitte alle Felder des Services ausfüllen.');
+      error('Bitte alle Felder des Services ausfüllen.');
       return;
     }
 
@@ -123,13 +126,13 @@ export default function AdminDashboard({
     onAddService(added);
     setNewServiceName('');
     setNewServiceDesc('');
-    alert(`✔ Service "${added.title}" wurde erfolgreich dem Katalog hinzugefügt!`);
+    success(`Service "${added.title}" wurde erfolgreich dem Katalog hinzugefügt!`);
   };
 
   const handleCreateArticleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newArticleTitle.trim() || !newArticleContent.trim()) {
-      alert('Bitte füllen Sie den Titel und Inhalt des Beitrags aus.');
+      error('Bitte füllen Sie den Titel und Inhalt des Beitrags aus.');
       return;
     }
 
@@ -150,7 +153,7 @@ export default function AdminDashboard({
     setNewArticleTitle('');
     setNewArticleExcerpt('');
     setNewArticleContent('');
-    alert(`✔ SEO-Blogartikel "${addedArt.title}" wurde erfolgreich veröffentlicht!`);
+    success(`SEO-Blogartikel "${addedArt.title}" wurde erfolgreich veröffentlicht!`);
   };
 
   // Stats Counters
@@ -374,7 +377,7 @@ export default function AdminDashboard({
 
               <button
                 id="dispatch-auto-btn"
-                onClick={() => alert('🤖 Auto-Routing abgeschlossen!\nMitarbeiterpläne wurden aktualisiert.')}
+                onClick={() => success('🤖 Auto-Routing abgeschlossen! Mitarbeiterpläne wurden aktualisiert.')}
                 className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-4 rounded-xl text-xs cursor-pointer text-center shadow-xs"
               >
                 Auto-Zuweisung ausführen
@@ -441,7 +444,7 @@ export default function AdminDashboard({
                         <button
                           onClick={() => {
                             onUpdateBookingStatus(b.id, 'assigned', draftCleaner);
-                            alert(`👤 Kraft "${draftCleaner || 'M. Becker'}" eingetragen und Status auf 'assigned' aktualisiert.`);
+                            success(`👤 Kraft "${draftCleaner || 'M. Becker'}" eingetragen und Status auf 'assigned' aktualisiert.`);
                           }}
                           className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[9px] font-black uppercase cursor-pointer"
                         >

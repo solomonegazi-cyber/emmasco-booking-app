@@ -3,11 +3,14 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { LanguageProvider } from './LanguageContext';
+import { ToastProvider } from './ToastContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <LanguageProvider>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </LanguageProvider>
   </StrictMode>,
 );

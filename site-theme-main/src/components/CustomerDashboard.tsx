@@ -8,6 +8,8 @@ import {
 import { Booking, UserDocument, ChatMessage } from '../types';
 import { jsPDF } from 'jspdf';
 import { useLanguage } from '../LanguageContext';
+import { useRegistrationErrorHandler } from '../hooks/useRegistrationErrorHandler';
+import { useToast } from '../ToastContext';
 import { 
   isNotificationSupported, 
   requestNotificationPermission, 
@@ -77,22 +79,28 @@ export default function CustomerDashboard({
 
   const { language } = useLanguage();
   const isDe = language === 'de';
+  const { success, error, warning, info } = useToast();
+
+  const {
+    error: registrationError,
+    setError: setRegistrationError,
+    clearError: clearRegistrationError,
+    handleApiError: handleRegistrationApiError,
+    handleNetworkError: handleRegistrationNetworkError
+  } = useRegistrationErrorHandler();
 
   // Authentication Flow states
   // 'login' | 'register' | 'verify' | 'forgot' | 'reset'
-  const [authMode, setAuthMode] = useState<'login' | 'register' | 'verify' | 'forgot' | 'reset'>(initialAuthMode || 'login');
+  const [authModeState, setAuthModeState] = useState<'login' | 'register' | 'verify' | 'forgot' | 'reset'>(initialAuthMode || 'login');
 
-  React.useEffect(() => {
-    if (initialAuthMode && initialAuthMode !== authMode) {
-      setAuthMode(initialAuthMode);
-    }
-  }, [initialAuthMode]);
+  const authMode = initialAuthMode || authModeState;
 
-  React.useEffect(() => {
+  const setAuthMode = React.useCallback((mode: 'login' | 'register' | 'verify' | 'forgot' | 'reset') => {
+    setAuthModeState(mode);
     if (onAuthModeChange) {
-      onAuthModeChange(authMode);
+      onAuthModeChange(mode);
     }
-  }, [authMode, onAuthModeChange]);
+  }, [onAuthModeChange]);
 
   // Extract registered email from location query string, history state, or localStorage fallback
   React.useEffect(() => {
@@ -105,8 +113,8 @@ export default function CustomerDashboard({
       const resolvedEmail = emailParam || historyEmail || storedEmail || "";
 
       if (resolvedEmail) {
-        setNeedsVerificationEmail(resolvedEmail);
-        setAuthEmail(resolvedEmail);
+        setNeedsVerificationEmail(prev => prev !== resolvedEmail ? resolvedEmail : prev);
+        setAuthEmail(prev => prev !== resolvedEmail ? resolvedEmail : prev);
       } else if (authMode === 'verify') {
         // No email exists, redirect back to Register mode
         setAuthMode('register');
@@ -118,7 +126,7 @@ export default function CustomerDashboard({
     } catch (err) {
       console.error('[Dashboard] Error parsing email from route state:', err);
     }
-  }, [authMode, initialAuthMode, isDe]);
+  }, [authMode, isDe]);
   
   // Registration and Authentication inputs
   const [authEmail, setAuthEmail] = useState('');
@@ -252,18 +260,19 @@ export default function CustomerDashboard({
     setAuthError('');
     setAuthSuccess('');
     setDevCodeHint('');
+    clearRegistrationError();
 
     console.log('[REGISTRATION] Form submitted. Email:', authEmail, 'Name:', authName);
 
     if (!authEmail || !authPassword || !authName || !authConfirmPassword) {
       console.warn('[REGISTRATION] Missing required fields');
-      setAuthError(language === 'de' ? 'Bitte füllen Sie alle erforderlichen Felder aus.' : 'Please fill out all required fields.');
+      setRegistrationError(language === 'de' ? 'Bitte füllen Sie alle erforderlichen Felder aus.' : 'Please fill out all required fields.');
       return;
     }
 
     if (authPassword !== authConfirmPassword) {
       console.warn('[REGISTRATION] Passwords do not match');
-      setAuthError(language === 'de' ? 'Die Passwörter stimmen nicht überein.' : 'Passwords do not match.');
+      setRegistrationError(language === 'de' ? 'Die Passwörter stimmen nicht überein.' : 'Passwords do not match.');
       return;
     }
 
@@ -319,17 +328,21 @@ export default function CustomerDashboard({
         }
         console.log('[STEP] After Navigate to Verify');
         
-        console.log('[STEP] Before setting authMode State update');
-        console.log('[STATE UPDATE] setting authMode to: verify');
-        setAuthMode('verify');
-        console.log('[STEP] After setting authMode State update (authMode set to verify)');
+        // NO double state updates or setAuthMode('verify') here!
+        // The window.history.pushState call synchronously triggers checkPath() in App.tsx,
+        // which sets customerAuthMode to 'verify'.
+        // This updates CustomerDashboard's props and triggers the sync useEffect cleanly,
+        // avoiding concurrent state updates, double unmounts, and the removeChild error.
       } else {
         console.error('[REGISTRATION FAILED] Error response:', result);
-        setAuthError(result?.error || (language === 'de' ? 'Registrierung fehlgeschlagen.' : 'Registration failed.'));
+        await handleRegistrationApiError({
+          error: result?.error,
+          status: response.status
+        }, language === 'de' ? 'Registrierung fehlgeschlagen.' : 'Registration failed.');
       }
     } catch (err: any) {
       console.error('[REGISTRATION] Error during registration network call:', err);
-      setAuthError(language === 'de' ? 'Netzwerkfehler bei der Registrierung.' : 'Network error during registration.');
+      handleRegistrationNetworkError(err);
     }
   };
 
@@ -427,6 +440,7 @@ export default function CustomerDashboard({
   const handleProfileSave = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateProfile(profileName, profilePhone, profileAddress);
+    success(isDe ? 'Profil erfolgreich aktualisiert!' : 'Profile updated successfully!');
     setProfileSavedMsg('Profil erfolgreich gespeichert!');
     setTimeout(() => setProfileSavedMsg(''), 3000);
   };
@@ -654,7 +668,7 @@ export default function CustomerDashboard({
       doc.save(`Rechnung_${invoiceNo}.pdf`);
     } catch (err) {
       console.error('Error generating PDF:', err);
-      alert('Der PDF-Download ist fehlgeschlagen.');
+      error(isDe ? 'Der PDF-Download ist fehlgeschlagen.' : 'The PDF download failed.');
     }
   };
 
@@ -677,13 +691,21 @@ export default function CustomerDashboard({
     onUploadDocument(newDoc);
     setUploadFileName('');
     setUploadFileNameError('');
-    alert('📄 Dokument erfolgreich hochgeladen! Status ist nun "In Prüfung" durch unser Team.');
+    success(
+      isDe
+        ? '📄 Dokument erfolgreich hochgeladen! Status ist nun "In Prüfung" durch unser Team.'
+        : '📄 Document uploaded successfully! Status is now "Under Review" by our team.'
+    );
   };
 
   // Rebooking trigger
   const handleRebookService = (b: Booking) => {
     // Show visual confirmation
-    alert(`🔁 Rebooking initialisiert:\nDienstleistung: "${b.serviceName}" wird übernommen. Wir leiten Sie nun zur Buchungsseite weiter, wo Ihre Adress- & Kontaktdaten bereits vorbelegt sind.`);
+    info(
+      isDe
+        ? `🔁 Rebooking initialisiert: Dienstleistung "${b.serviceName}" wird übernommen. Wir leiten Sie nun zur Buchungsseite weiter, wo Ihre Adress- & Kontaktdaten bereits vorbelegt sind.`
+        : `🔁 Rebooking initialized: service "${b.serviceName}" is being transferred. We will now redirect you to the booking page, where your address and contact details are already pre-filled.`
+    );
     if (onNavigateToBooking) {
       onNavigateToBooking(b.serviceId);
     }
@@ -1051,10 +1073,10 @@ export default function CustomerDashboard({
 
           {/* Feedback alerts - housed in a stable child block to prevent sibling reordering bugs */}
           <div className="flex flex-col gap-2 empty:hidden">
-            {authError && (
+            {(authError || (authMode === 'register' && registrationError)) && (
               <div key="auth-error-alert" className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 font-bold text-xs flex items-start gap-2 animate-fade-in">
                 <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{authError}</span>
+                <span>{authMode === 'register' ? registrationError : authError}</span>
               </div>
             )}
 

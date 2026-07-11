@@ -224,6 +224,7 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
   const { language, t, services } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [slideDirection, setSlideDirection] = useState<number>(1);
   const [selectedServiceDetail, setSelectedServiceDetail] = useState<Service | null>(null);
 
   // Review System States
@@ -336,6 +337,15 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
     { id: 'zusatz', label: language === 'de' ? 'Zusatzleistungen' : 'Additional Services' }
   ];
 
+  const handleCategoryChange = (catId: string) => {
+    const oldIndex = categories.findIndex((c) => c.id === selectedCategory);
+    const newIndex = categories.findIndex((c) => c.id === catId);
+    if (newIndex !== -1 && oldIndex !== -1 && newIndex !== oldIndex) {
+      setSlideDirection(newIndex > oldIndex ? 1 : -1);
+    }
+    setSelectedCategory(catId);
+  };
+
   const filteredServices = services.filter((service) => {
     const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           service.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -385,19 +395,29 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
           
           {/* Category Pill Filters */}
           <div className="flex flex-wrap gap-2 justify-center md:justify-start w-full md:w-auto font-semibold">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'bg-[#0056D6] text-white shadow-md'
-                    : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-100'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryChange(cat.id)}
+                  className={`relative px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer overflow-hidden ${
+                    isActive
+                      ? 'text-white shadow-xs bg-[#0056D6]'
+                      : 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-100'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeCategoryBg"
+                      className="absolute inset-0 bg-[#0056D6] z-0"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10">{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Search box */}
@@ -414,143 +434,172 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
 
         </div>
 
-        {/* Dynamic Service Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10 text-left">
-          <AnimatePresence mode="popLayout">
-            {filteredServices.map((service) => (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
-                transition={{ 
-                  duration: 0.4, 
-                  ease: [0.16, 1, 0.3, 1]
-                }}
-                key={service.id}
-                id={`service-detail-card-${service.id}`}
-                className="bg-white border border-blue-50 hover:border-blue-101 rounded-3xl p-6 shadow-[0_8px_20px_rgba(0,86,214,0.03)] hover:shadow-[0_15px_30px_rgba(0,86,214,0.08)] flex flex-col justify-between relative overflow-hidden group"
-              >
-                {service.isPopular && (
-                  <div className="absolute top-0 right-0 bg-[#0056D6] text-white text-[10px] uppercase font-extrabold tracking-widest px-4 py-1.5 rounded-bl-2xl">
-                    {language === 'de' ? 'Beste Wahl' : 'Best Choice'}
-                  </div>
-                )}
+        {/* Dynamic Service Grid with Slide Animation */}
+        <div className="overflow-hidden mt-10 w-full">
+          <AnimatePresence mode="wait" custom={slideDirection}>
+            <motion.div
+              key={selectedCategory}
+              custom={slideDirection}
+              variants={{
+                enter: (dir: number) => ({
+                  x: dir * 120,
+                  opacity: 0,
+                }),
+                center: {
+                  x: 0,
+                  opacity: 1,
+                },
+                exit: (dir: number) => ({
+                  x: dir * -120,
+                  opacity: 0,
+                })
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 350, damping: 32 },
+                opacity: { duration: 0.25 }
+              }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredServices.map((service) => (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                    whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
+                    transition={{ 
+                      duration: 0.4, 
+                      ease: [0.16, 1, 0.3, 1]
+                    }}
+                    key={service.id}
+                    id={`service-detail-card-${service.id}`}
+                    className="bg-white border border-blue-50 hover:border-blue-101 rounded-3xl p-6 shadow-[0_8px_20px_rgba(0,86,214,0.03)] hover:shadow-[0_15px_30px_rgba(0,86,214,0.08)] flex flex-col justify-between relative overflow-hidden group"
+                  >
+                    {service.isPopular && (
+                      <div className="absolute top-0 right-0 bg-[#0056D6] text-white text-[10px] uppercase font-extrabold tracking-widest px-4 py-1.5 rounded-bl-2xl">
+                        {language === 'de' ? 'Beste Wahl' : 'Best Choice'}
+                      </div>
+                    )}
 
-                <div className="flex flex-col gap-4">
-                  <div className="w-12 h-12 bg-blue-50 text-[#0056D6] rounded-2xl flex items-center justify-center font-bold">
-                    {renderIcon(service.iconName, 'w-6 h-6')}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-850 group-hover:text-[#0056D6] transition-colors">{service.title}</h3>
-                    <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                      <span className="inline-block text-[10px] font-black uppercase text-[#0056D6] bg-blue-50/70 px-2.5 py-1 rounded-md">
-                        {service.category === 'haushalt' && (language === 'de' ? 'Haushalt & Alltag' : 'Household & Daily')}
-                        {service.category === 'reinigung' && (language === 'de' ? 'Reinigung' : 'Cleaning')}
-                        {service.category === 'begleitung' && (language === 'de' ? 'Kassenbegleitung' : 'Care Companion')}
-                        {service.category === 'zusatz' && (language === 'de' ? 'Zusatzleistung' : 'Additional Service')}
-                      </span>
-                      
-                      {/* Render elegant star rating indicator */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedServiceDetail(service);
-                          // Ensures we scroll or show reviews
-                          setTimeout(() => {
-                            if (reviewsRef.current) {
-                              reviewsRef.current.scrollIntoView({ behavior: 'smooth' });
-                            }
-                          }, 100);
-                        }}
-                        className="flex items-center gap-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200/50 rounded-md py-0.5 px-2 select-none text-left cursor-pointer transition-all duration-200"
-                      >
-                        <div className="flex items-center text-amber-500">
-                          <Star className="w-3 h-3 fill-current" />
+                    <div className="flex flex-col gap-4">
+                      <div className="w-12 h-12 bg-blue-50 text-[#0056D6] rounded-2xl flex items-center justify-center font-bold">
+                        {renderIcon(service.iconName, 'w-6 h-6')}
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-850 group-hover:text-[#0056D6] transition-colors">{service.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                          <span className="inline-block text-[10px] font-black uppercase text-[#0056D6] bg-blue-50/70 px-2.5 py-1 rounded-md">
+                            {service.category === 'haushalt' && (language === 'de' ? 'Haushalt & Alltag' : 'Household & Daily')}
+                            {service.category === 'reinigung' && (language === 'de' ? 'Reinigung' : 'Cleaning')}
+                            {service.category === 'begleitung' && (language === 'de' ? 'Kassenbegleitung' : 'Care Companion')}
+                            {service.category === 'zusatz' && (language === 'de' ? 'Zusatzleistung' : 'Additional Service')}
+                          </span>
+                          
+                          {/* Render elegant star rating indicator */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedServiceDetail(service);
+                              // Ensures we scroll or show reviews
+                              setTimeout(() => {
+                                if (reviewsRef.current) {
+                                  reviewsRef.current.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }, 100);
+                            }}
+                            className="flex items-center gap-1 bg-amber-50/60 hover:bg-amber-100 border border-amber-200/50 rounded-md py-0.5 px-2 select-none text-left cursor-pointer transition-all duration-200"
+                          >
+                            <div className="flex items-center text-amber-500">
+                              <Star className="w-3 h-3 fill-current" />
+                            </div>
+                            <span className="text-amber-800 text-[10px] font-black">{getServiceAggregate(service.id).avg.toFixed(1)}</span>
+                            <span className="text-amber-600/60 text-[9px]">•</span>
+                            <span className="text-amber-700 text-[9px] font-bold underline decoration-dotted">
+                              {getServiceAggregate(service.id).total} {language === 'de' ? 'Kritiken' : 'Reviews'}
+                            </span>
+                          </button>
                         </div>
-                        <span className="text-amber-800 text-[10px] font-black">{getServiceAggregate(service.id).avg.toFixed(1)}</span>
-                        <span className="text-amber-600/60 text-[9px]">•</span>
-                        <span className="text-amber-700 text-[9px] font-bold underline decoration-dotted">
-                          {getServiceAggregate(service.id).total} {language === 'de' ? 'Kritiken' : 'Reviews'}
-                        </span>
-                      </button>
+                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed font-normal">
+                        {service.description}
+                      </p>
+                      <p className="text-xs text-slate-500 font-semibold bg-[#F6FAFF] p-3 rounded-xl border border-blue-50/50 leading-relaxed">
+                        {service.detailedDescription}
+                      </p>
                     </div>
-                  </div>
-                  <p className="text-sm text-slate-600 leading-relaxed font-normal">
-                    {service.description}
-                  </p>
-                  <p className="text-xs text-slate-500 font-semibold bg-[#F6FAFF] p-3 rounded-xl border border-blue-50/50 leading-relaxed">
-                    {service.detailedDescription}
-                  </p>
-                </div>
 
-                <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
-                  <div className="flex justify-between items-center bg-[#F6FAFF] p-4 rounded-2xl border border-blue-101/40">
-                    <div>
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                        {language === 'de' ? 'Verrechnung' : 'Hourly Rate'}
-                      </span>
-                      <span className="text-sm font-extrabold text-[#0056D6]">{service.price}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                        {language === 'de' ? 'Pflegegrad' : 'Care Level'}
-                      </span>
-                      <span className="text-xs font-extrabold text-green-700">
-                        {language === 'de' ? '100% Kasse' : '100% Covered'}
-                      </span>
-                    </div>
-                  </div>
+                    <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
+                      <div className="flex justify-between items-center bg-[#F6FAFF] p-4 rounded-2xl border border-blue-101/40">
+                        <div>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                            {language === 'de' ? 'Verrechnung' : 'Hourly Rate'}
+                          </span>
+                          <span className="text-sm font-extrabold text-[#0056D6]">{service.price}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
+                            {language === 'de' ? 'Pflegegrad' : 'Care Level'}
+                          </span>
+                          <span className="text-xs font-extrabold text-green-700">
+                            {language === 'de' ? '100% Kasse' : '100% Covered'}
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      id={`service-info-modal-btn-${service.id}`}
-                      onClick={() => {
-                        setSelectedServiceDetail(service);
-                        if (preselectedServiceId) clearPreselection();
-                      }}
-                      className="py-3 px-4 rounded-xl border border-blue-200 text-[#0056D6] font-extrabold text-xs hover:bg-blue-55 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-                    >
-                      <BadgeInfo className="w-4 h-4" />
-                      {language === 'de' ? 'Info-Broschüre' : 'Info Brochure'}
-                    </button>
-                    <button
-                      id={`service-book-btn-${service.id}`}
-                      onClick={() => onSelectServiceAndBook(service.id)}
-                      className="py-3 px-4 rounded-xl bg-[#0056D6] text-white font-extrabold text-xs hover:bg-[#0047b3] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow"
-                    >
-                      {language === 'de' ? 'Jetzt Buchen' : 'Book Now'}
-                      <ArrowRight className="w-4 h-4 lg:inline hidden" />
-                    </button>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          id={`service-info-modal-btn-${service.id}`}
+                          onClick={() => {
+                            setSelectedServiceDetail(service);
+                            if (preselectedServiceId) clearPreselection();
+                          }}
+                          className="py-3 px-4 rounded-xl border border-blue-200 text-[#0056D6] font-extrabold text-xs hover:bg-blue-55 flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                        >
+                          <BadgeInfo className="w-4 h-4" />
+                          {language === 'de' ? 'Info-Broschüre' : 'Info Brochure'}
+                        </button>
+                        <button
+                          id={`service-book-btn-${service.id}`}
+                          onClick={() => onSelectServiceAndBook(service.id)}
+                          className="py-3 px-4 rounded-xl bg-[#0056D6] text-white font-extrabold text-xs hover:bg-[#0047b3] flex items-center justify-center gap-1.5 cursor-pointer shadow-sm hover:shadow"
+                        >
+                          {language === 'de' ? 'Jetzt Buchen' : 'Book Now'}
+                          <ArrowRight className="w-4 h-4 lg:inline hidden" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              {filteredServices.length === 0 && (
+                <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-blue-100 flex flex-col items-center gap-4">
+                  <span className="text-4xl">🔍</span>
+                  <div>
+                    <h4 className="font-extrabold text-blue-950 text-base">
+                      {language === 'de' ? 'Keine Ergebnisse gefunden' : 'No results found'}
+                    </h4>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {language === 'de' 
+                        ? 'Versuchen Sie es mit einem anderen Begriff oder filtern Sie nach einer anderen Kategorie.'
+                        : 'Try another search term or filter by a different category.'}
+                    </p>
                   </div>
+                  <button
+                    id="reset-filter-btn"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
+                    className="bg-blue-50 text-blue-700 font-black text-xs px-4 py-2 rounded-xl border border-blue-150 cursor-pointer"
+                  >
+                    {language === 'de' ? 'Filter zurücksetzen' : 'Reset Filters'}
+                  </button>
                 </div>
-              </motion.div>
-            ))}
+              )}
+            </motion.div>
           </AnimatePresence>
-
-          {filteredServices.length === 0 && (
-            <div className="col-span-full bg-white p-12 text-center rounded-2xl border border-blue-100 flex flex-col items-center gap-4">
-              <span className="text-4xl">🔍</span>
-              <div>
-                <h4 className="font-extrabold text-blue-950 text-base">
-                  {language === 'de' ? 'Keine Ergebnisse gefunden' : 'No results found'}
-                </h4>
-                <p className="text-xs text-gray-500 mt-1">
-                  {language === 'de' 
-                    ? 'Versuchen Sie es mit einem anderen Begriff oder filtern Sie nach einer anderen Kategorie.'
-                    : 'Try another search term or filter by a different category.'}
-                </p>
-              </div>
-              <button
-                id="reset-filter-btn"
-                onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                className="bg-blue-50 text-blue-700 font-black text-xs px-4 py-2 rounded-xl border border-blue-150 cursor-pointer"
-              >
-                {language === 'de' ? 'Filter zurücksetzen' : 'Reset Filters'}
-              </button>
-            </div>
-          )}
         </div>
 
       </section>

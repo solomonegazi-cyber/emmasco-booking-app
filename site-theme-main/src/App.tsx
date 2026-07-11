@@ -28,6 +28,23 @@ import { Service, Booking, BlogArticle, UserDocument, ChatMessage } from './type
 
 export default function App() {
   const { language } = useLanguage();
+
+  // Authentication State with local session persistence
+  const [isClientLoggedIn, setIsClientLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('isClientLoggedIn') === 'true';
+  });
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('isAdminLoggedIn') === 'true';
+  });
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone: string; address: string } | null>(() => {
+    const saved = localStorage.getItem('currentUser');
+    try {
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
   const [customerAuthMode, setCustomerAuthMode] = useState<'login' | 'register' | 'verify' | 'forgot' | 'reset'>(() => {
     const path = window.location.pathname;
     if (path === '/register') return 'register';
@@ -49,18 +66,28 @@ export default function App() {
     return 'login';
   });
 
+  const [customerActiveTab, setCustomerActiveTab] = useState<'bookings' | 'documents' | 'profile' | 'support'>(() => {
+    const path = window.location.pathname;
+    if (path === '/my-bookings' || path === '/bookings') return 'bookings';
+    if (path === '/my-documents') return 'documents';
+    if (path === '/account-settings' || path === '/profile') return 'profile';
+    return 'bookings';
+  });
+
   const [currentPage, _setCurrentPage] = useState<string>(() => {
     const path = window.location.pathname;
     if (path === '/imprint') return 'imprint';
     if (path === '/admin') return 'admin-dashboard';
     if (path === '/documents') return 'documents';
-    if (['/customer-dashboard', '/portal', '/login', '/register', '/forgot-password', '/verify', '/reset-password'].includes(path)) {
+    if (['/customer-dashboard', '/portal', '/bookings', '/my-bookings', '/my-documents', '/account-settings', '/profile', '/login', '/register', '/forgot-password', '/verify', '/reset-password'].includes(path)) {
       return 'customer-dashboard';
     }
     return 'home';
   });
 
+  // Safe navigation handler which synchronizes the URL pathname
   const setCurrentPage = (page: string) => {
+    const loggedIn = localStorage.getItem('isClientLoggedIn') === 'true';
     if (page === 'imprint') {
       window.history.pushState({}, '', '/imprint');
     } else if (page === 'admin-dashboard') {
@@ -68,88 +95,156 @@ export default function App() {
     } else if (page === 'documents') {
       window.history.pushState({}, '', '/documents');
     } else if (page === 'customer-dashboard') {
-      const targetPath = customerAuthMode === 'forgot' ? '/forgot-password' : customerAuthMode === 'reset' ? '/reset-password' : `/${customerAuthMode}`;
-      window.history.pushState({}, '', targetPath);
+      if (loggedIn) {
+        let targetPath = '/portal';
+        if (customerActiveTab === 'bookings') targetPath = '/my-bookings';
+        else if (customerActiveTab === 'documents') targetPath = '/my-documents';
+        else if (customerActiveTab === 'profile') targetPath = '/account-settings';
+        window.history.pushState({}, '', targetPath);
+      } else {
+        const targetPath = customerAuthMode === 'forgot' ? '/forgot-password' : customerAuthMode === 'reset' ? '/reset-password' : `/${customerAuthMode}`;
+        window.history.pushState({}, '', targetPath);
+      }
     } else {
       window.history.pushState({}, '', '/');
     }
     _setCurrentPage(page);
   };
 
+  // Safe customer active tab change handler which synchronizes URL pathname immediately
+  const handleCustomerTabChange = (tab: 'bookings' | 'documents' | 'profile' | 'support') => {
+    setCustomerActiveTab(tab);
+    const loggedIn = localStorage.getItem('isClientLoggedIn') === 'true';
+    if (loggedIn) {
+      let targetPath = '/portal';
+      if (tab === 'bookings') targetPath = '/my-bookings';
+      else if (tab === 'documents') targetPath = '/my-documents';
+      else if (tab === 'profile') targetPath = '/account-settings';
+      window.history.pushState({}, '', targetPath);
+    }
+  };
+
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [customerActiveTab, setCustomerActiveTab] = useState<'bookings' | 'documents' | 'profile' | 'support'>('bookings');
 
   // Fetch bookings, listen to route routing
   React.useEffect(() => {
-    // Path route listener for Admin and Imprint bypass
+    // Path route listener for reactive routing and auth guards
     const checkPath = () => {
       try {
         const path = window.location.pathname;
         console.log('[NAVIGATION] checkPath called. Pathname:', path, 'Search:', window.location.search);
         
+        const loggedIn = localStorage.getItem('isClientLoggedIn') === 'true';
+
+        // 1. Admin dashboard
         if (path === '/admin') {
           console.log('[NAVIGATION] Route matched: admin-dashboard');
           _setCurrentPage('admin-dashboard');
           window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (path === '/imprint') {
+          return;
+        } 
+        
+        // 2. Imprint
+        if (path === '/imprint') {
           console.log('[NAVIGATION] Route matched: imprint');
           _setCurrentPage('imprint');
           window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (path === '/documents') {
-          console.log('[NAVIGATION] Route matched: documents');
-          _setCurrentPage('documents');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (['/customer-dashboard', '/portal', '/login', '/register', '/forgot-password', '/verify', '/reset-password'].includes(path)) {
-          console.log('[NAVIGATION] Route matched customer portal path:', path);
-          if (path === '/register') {
-            console.log('[STATE UPDATE] setting customerAuthMode to: register');
-            setCustomerAuthMode('register');
-          } else if (path === '/forgot-password') {
-            console.log('[STATE UPDATE] setting customerAuthMode to: forgot');
-            setCustomerAuthMode('forgot');
-          } else if (path === '/verify') {
-            const params = new URLSearchParams(window.location.search);
-            const emailParam = params.get('email');
-            const historyEmail = window.history.state && (window.history.state as any).email;
-            const storedEmail = localStorage.getItem("pendingVerificationEmail");
-            console.log('[NAVIGATION] Verification route parameters:', { emailParam, historyEmail, storedEmail });
-            
-            if (!emailParam && !historyEmail && !storedEmail) {
-              console.warn('[NAVIGATION] No email context found for /verify. Redirecting to /register');
-              window.history.replaceState({}, '', '/register');
-              console.log('[STATE UPDATE] setting customerAuthMode to: register (fallback)');
-              setCustomerAuthMode('register');
-            } else {
-              console.log('[STATE UPDATE] setting customerAuthMode to: verify');
-              setCustomerAuthMode('verify');
-            }
-          }
-          else if (path === '/reset-password') {
-            console.log('[STATE UPDATE] setting customerAuthMode to: reset');
-            setCustomerAuthMode('reset');
-          } else {
-            console.log('[STATE UPDATE] setting customerAuthMode to: login');
-            setCustomerAuthMode('login');
-          }
-
-          console.log('[STATE UPDATE] setting currentPage to: customer-dashboard');
-          _setCurrentPage('customer-dashboard');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          console.log('[NAVIGATION] Path did not match dashboard routes, setting currentPage to: home');
-          _setCurrentPage('home');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
         }
-      } catch (err) {
-        console.error('[Routing] Navigation error, retrying automatically...', err);
-        setTimeout(() => {
-          try {
+
+        // 3. Document Workspace (Secure Document Portal)
+        if (path === '/documents') {
+          console.log('[NAVIGATION] Route matched: documents');
+          if (!loggedIn) {
+            console.log('[NAVIGATION] Unauthenticated user trying to access /documents. Redirecting to /login');
+            window.history.replaceState({}, '', '/login');
+            setCustomerAuthMode('login');
             _setCurrentPage('customer-dashboard');
-            setCustomerAuthMode('verify');
-          } catch (retryErr) {
-            console.error('[Routing] Critical routing recovery failed:', retryErr);
+          } else {
+            _setCurrentPage('documents');
           }
-        }, 150);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        // 4. Protected client portal tabs/pages
+        const isClientPortalPath = ['/customer-dashboard', '/portal', '/bookings', '/my-bookings', '/my-documents', '/account-settings', '/profile'].includes(path);
+        if (isClientPortalPath) {
+          if (!loggedIn) {
+            console.log('[NAVIGATION] Unauthenticated user trying to access protected client portal route. Redirecting to /login');
+            window.history.replaceState({}, '', '/login');
+            setCustomerAuthMode('login');
+            _setCurrentPage('customer-dashboard');
+          } else {
+            if (path === '/bookings' || path === '/my-bookings') {
+              setCustomerActiveTab('bookings');
+            } else if (path === '/my-documents') {
+              setCustomerActiveTab('documents');
+            } else if (path === '/account-settings' || path === '/profile') {
+              setCustomerActiveTab('profile');
+            }
+            _setCurrentPage('customer-dashboard');
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        // 5. Auth / Guest routes
+        const isAuthPath = ['/login', '/register', '/forgot-password', '/verify', '/reset-password'].includes(path);
+        if (isAuthPath) {
+          if (loggedIn) {
+            console.log('[NAVIGATION] Authenticated user trying to access auth path. Redirecting to /portal');
+            window.history.replaceState({}, '', '/portal');
+            _setCurrentPage('customer-dashboard');
+          } else {
+            if (path === '/register') {
+              setCustomerAuthMode('register');
+            } else if (path === '/forgot-password') {
+              setCustomerAuthMode('forgot');
+            } else if (path === '/verify') {
+              const params = new URLSearchParams(window.location.search);
+              const emailParam = params.get('email');
+              const historyEmail = window.history.state && (window.history.state as any).email;
+              const storedEmail = localStorage.getItem("pendingVerificationEmail");
+              
+              if (!emailParam && !historyEmail && !storedEmail) {
+                window.history.replaceState({}, '', '/register');
+                setCustomerAuthMode('register');
+              } else {
+                setCustomerAuthMode('verify');
+              }
+            } else if (path === '/reset-password') {
+              setCustomerAuthMode('reset');
+            } else {
+              setCustomerAuthMode('login');
+            }
+            _setCurrentPage('customer-dashboard');
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
+
+        // 6. Public static routes
+        if (path === '/about') {
+          _setCurrentPage('about');
+        } else if (path === '/services') {
+          _setCurrentPage('services');
+        } else if (path === '/booking') {
+          _setCurrentPage('booking');
+        } else if (path === '/blog') {
+          _setCurrentPage('blog');
+        } else if (path === '/contact') {
+          _setCurrentPage('contact');
+        } else if (path === '/' || path === '/home') {
+          _setCurrentPage('home');
+        } else {
+          console.log('[NAVIGATION] Path did not match any routing rule, defaulting to home. Path:', path);
+          _setCurrentPage('home');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        console.error('[Routing] Navigation error:', err);
+        _setCurrentPage('home');
       }
     };
 
@@ -249,17 +344,7 @@ export default function App() {
     };
   }, []);
 
-  // Authentication State
-  const [isClientLoggedIn, setIsClientLoggedIn] = useState(false);
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone: string; address: string } | null>(null);
-
-  // Redirect unauthenticated users back to login if they try to access documents (Secure Workspace)
-  React.useEffect(() => {
-    if (currentPage === 'documents' && !isClientLoggedIn) {
-      setCurrentPage('customer-dashboard');
-    }
-  }, [currentPage, isClientLoggedIn]);
+  // Redirect unauthenticated users is now fully handled inside checkPath. Our main state declarations have been moved to the top of the component.
 
   // General App State (React memory persistence syncing across components)
   const [bookings, setBookings] = useState<Booking[]>(INITIAL_BOOKINGS as Booking[]);
@@ -329,15 +414,23 @@ export default function App() {
     const finalPhone = email.includes('schmidt') ? '0176 94857391' : '0152 1234567';
     const finalAddr = email.includes('schmidt') ? 'Kollwitzstraße 14, 10435 Berlin' : 'Prenzlauer Allee, Berlin';
     
-    setCurrentUser({
+    const userObj = {
       name,
       email,
       phone: finalPhone,
       address: finalAddr
-    });
+    };
 
-    // Navigate immediately to the Secure Workspace (Document Portal) after login
-    setCurrentPage('documents');
+    setCurrentUser(userObj);
+
+    localStorage.setItem('isClientLoggedIn', 'true');
+    localStorage.setItem('isAdminLoggedIn', 'false');
+    localStorage.setItem('currentUser', JSON.stringify(userObj));
+
+    // Redirect immediately to Client Portal Dashboard (My Bookings / Mein Haushaltsplan)
+    setCustomerActiveTab('bookings');
+    _setCurrentPage('customer-dashboard');
+    window.history.pushState({}, '', '/my-bookings');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -345,14 +438,20 @@ export default function App() {
   const handleAdminLogin = () => {
     setIsAdminLoggedIn(true);
     setIsClientLoggedIn(false);
-    setCurrentUser({
+    const adminObj = {
       name: 'Administrator Operator',
       email: 'admin@emmascoreinigungsteam.de',
       phone: '017621856044',
       address: 'Schönhauser Allee 163, Berlin'
-    });
+    };
+    setCurrentUser(adminObj);
 
-    setCurrentPage('admin-dashboard');
+    localStorage.setItem('isClientLoggedIn', 'false');
+    localStorage.setItem('isAdminLoggedIn', 'true');
+    localStorage.setItem('currentUser', JSON.stringify(adminObj));
+
+    _setCurrentPage('admin-dashboard');
+    window.history.pushState({}, '', '/admin');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -361,7 +460,11 @@ export default function App() {
     setIsClientLoggedIn(false);
     setIsAdminLoggedIn(false);
     setCurrentUser(null);
-    setCurrentPage('home');
+    localStorage.removeItem('isClientLoggedIn');
+    localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('currentUser');
+    _setCurrentPage('home');
+    window.history.pushState({}, '', '/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -456,7 +559,7 @@ export default function App() {
         currentPage={currentPage}
         setCurrentPage={setCurrentPage}
         customerActiveTab={customerActiveTab}
-        setCustomerActiveTab={setCustomerActiveTab}
+        setCustomerActiveTab={handleCustomerTabChange}
         onOpenBooking={() => {
           setSelectedServiceId(null);
           setCurrentPage('booking');
@@ -531,7 +634,7 @@ export default function App() {
                     onUpdateProfile={handleUpdateProfile}
                     currentUser={currentUser}
                     activeTab={customerActiveTab}
-                    onTabChange={setCustomerActiveTab}
+                    onTabChange={handleCustomerTabChange}
                     initialAuthMode={customerAuthMode}
                     onAuthModeChange={(mode) => {
                       setCustomerAuthMode(mode);
@@ -578,12 +681,16 @@ export default function App() {
                     onLoginRequest={(email, name) => {
                       setIsClientLoggedIn(true);
                       const isSolomon = email.toLowerCase() === 'solomonegazi@gmail.com';
-                      setCurrentUser({
+                      const userObj = {
                         name,
                         email,
                         phone: isSolomon ? '0176 12345678' : '0176 87654321',
                         address: isSolomon ? 'Hauptstraße 15, Berlin' : 'Zweite Allee 4, Berlin'
-                  });
+                      };
+                      setCurrentUser(userObj);
+                      localStorage.setItem('isClientLoggedIn', 'true');
+                      localStorage.setItem('isAdminLoggedIn', 'false');
+                      localStorage.setItem('currentUser', JSON.stringify(userObj));
                     }}
                     onLogoutRequest={handleLogout}
                   />
@@ -603,7 +710,7 @@ export default function App() {
                     onUpdateProfile={handleUpdateProfile}
                     currentUser={currentUser}
                     activeTab={customerActiveTab}
-                    onTabChange={setCustomerActiveTab}
+                    onTabChange={handleCustomerTabChange}
                     initialAuthMode={customerAuthMode}
                     onAuthModeChange={(mode) => {
                       setCustomerAuthMode(mode);
