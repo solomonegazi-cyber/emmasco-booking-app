@@ -12,6 +12,7 @@ import Services from './components/Services';
 import BookingForm from './components/Booking';
 import CustomerDashboard from './components/CustomerDashboard';
 import AdminDashboard from './components/AdminDashboard';
+import StaffDashboard from './components/StaffDashboard';
 import Blog from './components/Blog';
 import Contact from './components/Contact';
 import WhatsAppFloating from './components/WhatsAppFloating';
@@ -35,6 +36,9 @@ export default function App() {
   });
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState<boolean>(() => {
     return localStorage.getItem('isAdminLoggedIn') === 'true';
+  });
+  const [isStaffLoggedIn, setIsStaffLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('isStaffLoggedIn') === 'true';
   });
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string; phone: string; address: string } | null>(() => {
     const saved = localStorage.getItem('currentUser');
@@ -78,6 +82,7 @@ export default function App() {
     const path = window.location.pathname;
     if (path === '/imprint') return 'imprint';
     if (path === '/admin') return 'admin-dashboard';
+    if (path === '/staff') return 'staff-dashboard';
     if (path === '/documents') return 'documents';
     if (['/customer-dashboard', '/portal', '/bookings', '/my-bookings', '/my-documents', '/account-settings', '/profile', '/login', '/register', '/forgot-password', '/verify', '/reset-password'].includes(path)) {
       return 'customer-dashboard';
@@ -88,10 +93,14 @@ export default function App() {
   // Safe navigation handler which synchronizes the URL pathname
   const setCurrentPage = (page: string) => {
     const loggedIn = localStorage.getItem('isClientLoggedIn') === 'true';
+    const staffLoggedIn = localStorage.getItem('isStaffLoggedIn') === 'true';
+
     if (page === 'imprint') {
       window.history.pushState({}, '', '/imprint');
     } else if (page === 'admin-dashboard') {
       window.history.pushState({}, '', '/admin');
+    } else if (page === 'staff-dashboard') {
+      window.history.pushState({}, '', '/staff');
     } else if (page === 'documents') {
       window.history.pushState({}, '', '/documents');
     } else if (page === 'customer-dashboard') {
@@ -101,6 +110,10 @@ export default function App() {
         else if (customerActiveTab === 'documents') targetPath = '/my-documents';
         else if (customerActiveTab === 'profile') targetPath = '/account-settings';
         window.history.pushState({}, '', targetPath);
+      } else if (staffLoggedIn) {
+        window.history.pushState({}, '', '/staff');
+        _setCurrentPage('staff-dashboard');
+        return;
       } else {
         const targetPath = customerAuthMode === 'forgot' ? '/forgot-password' : customerAuthMode === 'reset' ? '/reset-password' : `/${customerAuthMode}`;
         window.history.pushState({}, '', targetPath);
@@ -135,14 +148,36 @@ export default function App() {
         console.log('[NAVIGATION] checkPath called. Pathname:', path, 'Search:', window.location.search);
         
         const loggedIn = localStorage.getItem('isClientLoggedIn') === 'true';
+        const staffLoggedIn = localStorage.getItem('isStaffLoggedIn') === 'true';
+        const adminLoggedIn = localStorage.getItem('isAdminLoggedIn') === 'true';
 
         // 1. Admin dashboard
         if (path === '/admin') {
           console.log('[NAVIGATION] Route matched: admin-dashboard');
-          _setCurrentPage('admin-dashboard');
+          if (!adminLoggedIn) {
+            window.history.replaceState({}, '', '/login');
+            setCustomerAuthMode('login');
+            _setCurrentPage('customer-dashboard');
+          } else {
+            _setCurrentPage('admin-dashboard');
+          }
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
-        } 
+        }
+
+        // 1b. Staff dashboard
+        if (path === '/staff') {
+          console.log('[NAVIGATION] Route matched: staff-dashboard');
+          if (!staffLoggedIn) {
+            window.history.replaceState({}, '', '/login');
+            setCustomerAuthMode('login');
+            _setCurrentPage('customer-dashboard');
+          } else {
+            _setCurrentPage('staff-dashboard');
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          return;
+        }
         
         // 2. Imprint
         if (path === '/imprint') {
@@ -196,6 +231,14 @@ export default function App() {
             console.log('[NAVIGATION] Authenticated user trying to access auth path. Redirecting to /portal');
             window.history.replaceState({}, '', '/portal');
             _setCurrentPage('customer-dashboard');
+          } else if (staffLoggedIn) {
+            console.log('[NAVIGATION] Authenticated staff. Redirecting to /staff');
+            window.history.replaceState({}, '', '/staff');
+            _setCurrentPage('staff-dashboard');
+          } else if (adminLoggedIn) {
+            console.log('[NAVIGATION] Authenticated admin. Redirecting to /admin');
+            window.history.replaceState({}, '', '/admin');
+            _setCurrentPage('admin-dashboard');
           } else {
             if (path === '/register') {
               setCustomerAuthMode('register');
@@ -405,12 +448,11 @@ export default function App() {
     }
   ]);
 
-  // Handle Client logins
-  const handleClientLogin = (email: string, name: string) => {
-    setIsClientLoggedIn(true);
-    setIsAdminLoggedIn(false);
-    
-    // Default phone/address if it is our test card user
+  // Handle Client logins with role detection & redirection
+  const handleClientLogin = (email: string, name: string, role?: string) => {
+    // If no role is passed, let's detect it or default to customer
+    const detectedRole = role || (email.toLowerCase().includes('admin') ? 'admin' : email.toLowerCase().includes('cleaner') || email.toLowerCase().includes('staff') ? 'staff' : 'customer');
+
     const finalPhone = email.includes('schmidt') ? '0176 94857391' : '0152 1234567';
     const finalAddr = email.includes('schmidt') ? 'Kollwitzstraße 14, 10435 Berlin' : 'Prenzlauer Allee, Berlin';
     
@@ -418,50 +460,62 @@ export default function App() {
       name,
       email,
       phone: finalPhone,
-      address: finalAddr
+      address: finalAddr,
+      role: detectedRole
     };
 
     setCurrentUser(userObj);
-
-    localStorage.setItem('isClientLoggedIn', 'true');
-    localStorage.setItem('isAdminLoggedIn', 'false');
     localStorage.setItem('currentUser', JSON.stringify(userObj));
 
-    // Redirect immediately to Client Portal Dashboard (My Bookings / Mein Haushaltsplan)
-    setCustomerActiveTab('bookings');
-    _setCurrentPage('customer-dashboard');
-    window.history.pushState({}, '', '/my-bookings');
+    if (detectedRole === 'admin') {
+      setIsAdminLoggedIn(true);
+      setIsClientLoggedIn(false);
+      setIsStaffLoggedIn(false);
+      localStorage.setItem('isAdminLoggedIn', 'true');
+      localStorage.setItem('isClientLoggedIn', 'false');
+      localStorage.setItem('isStaffLoggedIn', 'false');
+      
+      _setCurrentPage('admin-dashboard');
+      window.history.pushState({}, '', '/admin');
+    } else if (detectedRole === 'staff') {
+      setIsAdminLoggedIn(false);
+      setIsClientLoggedIn(false);
+      setIsStaffLoggedIn(true);
+      localStorage.setItem('isAdminLoggedIn', 'false');
+      localStorage.setItem('isClientLoggedIn', 'false');
+      localStorage.setItem('isStaffLoggedIn', 'true');
+      
+      _setCurrentPage('staff-dashboard');
+      window.history.pushState({}, '', '/staff');
+    } else {
+      setIsAdminLoggedIn(false);
+      setIsClientLoggedIn(true);
+      setIsStaffLoggedIn(false);
+      localStorage.setItem('isAdminLoggedIn', 'false');
+      localStorage.setItem('isClientLoggedIn', 'true');
+      localStorage.setItem('isStaffLoggedIn', 'false');
+      
+      setCustomerActiveTab('bookings');
+      _setCurrentPage('customer-dashboard');
+      window.history.pushState({}, '', '/my-bookings');
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handle Admin Logins
+  // Handle Admin Logins (e.g. from static demo bypass buttons)
   const handleAdminLogin = () => {
-    setIsAdminLoggedIn(true);
-    setIsClientLoggedIn(false);
-    const adminObj = {
-      name: 'Administrator Operator',
-      email: 'admin@emmascoreinigungsteam.de',
-      phone: '017621856044',
-      address: 'Schönhauser Allee 163, Berlin'
-    };
-    setCurrentUser(adminObj);
-
-    localStorage.setItem('isClientLoggedIn', 'false');
-    localStorage.setItem('isAdminLoggedIn', 'true');
-    localStorage.setItem('currentUser', JSON.stringify(adminObj));
-
-    _setCurrentPage('admin-dashboard');
-    window.history.pushState({}, '', '/admin');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleClientLogin('admin@emmascoreinigungsteam.de', 'Administrator Operator', 'admin');
   };
 
   // Handle general logs out
   const handleLogout = () => {
     setIsClientLoggedIn(false);
     setIsAdminLoggedIn(false);
+    setIsStaffLoggedIn(false);
     setCurrentUser(null);
     localStorage.removeItem('isClientLoggedIn');
     localStorage.removeItem('isAdminLoggedIn');
+    localStorage.removeItem('isStaffLoggedIn');
     localStorage.removeItem('currentUser');
     _setCurrentPage('home');
     window.history.pushState({}, '', '/');
@@ -565,8 +619,9 @@ export default function App() {
           setCurrentPage('booking');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
-        isLoggedIn={isClientLoggedIn || isAdminLoggedIn}
+        isLoggedIn={isClientLoggedIn || isAdminLoggedIn || isStaffLoggedIn}
         isAdmin={isAdminLoggedIn}
+        isStaff={isStaffLoggedIn}
         onLogout={handleLogout}
         userEmail={currentUser?.email}
       />
@@ -664,6 +719,14 @@ export default function App() {
                     onAddArticle={handleAddArticle}
                     onUpdateBookingStatus={handleUpdateBookingStatus}
                     onDeleteBooking={handleDeleteBooking}
+                  />
+                )}
+
+                {currentPage === 'staff-dashboard' && (
+                  <StaffDashboard
+                    userEmail={currentUser?.email || 'cleaner@emmascoreinigungsteam.de'}
+                    userName={currentUser?.name || 'Mitarbeiter'}
+                    onLogout={handleLogout}
                   />
                 )}
 

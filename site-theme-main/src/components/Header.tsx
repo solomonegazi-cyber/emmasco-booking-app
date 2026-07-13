@@ -18,6 +18,7 @@ interface HeaderProps {
   onOpenBooking: () => void;
   isLoggedIn: boolean;
   isAdmin: boolean;
+  isStaff?: boolean;
   onLogout: () => void;
   userEmail?: string;
 }
@@ -30,6 +31,7 @@ export default function Header({
   onOpenBooking,
   isLoggedIn,
   isAdmin,
+  isStaff = false,
   onLogout,
   userEmail
 }: HeaderProps) {
@@ -86,6 +88,18 @@ export default function Header({
     if (!isLoggedIn) {
       // If user is not authenticated: redirect to login page (customer-dashboard)
       setCurrentPage('customer-dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (isStaff) {
+      setCurrentPage('staff-dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (isAdmin) {
+      setCurrentPage('admin-dashboard');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -226,6 +240,17 @@ export default function Header({
               </button>
             )}
 
+            {isStaff && (
+              <button
+                id="staff-dashboard-btn"
+                onClick={() => handleNavClick('staff-dashboard')}
+                className="px-3 py-1.5 rounded-lg border border-amber-200 dark:border-slate-700 text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-slate-800 hover:bg-amber-100 dark:hover:bg-slate-700 flex items-center gap-1.5 cursor-pointer mr-2 shadow-sm animate-pulse"
+              >
+                <User className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                {language === 'de' ? 'Mitarbeiter-Portal' : 'Staff Portal'}
+              </button>
+            )}
+
             {/* Client Login Dropdown */}
             <div className="relative">
               <button
@@ -238,7 +263,17 @@ export default function Header({
                 }`}
               >
                 <User className="w-4 h-4 shrink-0 text-blue-500" />
-                <span>{isLoggedIn ? (userEmail ? `${userEmail.split('@')[0]}` : t('nav.login_client')) : t('nav.login_client')}</span>
+                <span>
+                  {isLoggedIn 
+                    ? isStaff 
+                      ? (language === 'de' ? 'Mitarbeiter' : 'Staff')
+                      : isAdmin 
+                        ? 'Admin'
+                        : userEmail 
+                          ? `${userEmail.split('@')[0]}` 
+                          : t('nav.login_client') 
+                    : t('nav.login_client')}
+                </span>
                 <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180 text-blue-500' : ''}`} />
               </button>
 
@@ -250,70 +285,98 @@ export default function Header({
                   />
                   <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-blue-50/60 dark:border-slate-800 rounded-2xl shadow-xl py-3 z-25">
                     <div className="px-4 pb-2 mb-2 border-b border-gray-100 dark:border-slate-800/60 text-[10px] font-black text-gray-400 dark:text-slate-500 uppercase tracking-widest text-left">
-                      {isLoggedIn ? (userEmail || 'Client Account') : t('nav.login_client')}
+                      {isLoggedIn ? (isStaff ? 'Staff Account' : isAdmin ? 'Admin Account' : (userEmail || 'Client Account')) : t('nav.login_client')}
                     </div>
                     
-                    <button
-                      onClick={() => handleDropdownItemClick('portal')}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
-                        currentPage === 'customer-dashboard' && customerActiveTab === 'bookings'
-                          ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
-                          : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
-                      }`}
-                    >
-                      <LayoutDashboard className="w-4 h-4 shrink-0 text-blue-500" />
-                      <span>{language === 'de' ? 'Kundenportal' : 'Customer Portal'}</span>
-                    </button>
-
-                    {isLoggedIn && (
+                    {isStaff ? (
                       <button
-                        onClick={() => handleDropdownItemClick('workspace')}
+                        onClick={() => handleDropdownItemClick('portal')}
                         className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
-                          currentPage === 'documents'
-                            ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
-                            : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                          currentPage === 'staff-dashboard'
+                            ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50'
                         }`}
                       >
-                        <FolderOpen className="w-4 h-4 shrink-0 text-blue-500 animate-pulse" />
-                        <span>{language === 'de' ? 'Workspace (Dokumentencenter)' : 'Workspace (Document Portal)'}</span>
+                        <LayoutDashboard className="w-4 h-4 shrink-0 text-amber-500" />
+                        <span>{language === 'de' ? 'Mitarbeiter-Portal' : 'Staff Portal'}</span>
                       </button>
+                    ) : isAdmin ? (
+                      <button
+                        onClick={() => handleDropdownItemClick('portal')}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                          currentPage === 'admin-dashboard'
+                            ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <LayoutDashboard className="w-4 h-4 shrink-0 text-blue-500" />
+                        <span>{language === 'de' ? 'Admin-Portal' : 'Admin Portal'}</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleDropdownItemClick('portal')}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                            currentPage === 'customer-dashboard' && customerActiveTab === 'bookings'
+                              ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
+                              : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                          }`}
+                        >
+                          <LayoutDashboard className="w-4 h-4 shrink-0 text-blue-500" />
+                          <span>{language === 'de' ? 'Kundenportal' : 'Customer Portal'}</span>
+                        </button>
+
+                        {isLoggedIn && (
+                          <button
+                            onClick={() => handleDropdownItemClick('workspace')}
+                            className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                              currentPage === 'documents'
+                                ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
+                                : 'text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                            }`}
+                          >
+                            <FolderOpen className="w-4 h-4 shrink-0 text-blue-500 animate-pulse" />
+                            <span>{language === 'de' ? 'Workspace (Dokumentencenter)' : 'Workspace (Document Portal)'}</span>
+                          </button>
+                        )}
+
+                        <button
+                          onClick={() => handleDropdownItemClick('bookings')}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                            currentPage === 'customer-dashboard' && customerActiveTab === 'bookings'
+                              ? 'text-blue-600 bg-blue-50/45 dark:text-blue-400'
+                              : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/45 hover:text-blue-600 dark:hover:text-blue-400'
+                          }`}
+                        >
+                          <Calendar className="w-4 h-4 shrink-0 text-gray-400" />
+                          <span>{language === 'de' ? 'Meine Buchungen' : 'My Bookings'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDropdownItemClick('documents')}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                            currentPage === 'customer-dashboard' && customerActiveTab === 'documents'
+                              ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
+                              : 'text-gray-605 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                          }`}
+                        >
+                          <FileText className="w-4 h-4 shrink-0 text-gray-400" />
+                          <span>{language === 'de' ? 'Meine Dokumente' : 'My Documents'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDropdownItemClick('profile')}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
+                            currentPage === 'customer-dashboard' && customerActiveTab === 'profile'
+                              ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60'
+                              : 'text-gray-605 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
+                          }`}
+                        >
+                          <Settings className="w-4 h-4 shrink-0 text-gray-400" />
+                          <span>{language === 'de' ? 'Kontoeinstellungen' : 'Account Settings'}</span>
+                        </button>
+                      </>
                     )}
-
-                    <button
-                      onClick={() => handleDropdownItemClick('bookings')}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
-                        currentPage === 'customer-dashboard' && customerActiveTab === 'bookings'
-                          ? 'text-blue-600 bg-blue-50/45 dark:text-blue-400'
-                          : 'text-gray-600 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/45 hover:text-blue-600 dark:hover:text-blue-400'
-                      }`}
-                    >
-                      <Calendar className="w-4 h-4 shrink-0 text-gray-400" />
-                      <span>{language === 'de' ? 'Meine Buchungen' : 'My Bookings'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDropdownItemClick('documents')}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
-                        currentPage === 'customer-dashboard' && customerActiveTab === 'documents'
-                          ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60 font-bold'
-                          : 'text-gray-605 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
-                      }`}
-                    >
-                      <FileText className="w-4 h-4 shrink-0 text-gray-400" />
-                      <span>{language === 'de' ? 'Meine Dokumente' : 'My Documents'}</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleDropdownItemClick('profile')}
-                      className={`w-full text-left px-4 py-2.5 text-xs font-semibold flex items-center gap-2.5 transition-colors cursor-pointer ${
-                        currentPage === 'customer-dashboard' && customerActiveTab === 'profile'
-                          ? 'text-blue-600 bg-blue-50/40 dark:text-blue-400 dark:bg-slate-800/60'
-                          : 'text-gray-605 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800/40 hover:text-blue-600 dark:hover:text-blue-400'
-                      }`}
-                    >
-                      <Settings className="w-4 h-4 shrink-0 text-gray-400" />
-                      <span>{language === 'de' ? 'Kontoeinstellungen' : 'Account Settings'}</span>
-                    </button>
 
                     {isLoggedIn && (
                       <div className="mt-2 pt-2 border-t border-gray-100 dark:border-slate-800/60">

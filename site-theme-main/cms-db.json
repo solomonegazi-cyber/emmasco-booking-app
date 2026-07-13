@@ -1,0 +1,49 @@
+{
+  "hero": {
+    "title": "Seniorenbetreuung & Haushalshilfe aus Leidenschaft",
+    "subtitle": "ERT Emmasco Reinigungsteam - Ihr verlässlicher SGB XI Vertragspartner für Pflegekassen-Abrechnungen in Berlin & Brandenburg. Liebevolle Pflege im Alltag.",
+    "ctaText": "Jetzt kostenfreie Beratung anfordern",
+    "ctaUrl": "/booking",
+    "heroImage": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80&w=1200"
+  },
+  "contact": {
+    "phone": "0176 21856044",
+    "email": "info@emmascoreinigungsteam.de",
+    "address": "Schönhauser Allee 163, 10435 Berlin",
+    "emergencyPhone": "0176 21856044",
+    "openingHours": "Mo - Fr: 08:00 - 18:00 Uhr, Sa: 09:00 - 14:00 Uhr",
+    "gmapsIframe": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2426.9691761664183!2d13.411624577237936!3d52.5340156358327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47a84e0307ee0da3%3A0xe50bc59a37a91bf2!2sSch%C3%B6nhauser%20Allee%20163%2C%2010435%20Berlin!5e0!3m2!1sde!2sde!4v1710111111111!5m2!1sde!2sde",
+    "socials": {
+      "facebook": "https://facebook.com/emmasco",
+      "instagram": "https://instagram.com/emmasco",
+      "linkedin": "https://linkedin.com/company/emmasco"
+    }
+  },
+  "seo": {
+    "metaTitle": "Emmasco Reinigungsteam & Haushaltshilfe Berlin | SGB XI Partner",
+    "metaDescription": "Seniorenbetreuung, Unterhaltsreinigung, Alltagsbegleitung & Entlastungsleistungen direkt über die Pflegekasse abrechnen. Zugelassen & zertifiziert.",
+    "keywords": "Reinigung Berlin, Haushaltshilfe Pflegekasse, Seniorenbetreuung §45a, Alltagsbegleitung"
+  },
+  "pricing": {
+    "taxRate": 19,
+    "discounts": {
+      "recurring_weekly": 10,
+      "recurring_fortnightly": 5,
+      "first_time": 15
+    },
+    "packages": [
+      {
+        "id": "basic",
+        "name": "Basis Entlastung",
+        "price": "125,00 € / Monat",
+        "features": ["4 Stunden/Monat Haushaltshilfe", "Abrechnung über Entlastungsbetrag", "Zertifizierter Betreuer", "Wäschepflege inklusive"]
+      },
+      {
+        "id": "premium",
+        "name": "Senioren-Komfort Paket",
+        "price": "299,00 € / Monat",
+        "features": ["10 Stunden/Monat Begleitung & Pflege", "Bevorzugte Terminbuchung", "Komplette Kassen-Abrechnungshilfe", "Hausarzt-Begleitung"]
+      }
+    ]
+  }
+}

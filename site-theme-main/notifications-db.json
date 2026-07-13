@@ -1,0 +1,32 @@
+[
+  {
+    "id": "notif-1",
+    "userEmail": "solomonegazi@gmail.com",
+    "title": "Neue Buchungsanfrage",
+    "titleEn": "New Booking Request",
+    "message": "Eine neue Buchung für Unterhaltsreinigung wurde von Waltraud Schmidt eingereicht.",
+    "messageEn": "A new booking for Maintenance Cleaning has been submitted by Waltraud Schmidt.",
+    "read": false,
+    "createdAt": "2026-07-11T10:00:00.000Z"
+  },
+  {
+    "id": "notif-2",
+    "userEmail": "friend@emmasco.de",
+    "title": "Neuer Auftrag zugewiesen",
+    "titleEn": "New Job Assigned",
+    "message": "Ihnen wurde die Haushaltshilfe für Waltraud Schmidt am Montag um 09:00 Uhr zugewiesen.",
+    "messageEn": "You have been assigned to the Housekeeping job for Waltraud Schmidt on Monday at 09:00 AM.",
+    "read": false,
+    "createdAt": "2026-07-11T10:05:00.000Z"
+  },
+  {
+    "id": "notif-3",
+    "userEmail": "demo@emmascoreinigungsteam.de",
+    "title": "Buchung bestätigt",
+    "titleEn": "Booking Confirmed",
+    "message": "Ihre Haushaltshilfe am Montag, den 13. Juli, wurde erfolgreich bestätigt.",
+    "messageEn": "Your Housekeeping session on Monday, July 13th, has been successfully confirmed.",
+    "read": false,
+    "createdAt": "2026-07-11T10:10:00.000Z"
+  }
+]

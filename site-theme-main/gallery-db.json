@@ -1,0 +1,38 @@
+[
+  {
+    "id": "img-1",
+    "title": "Seniorenbetreuung im Park",
+    "category": "team",
+    "url": "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?auto=format&fit=crop&q=80&w=600",
+    "size": "154 KB",
+    "createdAt": "2026-06-15T08:00:00.000Z"
+  },
+  {
+    "id": "img-2",
+    "title": "Gründliche Küchenreinigung",
+    "category": "services",
+    "url": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=600",
+    "size": "210 KB",
+    "createdAt": "2026-06-18T10:30:00.000Z"
+  },
+  {
+    "id": "img-3",
+    "title": "Haushaltshilfe Badezimmer - Vorher",
+    "category": "before_after",
+    "url": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=400",
+    "size": "112 KB",
+    "createdAt": "2026-06-20T12:00:00.000Z",
+    "isBefore": true,
+    "pairId": "pair-1"
+  },
+  {
+    "id": "img-4",
+    "title": "Haushaltshilfe Badezimmer - Nachher",
+    "category": "before_after",
+    "url": "https://images.unsplash.com/photo-1620626011161-997c51447094?auto=format&fit=crop&q=80&w=400",
+    "size": "124 KB",
+    "createdAt": "2026-06-20T12:30:00.000Z",
+    "isBefore": false,
+    "pairId": "pair-1"
+  }
+]

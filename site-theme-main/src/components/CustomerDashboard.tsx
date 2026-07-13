@@ -3,7 +3,7 @@ import {
   User, Lock, Mail, Phone, MapPin, Calendar, FileText, Download, 
   Upload, MessageSquare, Send, CheckCircle, Clock, Trash, Key, 
   PencilLine, ShieldAlert, ArrowRight, RefreshCw, ChevronDown, 
-  ChevronUp, Check, Play, UserCheck, Shield, Bell
+  ChevronUp, Check, Play, UserCheck, Shield, Bell, Star, CalendarDays
 } from 'lucide-react';
 import { Booking, UserDocument, ChatMessage } from '../types';
 import { jsPDF } from 'jspdf';
@@ -20,7 +20,7 @@ import {
 interface CustomerDashboardProps {
   bookings: Booking[];
   isLoggedIn: boolean;
-  onLogin: (email: string, name: string) => void;
+  onLogin: (email: string, name: string, role?: string) => void;
   onUpdateBookingStatus: (bookingId: string, status: 'cancelled') => void;
   onAddMessage: (msg: ChatMessage) => void;
   chatMessages: ChatMessage[];
@@ -219,6 +219,56 @@ export default function CustomerDashboard({
     }
   }, [currentUser]);
 
+  // Rescheduling states
+  const [reschedulingBooking, setReschedulingBooking] = useState<Booking | null>(null);
+  const [rescheduleDate, setRescheduleDate] = useState('');
+  const [rescheduleTime, setRescheduleTime] = useState('09:00');
+
+  // Reviews states
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewPhoto, setReviewPhoto] = useState('');
+
+  // Notifications states
+  const [clientNotifications, setClientNotifications] = useState<any[]>([]);
+
+  // Address book states
+  const [savedAddresses, setSavedAddresses] = useState<string[]>([]);
+  const [newAddressInput, setNewAddressInput] = useState('');
+
+  // Preferences states
+  const [favouriteServices, setFavouriteServices] = useState<string[]>([]);
+
+  // Effect to load notifications, address book and favourite services
+  React.useEffect(() => {
+    if (isLoggedIn && currentUser) {
+      // Fetch in-app notifications
+      fetch(`/api/notifications?email=${encodeURIComponent(currentUser.email)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setClientNotifications(data);
+          }
+        })
+        .catch(() => {});
+
+      // Load advanced user preferences
+      fetch('/api/admin/users-detailed')
+        .then(res => res.json())
+        .then(resData => {
+          if (resData.success && Array.isArray(resData.users)) {
+            const thisUser = resData.users.find((u: any) => u.email.toLowerCase() === currentUser.email.toLowerCase());
+            if (thisUser) {
+              setSavedAddresses(thisUser.savedAddresses || [currentUser.address].filter(Boolean));
+              setFavouriteServices(thisUser.preferences?.favouriteServices || []);
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isLoggedIn, currentUser]);
+
   // Auth Handler: LOGIN
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -235,7 +285,7 @@ export default function CustomerDashboard({
 
       const result = await response.json();
       if (response.ok && result.success) {
-        onLogin(result.user.email, result.user.name);
+        onLogin(result.user.email, result.user.name, result.user.role);
       } else if (response.status === 403 && result.needsVerification) {
         // Needs verification setup code input
         setNeedsVerificationEmail(authEmail);
@@ -670,6 +720,143 @@ export default function CustomerDashboard({
       console.error('Error generating PDF:', err);
       error(isDe ? 'Der PDF-Download ist fehlgeschlagen.' : 'The PDF download failed.');
     }
+  };
+
+  const handleRescheduleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reschedulingBooking) return;
+    
+    fetch(`/api/bookings/${reschedulingBooking.id}/reschedule`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: rescheduleDate,
+        time: rescheduleTime
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      // Send alert notification
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userEmail: currentUser?.email,
+          title: 'Termin verschoben',
+          titleEn: 'Appointment Rescheduled',
+          message: `Ihr Termin für ${reschedulingBooking.serviceName} wurde auf den ${rescheduleDate} um ${rescheduleTime} Uhr verlegt.`,
+          messageEn: `Your appointment for ${reschedulingBooking.serviceName} has been rescheduled to ${rescheduleDate} at ${rescheduleTime}.`
+        })
+      });
+
+      success(isDe ? 'Termin erfolgreich verschoben!' : 'Appointment rescheduled successfully!');
+      setReschedulingBooking(null);
+      
+      // Update local state or reload
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    })
+    .catch(() => {
+      error(isDe ? 'Fehler beim Verschieben des Termins.' : 'Failed to reschedule appointment.');
+    });
+  };
+
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewBooking) return;
+
+    fetch('/api/reviews', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: currentUser?.name || 'Kunde',
+        email: currentUser?.email || 'kunde@emmasco.de',
+        rating: reviewRating,
+        serviceId: reviewBooking.serviceId,
+        text: reviewText,
+        photoUrl: reviewPhoto
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      success(isDe ? 'Bewertung erfolgreich eingereicht! Sie wird nach der Prüfung veröffentlicht.' : 'Review submitted! It will be published after approval.');
+      setReviewBooking(null);
+      setReviewText('');
+      setReviewPhoto('');
+      setReviewRating(5);
+    })
+    .catch(() => {
+      error(isDe ? 'Fehler beim Senden der Bewertung.' : 'Failed to submit review.');
+    });
+  };
+
+  const handleAddAddress = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAddressInput.trim() || !currentUser) return;
+
+    const updatedAddresses = [...savedAddresses, newAddressInput.trim()];
+    
+    fetch('/api/admin/users/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentUser.email,
+        savedAddresses: updatedAddresses
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setSavedAddresses(updatedAddresses);
+        setNewAddressInput('');
+        success(isDe ? 'Adresse hinzugefügt!' : 'Address added!');
+      }
+    });
+  };
+
+  const handleRemoveAddress = (addressToRemove: string) => {
+    if (!currentUser) return;
+    const updatedAddresses = savedAddresses.filter(a => a !== addressToRemove);
+    
+    fetch('/api/admin/users/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentUser.email,
+        savedAddresses: updatedAddresses
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setSavedAddresses(updatedAddresses);
+        warning(isDe ? 'Adresse entfernt.' : 'Address removed.');
+      }
+    });
+  };
+
+  const handleToggleFavouriteService = (serviceId: string) => {
+    if (!currentUser) return;
+    const updated = favouriteServices.includes(serviceId)
+      ? favouriteServices.filter(id => id !== serviceId)
+      : [...favouriteServices, serviceId];
+
+    fetch('/api/admin/users/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentUser.email,
+        preferences: { favouriteServices: updated }
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        setFavouriteServices(updated);
+        info(isDe ? 'Favoriten aktualisiert!' : 'Favorites updated!');
+      }
+    });
   };
 
   const handleDocumentUpload = (e: React.FormEvent) => {
@@ -1124,6 +1311,46 @@ export default function CustomerDashboard({
         </div>
       </div>
 
+      {/* In-App Notifications Banner */}
+      {clientNotifications.length > 0 && (
+        <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-5 mt-6 text-left animate-fade-in max-w-7xl mx-auto w-full">
+          <div className="flex items-center justify-between mb-3 border-b border-blue-100/50 pb-2">
+            <div className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-[#0056D6] animate-bounce shrink-0" />
+              <h3 className="font-extrabold text-blue-900 text-sm">
+                {isDe ? 'Ihre Mitteilungen & Benachrichtigungen' : 'Your Notifications & Alerts'}
+              </h3>
+            </div>
+            <button 
+              onClick={() => {
+                fetch('/api/notifications/read', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: currentUser?.email })
+                })
+                .then(() => setClientNotifications([]));
+              }}
+              className="text-[10px] font-bold text-[#0056D6] hover:underline cursor-pointer bg-transparent border-none"
+            >
+              {isDe ? 'Alle als gelesen markieren' : 'Mark all as read'}
+            </button>
+          </div>
+          <div className="flex flex-col gap-2.5 max-h-40 overflow-y-auto pr-2">
+            {clientNotifications.map((notif: any) => (
+              <div key={notif.id || Math.random()} className="flex gap-3 text-xs bg-white p-3 rounded-xl border border-blue-50 shadow-xs">
+                <span className="text-[10px] text-gray-400 font-bold shrink-0 self-start mt-0.5">
+                  {new Date(notif.createdAt || Date.now()).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-extrabold text-gray-800">{isDe ? (notif.title || notif.titleDe) : (notif.titleEn || notif.title)}</span>
+                  <span className="text-gray-650">{isDe ? (notif.message || notif.messageDe) : (notif.messageEn || notif.message)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Grid container layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-10 items-start">
         
@@ -1375,6 +1602,18 @@ export default function CustomerDashboard({
                           {/* Action Buttons */}
                           <div className="flex gap-3 justify-end flex-wrap">
                             <button
+                              onClick={() => {
+                                setReschedulingBooking(b);
+                                setRescheduleDate(b.date);
+                                setRescheduleTime(b.time);
+                              }}
+                              className="px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-600 hover:text-white rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-1.5"
+                            >
+                              <CalendarDays className="w-4 h-4" />
+                              Termin verschieben
+                            </button>
+
+                            <button
                               onClick={() => generateInvoicePdf(b)}
                               className="px-4 py-2 bg-blue-50 text-[#0056D6] border border-blue-200 hover:bg-[#0056D6] hover:text-white rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-1.5"
                             >
@@ -1429,6 +1668,22 @@ export default function CustomerDashboard({
                       </div>
 
                       <div className="flex gap-2">
+                        {b.status === 'completed' && (
+                          <button
+                            onClick={() => {
+                              setReviewBooking(b);
+                              setReviewRating(5);
+                              setReviewText('');
+                              setReviewPhoto('');
+                            }}
+                            className="px-3 py-1.5 rounded-xl border border-amber-100 hover:border-amber-300 text-amber-700 bg-[#FFFBEB] hover:bg-amber-100 shadow-xs font-black text-[10px] flex items-center gap-1 cursor-pointer"
+                            title="Einsatz bewerten"
+                          >
+                            <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                            Bewerten
+                          </button>
+                        )}
+
                         {/* Quick Rebook Trigger */}
                         <button
                           id={`rebook-btn-${b.id}`}
@@ -1614,6 +1869,98 @@ export default function CustomerDashboard({
                   Änderungen speichern
                 </button>
               </form>
+
+              {/* Address Book Section */}
+              <div className="border-t border-gray-150 pt-6 mt-6">
+                <h3 className="text-sm font-black text-blue-900 mb-1">
+                  {isDe ? 'Adressbuch (Gespeicherte Anschriften)' : 'Address Book (Saved Addresses)'}
+                </h3>
+                <p className="text-[11px] text-gray-400 mb-3">
+                  {isDe 
+                    ? 'Fügen Sie zusätzliche Adressen für Pflegestellen oder Zweitwohnsitze hinzu.'
+                    : 'Manage alternative care or cleaning service addresses.'}
+                </p>
+
+                {savedAddresses.length > 0 ? (
+                  <div className="flex flex-col gap-2 mb-4">
+                    {savedAddresses.map((addr) => (
+                      <div key={addr} className="flex justify-between items-center bg-[#F6FAFF] border border-blue-50 px-4 py-2.5 rounded-xl text-xs font-semibold">
+                        <div className="flex items-center gap-2 text-slate-800">
+                          <MapPin className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <span>{addr}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAddress(addr)}
+                          className="p-1 text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic mb-4">
+                    {isDe ? 'Keine zusätzlichen Adressen gespeichert.' : 'No secondary addresses saved.'}
+                  </p>
+                )}
+
+                <form onSubmit={handleAddAddress} className="flex gap-2">
+                  <input
+                    type="text"
+                    required
+                    value={newAddressInput}
+                    onChange={(e) => setNewAddressInput(e.target.value)}
+                    placeholder={isDe ? 'Neue Adresse in Berlin...' : 'Add a new address...'}
+                    className="flex-1 bg-[#F6FAFF] border border-blue-50 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-[#0056D6] hover:bg-blue-700 text-white font-extrabold px-4 py-2 rounded-xl text-xs cursor-pointer whitespace-nowrap"
+                  >
+                    {isDe ? 'Hinzufügen' : 'Add'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Favourite Services Section */}
+              <div className="border-t border-gray-150 pt-6 mt-6">
+                <h3 className="text-sm font-black text-blue-900 mb-1">
+                  {isDe ? 'Lieblingsleistungen & Favoriten' : 'Favorite Services'}
+                </h3>
+                <p className="text-[11px] text-gray-400 mb-4">
+                  {isDe 
+                    ? 'Markieren Sie Ihre am häufigsten genutzten Services für Schnellbuchungen.'
+                    : 'Mark services you regularly book for fast checkout and preferences.'}
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { id: 'unterhaltsreinigung', nameDe: 'Unterhaltsreinigung', nameEn: 'Basic Cleaning' },
+                    { id: 'alltagsbegleitung', nameDe: 'Alltagsbegleitung', nameEn: 'Senior Companion Care' },
+                    { id: 'haushaltshilfe', nameDe: 'Haushaltshilfe', nameEn: 'Domestic Help' },
+                    { id: 'fensterreinigung', nameDe: 'Fensterreinigung', nameEn: 'Window Cleaning' },
+                    { id: 'grundreinigung', nameDe: 'Spezial-Grundreinigung', nameEn: 'Deep Cleaning' }
+                  ].map((service) => {
+                    const isFav = favouriteServices.includes(service.id);
+                    return (
+                      <button
+                        key={service.id}
+                        type="button"
+                        onClick={() => handleToggleFavouriteService(service.id)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-left cursor-pointer transition ${
+                          isFav 
+                            ? 'bg-blue-50/50 border-blue-200 text-blue-950 font-extrabold' 
+                            : 'bg-white border-gray-150 text-gray-650 hover:bg-slate-50 font-semibold'
+                        }`}
+                      >
+                        <Star className={`w-4 h-4 shrink-0 ${isFav ? 'text-amber-500 fill-amber-500' : 'text-gray-300'}`} />
+                        <span className="text-xs">{isDe ? service.nameDe : service.nameEn}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
@@ -1680,6 +2027,161 @@ export default function CustomerDashboard({
         </div>
 
       </div>
+
+      {/* Reschedule Modal */}
+      {reschedulingBooking && (
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-blue-50 shadow-2xl p-6 md:p-8 max-w-md w-full text-left">
+            <h3 className="text-lg font-black text-blue-900 flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-amber-600" />
+              {isDe ? 'Einsatz verschieben' : 'Reschedule Visit'}
+            </h3>
+            <p className="text-xs text-gray-400 mt-1">
+              {isDe 
+                ? `Wählen Sie einen neuen Wunschtermin für den Service "${reschedulingBooking.serviceName}".`
+                : `Select a new preferred date and time for "${reschedulingBooking.serviceName}".`}
+            </p>
+
+            <form onSubmit={handleRescheduleSubmit} className="flex flex-col gap-4 mt-5">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-700">{isDe ? 'Wunschdatum' : 'Desired Date'}</label>
+                <input
+                  type="date"
+                  required
+                  value={rescheduleDate}
+                  onChange={(e) => setRescheduleDate(e.target.value)}
+                  className="bg-[#F6FAFF] border border-blue-50 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-700">{isDe ? 'Startzeit' : 'Start Time'}</label>
+                <select
+                  required
+                  value={rescheduleTime}
+                  onChange={(e) => setRescheduleTime(e.target.value)}
+                  className="bg-[#F6FAFF] border border-blue-50 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                >
+                  <option value="08:00">08:00 Uhr (Vormittag)</option>
+                  <option value="10:00">10:00 Uhr</option>
+                  <option value="12:00">12:00 Uhr (Mittag)</option>
+                  <option value="14:00">14:00 Uhr (Nachmittag)</option>
+                  <option value="16:00">16:00 Uhr (Spätnachmittag)</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setReschedulingBooking(null)}
+                  className="flex-1 px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-extrabold text-center cursor-pointer transition"
+                >
+                  {isDe ? 'Abbrechen' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold text-center cursor-pointer transition shadow-sm"
+                >
+                  {isDe ? 'Termin verlegen' : 'Confirm Shift'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {reviewBooking && (
+        <div className="fixed inset-0 bg-black/55 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-white rounded-3xl border border-blue-50 shadow-2xl p-6 md:p-8 max-w-md w-full text-left">
+            <h3 className="text-lg font-black text-blue-900 flex items-center gap-2">
+              <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+              {isDe ? 'Einsatz bewerten' : 'Rate Your Cleaner'}
+            </h3>
+            <p className="text-xs text-gray-400 mt-1">
+              {isDe 
+                ? `Wie zufrieden waren Sie mit dem Service "${reviewBooking.serviceName}"? Ihre ehrliche Bewertung hilft uns, die Qualität stetig zu sichern.`
+                : `How satisfied were you with "${reviewBooking.serviceName}"? Your feedback ensures excellent service quality.`}
+            </p>
+
+            <form onSubmit={handleReviewSubmit} className="flex flex-col gap-4 mt-5">
+              <div className="flex flex-col gap-1.5 items-center">
+                <span className="text-xs font-extrabold text-gray-700 mb-1">{isDe ? 'Ihre Sternebewertung:' : 'Your Rating:'}</span>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map((stars) => (
+                    <button
+                      key={stars}
+                      type="button"
+                      onClick={() => setReviewRating(stars)}
+                      className="p-1 hover:scale-115 transition bg-transparent border-none cursor-pointer"
+                    >
+                      <Star 
+                        className={`w-8 h-8 transition ${
+                          stars <= reviewRating 
+                            ? 'text-amber-500 fill-amber-500' 
+                            : 'text-gray-250 hover:text-amber-350'
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-700">{isDe ? 'Kommentar / Lob / Kritik' : 'Comment'}</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder={isDe ? 'Was hat Ihnen besonders gut gefallen? Gab es Verbesserungsvorschläge?' : 'Tell us about your experience...'}
+                  className="bg-[#F6FAFF] border border-blue-50 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none w-full"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-extrabold text-gray-700">{isDe ? 'Foto hochladen (optional)' : 'Upload Photo (Optional)'}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="text"
+                    value={reviewPhoto}
+                    onChange={(e) => setReviewPhoto(e.target.value)}
+                    placeholder="/images/review-completed.jpg"
+                    className="flex-1 bg-[#F6FAFF] border border-blue-50 rounded-xl px-4 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Autoprefill a nice default cleaning picture for testing or showcase
+                      setReviewPhoto('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=400&q=80');
+                      success(isDe ? 'Musterfoto geladen!' : 'Sample photo prefilled!');
+                    }}
+                    className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-[#0056D6] rounded-xl text-[10px] font-black cursor-pointer whitespace-nowrap"
+                  >
+                    Musterfoto
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setReviewBooking(null)}
+                  className="flex-1 px-4 py-3 border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-extrabold text-center cursor-pointer transition"
+                >
+                  {isDe ? 'Abbrechen' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold text-center cursor-pointer transition shadow-sm"
+                >
+                  {isDe ? 'Bewertung senden' : 'Submit Review'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

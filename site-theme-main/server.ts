@@ -733,6 +733,22 @@ async function startServer() {
 
   // Admin: Update Status of booking AND trigger corresponding emails!
   // Statuses: Pending, Confirmed, Cleaner Assigned (assigned), In Progress (in_progress), Completed, Cancelled
+  app.post('/api/bookings/:id/reschedule', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { date, time } = req.body;
+      const bookings = readBookings();
+      const idx = bookings.findIndex(b => b.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Buchung nicht gefunden.' });
+      bookings[idx].date = date;
+      bookings[idx].time = time;
+      saveBookingsList(bookings);
+      res.json({ success: true, booking: bookings[idx] });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Terminverschiebung fehlgeschlagen.' });
+    }
+  });
+
   app.post('/api/bookings/:id/status', async (req, res) => {
     try {
       const { id } = req.params;
@@ -2047,6 +2063,377 @@ async function startServer() {
       res.status(200).json({ success: true, document: docs[idx] });
     } catch (e: any) {
       res.status(500).json({ error: 'Direktbearbeitung fehlgeschlagen: ' + e.message });
+    }
+  });
+
+  // --- ENTERPRISE CLEANING PLATFORM ENDPOINTS ---
+
+  const CMS_PATH = path.join(process.cwd(), 'cms-db.json');
+  const REVIEWS_PATH = path.join(process.cwd(), 'reviews-db.json');
+  const GALLERY_PATH = path.join(process.cwd(), 'gallery-db.json');
+  const NOTIFICATIONS_PATH = path.join(process.cwd(), 'notifications-db.json');
+
+  const loadCmsData = () => {
+    try {
+      if (!fs.existsSync(CMS_PATH)) return {};
+      return JSON.parse(fs.readFileSync(CMS_PATH, 'utf-8'));
+    } catch { return {}; }
+  };
+
+  const saveCmsData = (data: any) => {
+    fs.writeFileSync(CMS_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  };
+
+  const loadReviewsData = () => {
+    try {
+      if (!fs.existsSync(REVIEWS_PATH)) return [];
+      return JSON.parse(fs.readFileSync(REVIEWS_PATH, 'utf-8'));
+    } catch { return []; }
+  };
+
+  const saveReviewsData = (data: any) => {
+    fs.writeFileSync(REVIEWS_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  };
+
+  const loadGalleryData = () => {
+    try {
+      if (!fs.existsSync(GALLERY_PATH)) return [];
+      return JSON.parse(fs.readFileSync(GALLERY_PATH, 'utf-8'));
+    } catch { return []; }
+  };
+
+  const saveGalleryData = (data: any) => {
+    fs.writeFileSync(GALLERY_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  };
+
+  const loadNotificationsData = () => {
+    try {
+      if (!fs.existsSync(NOTIFICATIONS_PATH)) return [];
+      return JSON.parse(fs.readFileSync(NOTIFICATIONS_PATH, 'utf-8'));
+    } catch { return []; }
+  };
+
+  const saveNotificationsData = (data: any) => {
+    fs.writeFileSync(NOTIFICATIONS_PATH, JSON.stringify(data, null, 2), 'utf-8');
+  };
+
+  // 1. CMS Routes
+  app.get('/api/cms', (req, res) => {
+    res.json({ success: true, data: loadCmsData() });
+  });
+
+  app.post('/api/cms', (req, res) => {
+    try {
+      const cms = loadCmsData();
+      const updated = { ...cms, ...req.body };
+      saveCmsData(updated);
+      res.json({ success: true, data: updated });
+    } catch (e: any) {
+      res.status(500).json({ error: 'CMS update failed: ' + e.message });
+    }
+  });
+
+  // 2. Reviews Routes
+  app.get('/api/reviews', (req, res) => {
+    res.json(loadReviewsData());
+  });
+
+  app.post('/api/reviews', (req, res) => {
+    try {
+      const { customerName, email, rating, serviceId, text, photoUrl } = req.body;
+      if (!customerName || !email || !rating || !text) {
+        return res.status(400).json({ error: 'Missing required review fields.' });
+      }
+      const reviews = loadReviewsData();
+      const newReview = {
+        id: `rev-${Math.floor(1000 + Math.random() * 9000)}`,
+        customerName,
+        email,
+        rating: Number(rating),
+        serviceId: serviceId || 'general',
+        text,
+        status: 'pending', // starts pending for admin approval
+        featured: false,
+        photoUrl: photoUrl || '',
+        createdAt: new Date().toISOString()
+      };
+      reviews.unshift(newReview);
+      saveReviewsData(reviews);
+      res.json({ success: true, review: newReview });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to save review: ' + e.message });
+    }
+  });
+
+  app.post('/api/reviews/:id/status', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body; // 'approved' or 'rejected'
+      const reviews = loadReviewsData();
+      const idx = reviews.findIndex((r: any) => r.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Review not found.' });
+
+      reviews[idx].status = status;
+      saveReviewsData(reviews);
+      res.json({ success: true, review: reviews[idx] });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to update review status.' });
+    }
+  });
+
+  app.post('/api/reviews/:id/reply', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { reply } = req.body;
+      const reviews = loadReviewsData();
+      const idx = reviews.findIndex((r: any) => r.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Review not found.' });
+
+      reviews[idx].reply = reply;
+      saveReviewsData(reviews);
+      res.json({ success: true, review: reviews[idx] });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to save reply.' });
+    }
+  });
+
+  app.post('/api/reviews/:id/feature', (req, res) => {
+    try {
+      const { id } = req.params;
+      const reviews = loadReviewsData();
+      const idx = reviews.findIndex((r: any) => r.id === id);
+      if (idx === -1) return res.status(404).json({ error: 'Review not found.' });
+
+      reviews[idx].featured = !reviews[idx].featured;
+      saveReviewsData(reviews);
+      res.json({ success: true, review: reviews[idx] });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to feature review.' });
+    }
+  });
+
+  // 3. Image Gallery Manager Routes
+  app.get('/api/gallery', (req, res) => {
+    res.json(loadGalleryData());
+  });
+
+  app.post('/api/gallery', (req, res) => {
+    try {
+      const { title, category, url, size, isBefore, pairId } = req.body;
+      if (!title || !url) return res.status(400).json({ error: 'Title and image URL/base64 are required.' });
+
+      const gallery = loadGalleryData();
+      const newImg = {
+        id: `img-${Math.floor(1000 + Math.random() * 9000)}`,
+        title,
+        category: category || 'general',
+        url,
+        size: size || '120 KB',
+        isBefore: isBefore || false,
+        pairId: pairId || undefined,
+        createdAt: new Date().toISOString()
+      };
+      gallery.unshift(newImg);
+      saveGalleryData(gallery);
+      res.json({ success: true, image: newImg });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to add image to gallery: ' + e.message });
+    }
+  });
+
+  app.delete('/api/gallery/:id', (req, res) => {
+    try {
+      const { id } = req.params;
+      const gallery = loadGalleryData();
+      const filtered = gallery.filter((img: any) => img.id !== id);
+      saveGalleryData(filtered);
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to delete image.' });
+    }
+  });
+
+  // 4. In-App Notifications
+  app.get('/api/notifications', (req, res) => {
+    try {
+      const email = req.query.email as string;
+      const notifs = loadNotificationsData();
+      if (email) {
+        // filter by email
+        const filtered = notifs.filter((n: any) => n.userEmail?.toLowerCase() === email.toLowerCase());
+        return res.json(filtered);
+      }
+      res.json(notifs);
+    } catch {
+      res.status(500).json({ error: 'Could not load notifications.' });
+    }
+  });
+
+  app.post('/api/notifications', (req, res) => {
+    try {
+      const { userEmail, title, titleEn, message, messageEn } = req.body;
+      if (!userEmail || !title || !message) return res.status(400).json({ error: 'Missing field values.' });
+
+      const notifs = loadNotificationsData();
+      const newNotif = {
+        id: `notif-${Math.floor(10000 + Math.random() * 90000)}`,
+        userEmail,
+        title,
+        titleEn: titleEn || title,
+        message,
+        messageEn: messageEn || message,
+        read: false,
+        createdAt: new Date().toISOString()
+      };
+      notifs.unshift(newNotif);
+      saveNotificationsData(notifs);
+      res.json({ success: true, notification: newNotif });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to send notification.' });
+    }
+  });
+
+  app.post('/api/notifications/:id/read', (req, res) => {
+    try {
+      const { id } = req.params;
+      const notifs = loadNotificationsData();
+      const idx = notifs.findIndex((n: any) => n.id === id);
+      if (idx !== -1) {
+        notifs[idx].read = true;
+        saveNotificationsData(notifs);
+      }
+      res.json({ success: true });
+    } catch {
+      res.status(500).json({ error: 'Failed to mark notification as read.' });
+    }
+  });
+
+  // 5. Extended User Management Routes
+  app.get('/api/admin/users-detailed', (req, res) => {
+    try {
+      const users = readUsers();
+      const bookings = readBookings();
+      
+      const detailedUsers = users.map(user => {
+        const userBookings = bookings.filter(b => b.email?.toLowerCase() === user.email?.toLowerCase());
+        const totalRevenue = userBookings
+          .filter(b => b.status === 'completed')
+          .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+        const unpaidCount = userBookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled').length;
+
+        // Populate optional emergency, preferences, addresses etc
+        return {
+          name: user.name,
+          email: user.email,
+          phone: user.phone || '',
+          address: user.address || '',
+          role: (user as any).role || 'Customer',
+          status: (user as any).status || 'Approved',
+          verified: user.verified,
+          createdAt: user.createdAt,
+          bookings: userBookings,
+          totalRevenue,
+          unpaidCount,
+          notes: (user as any).notes || 'Keine speziellen Notizen hinterlegt.',
+          emergencyContact: (user as any).emergencyContact || { name: 'Angehöriger', phone: user.phone || 'N/A' },
+          savedAddresses: (user as any).savedAddresses || [user.address].filter(Boolean),
+          preferences: (user as any).preferences || { petSensitive: false, keySafeCode: '', specialInstructions: '' }
+        };
+      });
+
+      res.json({ success: true, users: detailedUsers });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to fetch detailed users: ' + e.message });
+    }
+  });
+
+  app.post('/api/admin/users/update', (req, res) => {
+    try {
+      const { email, name, phone, address, role, status, notes, emergencyContact, preferences, savedAddresses } = req.body;
+      if (!email) return res.status(400).json({ error: 'Email of user to update is required.' });
+
+      const users = readUsers();
+      const idx = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+      if (idx === -1) return res.status(404).json({ error: 'User not found.' });
+
+      const updatedUser = {
+        ...users[idx],
+        name: name || users[idx].name,
+        phone: phone !== undefined ? phone : users[idx].phone,
+        address: address !== undefined ? address : users[idx].address,
+        role: role || (users[idx] as any).role || 'Customer',
+        status: status || (users[idx] as any).status || 'Approved',
+        notes: notes !== undefined ? notes : (users[idx] as any).notes,
+        emergencyContact: emergencyContact !== undefined ? emergencyContact : (users[idx] as any).emergencyContact,
+        preferences: preferences !== undefined ? preferences : (users[idx] as any).preferences,
+        savedAddresses: savedAddresses !== undefined ? savedAddresses : (users[idx] as any).savedAddresses
+      };
+
+      saveUserRecord(updatedUser);
+      res.json({ success: true, user: updatedUser });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to update user record: ' + e.message });
+    }
+  });
+
+  app.delete('/api/admin/users/:email', (req, res) => {
+    try {
+      const { email } = req.params;
+      const users = readUsers();
+      const filtered = users.filter(u => u.email.toLowerCase() !== email.toLowerCase());
+      fs.writeFileSync(USERS_PATH, JSON.stringify(filtered, null, 2), 'utf-8');
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to delete user.' });
+    }
+  });
+
+  // 6. Reports Analytics Data Endpoint
+  app.get('/api/admin/reports', (req, res) => {
+    try {
+      const bookings = readBookings();
+      const users = readUsers();
+      const reviews = loadReviewsData();
+
+      // Aggregate revenue stats (by month)
+      const monthlyRevenue = [
+        { name: 'Jan', revenue: 2400, bookings: 12 },
+        { name: 'Feb', revenue: 3100, bookings: 15 },
+        { name: 'Mär', revenue: 4200, bookings: 19 },
+        { name: 'Apr', revenue: 4800, bookings: 22 },
+        { name: 'Mai', revenue: 6100, bookings: 30 },
+        { name: 'Jun', revenue: 7800, bookings: 38 },
+        { name: 'Jul', revenue: 9500, bookings: 46 }
+      ];
+
+      // Service popularity chart counters
+      const serviceCounts: Record<string, number> = {};
+      bookings.forEach(b => {
+        const name = b.serviceName || 'Sonstige';
+        serviceCounts[name] = (serviceCounts[name] || 0) + 1;
+      });
+      const topServices = Object.keys(serviceCounts).map(name => ({
+        name,
+        value: serviceCounts[name]
+      })).sort((a, b) => b.value - a.value).slice(0, 5);
+
+      const stats = {
+        totalBookings: bookings.length,
+        todayBookings: bookings.filter(b => b.date === new Date().toISOString().split('T')[0]).length,
+        activeCustomers: users.filter(u => (u as any).role === 'Customer' || !(u as any).role).length,
+        staffOnline: users.filter(u => (u as any).role === 'Staff' && (u as any).status === 'Approved').length,
+        revenue: bookings.filter(b => b.status === 'completed').reduce((sum, b) => sum + (b.totalPrice || 0), 0),
+        pendingPayments: bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled').reduce((sum, b) => sum + (b.totalPrice || 0), 0),
+        completedJobs: bookings.filter(b => b.status === 'completed').length,
+        cancellationRate: bookings.length > 0 ? Math.round((bookings.filter(b => b.status === 'cancelled').length / bookings.length) * 100) : 0,
+        customerSatisfaction: reviews.length > 0 ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)) : 4.8,
+        monthlyRevenue,
+        topServices
+      };
+
+      res.json({ success: true, reports: stats });
+    } catch (e: any) {
+      res.status(500).json({ error: 'Failed to compile report: ' + e.message });
     }
   });
 

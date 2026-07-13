@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Solomon Egazi",
+    "email": "solomonegazi@gmail.com",
+    "phone": "0176 12345678",
+    "address": "Hauptstraße 15, Berlin",
+    "password": "solomon123",
+    "verified": true,
+    "createdAt": "2026-07-07T10:10:42.095Z",
+    "passwordHash": "solomon123",
+    "role": "Owner",
+    "status": "Approved"
+  },
+  {
+    "name": "My Friend",
+    "email": "friend@emmasco.de",
+    "phone": "0176 87654321",
+    "address": "Zweite Allee 4, Berlin",
+    "password": "collab123",
+    "passwordHash": "collab123",
+    "verified": true,
+    "createdAt": "2026-07-07T10:10:42.096Z",
+    "role": "Collaborator",
+    "status": "Approved"
+  },
+  {
+    "name": "Collaborator",
+    "email": "collaborator@gmail.com",
+    "phone": "0176 99998888",
+    "address": "Kollwitzstraße 14, 10435 Berlin",
+    "password": "collab123",
+    "passwordHash": "collab123",
+    "verified": true,
+    "createdAt": "2026-07-07T10:10:42.096Z",
+    "role": "Collaborator",
+    "status": "Approved"
+  },
+  {
+    "name": "Demo User",
+    "email": "demo@emmascoreinigungsteam.de",
+    "phone": "0176 11112222",
+    "address": "Demo Straße 1, Berlin",
+    "password": "Demo123!",
+    "passwordHash": "Demo123!",
+    "verified": true,
+    "createdAt": "2026-07-10T10:10:42.096Z",
+    "role": "Collaborator",
+    "status": "Approved"
+  }
+]
