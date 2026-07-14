@@ -451,7 +451,16 @@ export default function Header({
 
       {/* Mobile Drawer menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-slate-900 border-t border-blue-50 dark:border-slate-800/80 animate-fade-in py-4 px-4 shadow-xl">
+        <div
+          className="lg:hidden bg-white dark:bg-slate-900 border-t border-blue-50 dark:border-slate-800/80 animate-fade-in py-4 px-4 shadow-xl"
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            const anchor = target.closest('a');
+            if (anchor && (anchor.getAttribute('href')?.includes('#') || anchor.hash)) {
+              setMobileMenuOpen(false);
+            }
+          }}
+        >
           <div className="flex flex-col gap-2">
             {navItems.map((item) => (
               <button

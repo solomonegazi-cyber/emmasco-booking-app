@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { GALLERY_ITEMS } from '../data';
 import { useLanguage } from '../LanguageContext';
+import TrustGallery from './TrustGallery';
 
 // Dynamic asset path resolver that bypasses typescript module declaration limits
 const heroImage = new URL('../assets/images/caregiver_helping_elderly_1781598992140.jpg', import.meta.url).href;
@@ -192,7 +193,7 @@ export default function Home({ setCurrentPage, onOpenBooking, onSelectService }:
                 <span className="block text-[10px] uppercase tracking-wider font-extrabold text-blue-400">
                   {language === 'de' ? 'Direktabrechnung' : 'Direct Billing'}
                 </span>
-                <span className="text-xs font-bold">125 € Freibetrag</span>
+                <span className="text-xs font-bold">131 € Freibetrag</span>
               </div>
             </div>
           </div>
@@ -506,6 +507,9 @@ export default function Home({ setCurrentPage, onOpenBooking, onSelectService }:
 
         </div>
       </section>
+
+      {/* TRUST TEAM & PREMIUM EQUIPMENT GALLERY */}
+      <TrustGallery onOpenBooking={onOpenBooking} language={language} />
 
       {/* 6. TESTIMONIALS CAROUSEL */}
       <section ref={testimonialsSectionRef} className="py-16 bg-[#F6FAFF] border-y border-blue-50 overflow-hidden">

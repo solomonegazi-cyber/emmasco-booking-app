@@ -8,6 +8,7 @@ import { Calendar, Clock, User, Mail, Phone, MapPin, MessageSquare, Heart, Spark
 import { SERVICES } from '../data';
 import { Booking } from '../types';
 import { useLanguage } from '../LanguageContext';
+import { motion } from 'motion/react';
 
 interface BookingProps {
   selectedServiceId: string | null;
@@ -346,10 +347,21 @@ export default function BookingForm({ selectedServiceId, onBookingSubmit, isLogg
         {/* Left Side: Interactive Booking Form */}
         <div className="lg:col-span-7">
           {isSubmitted && createdBooking ? (
-            <div className="bg-white p-8 md:p-10 rounded-3xl border border-blue-100 shadow-xl text-center flex flex-col items-center gap-6 animate-scale-up">
-              <div className={`w-16 h-16 ${createdBooking.status === 'offline_queued' ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center text-2xl font-black`}>
-                {createdBooking.status === 'offline_queued' ? '⏳' : '✔'}
-              </div>
+            <div className="bg-white p-8 md:p-10 rounded-3xl border border-blue-100 shadow-xl text-center flex flex-col items-center gap-6">
+              <motion.div 
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className={`w-16 h-16 ${createdBooking.status === 'offline_queued' ? 'bg-orange-100 text-orange-600' : 'bg-emerald-100 text-emerald-600'} rounded-full flex items-center justify-center text-2xl font-black shadow-md`}
+              >
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  {createdBooking.status === 'offline_queued' ? '⏳' : '✔'}
+                </motion.span>
+              </motion.div>
               
               {/* Premium Green or Orange highlight for the confirmation message */}
               {createdBooking.status === 'offline_queued' ? (

@@ -8,6 +8,7 @@ import { Mail, Phone, MapPin, Send, HelpCircle, ShieldCheck, Heart } from 'lucid
 import { useLanguage } from '../LanguageContext';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { motion } from 'motion/react';
 
 const BERLIN_DISTRICTS = [
   {
@@ -422,7 +423,20 @@ export default function Contact() {
 
           {isSent ? (
             <div className="p-8 bg-green-50 rounded-2xl border border-green-150 text-center flex flex-col items-center gap-4">
-              <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xl">✔</div>
+              <motion.div 
+                initial={{ scale: 0, rotate: -45 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-bold text-xl shadow-md"
+              >
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  ✔
+                </motion.span>
+              </motion.div>
               <h4 className="font-extrabold text-green-800 text-base">
                 {t('contact.msg_sent_title')}
               </h4>

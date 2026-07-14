@@ -728,9 +728,22 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
 
               {/* Form Success/Error notifications */}
               {formSuccessMessage && (
-                <div className="bg-emerald-50 border border-emerald-150 p-3.5 rounded-xl text-emerald-800 text-xs font-semibold leading-relaxed">
-                  {formSuccessMessage}
-                </div>
+                <motion.div 
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                  className="bg-emerald-50 border border-emerald-150 p-3.5 rounded-xl text-emerald-800 text-xs font-semibold leading-relaxed flex items-center gap-2.5 shadow-sm"
+                >
+                  <motion.div
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.1, type: "spring", stiffness: 450, damping: 10 }}
+                    className="w-5 h-5 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-[10px] shrink-0"
+                  >
+                    ✔
+                  </motion.div>
+                  <span>{formSuccessMessage}</span>
+                </motion.div>
               )}
 
               {formErrorMessage && (
