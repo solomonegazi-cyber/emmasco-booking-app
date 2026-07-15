@@ -55,15 +55,77 @@ const BERLIN_DISTRICTS = [
   }
 ];
 
-const SERVICE_AREA_OUTLINE: [number, number][] = [
-  [52.615, 13.310], // Reinickendorf North
-  [52.610, 13.430], // Pankow North
-  [52.570, 13.490], // Pankow Outer East
-  [52.535, 13.510], // Lichtenberg East
-  [52.485, 13.440], // Southeast (Neukölln boundary)
-  [52.470, 13.350], // South
-  [52.490, 13.260], // Charlottenburg West
-  [52.540, 13.270], // Northwest (Spandau edge)
+const BRANDENBURG_CITIES = [
+  {
+    nameDe: 'Potsdam',
+    nameEn: 'Potsdam',
+    coords: [52.3989, 13.0657] as [number, number],
+    infoDe: '🚗 Voller Service: Haushaltsnahe Dienstleistungen & Alltagshilfe vor Ort.',
+    infoEn: '🚗 Full Service: Household assistance & everyday help on site.'
+  },
+  {
+    nameDe: 'Falkensee',
+    nameEn: 'Falkensee',
+    coords: [52.5583, 13.0917] as [number, number],
+    infoDe: '🏠 Regelmäßige Haushaltshilfe & Reinigungsservice für Senioren und Familien.',
+    infoEn: '🏠 Regular household assistance & cleaning service for seniors and families.'
+  },
+  {
+    nameDe: 'Oranienburg',
+    nameEn: 'Oranienburg',
+    coords: [52.7544, 13.2369] as [number, number],
+    infoDe: '🌿 Alltagshilfe & Entlastungsleistungen gem. § 45a SGB XI.',
+    infoEn: '🌿 Everyday assistance & relief services under § 45a SGB XI.'
+  },
+  {
+    nameDe: 'Bernau bei Berlin',
+    nameEn: 'Bernau bei Berlin',
+    coords: [52.6798, 13.5871] as [number, number],
+    infoDe: '✨ Zuverlässige Reinigung, Seniorenbegleitung und Hilfe im Alltag.',
+    infoEn: '✨ Reliable cleaning, companion care, and everyday help.'
+  },
+  {
+    nameDe: 'Eberswalde',
+    nameEn: 'Eberswalde',
+    coords: [52.8331, 13.8219] as [number, number],
+    infoDe: '⭐ Service-Erweiterung: Haushaltsreinigung & Alltagshilfe auf Anfrage.',
+    infoEn: '⭐ Service extension: Household cleaning & everyday help on request.'
+  },
+  {
+    nameDe: 'Königs Wusterhausen',
+    nameEn: 'Königs Wusterhausen',
+    coords: [52.2936, 13.6268] as [number, number],
+    infoDe: '✔ Abrechnung mit allen Kranken- und Pflegekassen möglich.',
+    infoEn: '✔ Billing with all health and long-term care insurance providers.'
+  },
+  {
+    nameDe: 'Luckenwalde',
+    nameEn: 'Luckenwalde',
+    coords: [52.0919, 13.1147] as [number, number],
+    infoDe: '🏠 Service-Erweiterung: Unterstützung im Alltag & Hausreinigung.',
+    infoEn: '🏠 Service extension: Everyday support & home cleaning.'
+  },
+  {
+    nameDe: 'Werder (Havel)',
+    nameEn: 'Werder (Havel)',
+    coords: [52.3786, 12.9378] as [number, number],
+    infoDe: '🚗 Haushaltsnahe Dienste & Alltagsunterstützung direkt vor Ort.',
+    infoEn: '🚗 Household services & everyday support directly on site.'
+  },
+  {
+    nameDe: 'Teltow',
+    nameEn: 'Teltow',
+    coords: [52.4036, 13.2656] as [number, number],
+    infoDe: '✨ Alltagsbegleitung & Haushaltspflege. Abrechnung über Entlastungsbetrag.',
+    infoEn: '✨ Companion care & household care. Direct billing with care funds.'
+  },
+  {
+    nameDe: 'Blankenfelde-Mahlow',
+    nameEn: 'Blankenfelde-Mahlow',
+    coords: [52.3333, 13.4333] as [number, number],
+    infoDe: '✔ Schnelle Hilfe im Haushalt & Begleitdienste für ältere Menschen.',
+    infoEn: '✔ Quick household help & companion services for seniors.'
+  }
 ];
 
 
@@ -139,14 +201,33 @@ export default function Contact() {
 
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<{ [key: string]: L.Marker }>({});
+
+  const handleDistrictClick = (coords: [number, number], nameDe: string) => {
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo(coords, 12.5, {
+        animate: true,
+        duration: 1.5
+      });
+      const marker = markersRef.current[nameDe];
+      if (marker) {
+        setTimeout(() => {
+          marker.openPopup();
+        }, 1200);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
     if (mapInstanceRef.current) return;
 
+    const isMobile = window.innerWidth < 768;
+    const initialZoom = isMobile ? 8.0 : 8.7;
+
     const map = L.map(mapContainerRef.current, {
-      center: [52.5398, 13.4111],
-      zoom: 10.5,
+      center: [52.46, 13.38],
+      zoom: initialZoom,
       scrollWheelZoom: false,
       zoomControl: true,
     });
@@ -157,23 +238,61 @@ export default function Contact() {
       maxZoom: 19
     }).addTo(map);
 
-    L.polygon(SERVICE_AREA_OUTLINE, {
+    // Multi-layered radial/circular service coverage overlay (soft edges / premium radial glow)
+    const overlayCenter: [number, number] = [52.515, 13.40]; // Center of Berlin
+
+    // 1. Inner core active zone (high density)
+    L.circle(overlayCenter, {
+      radius: 20000,
       color: '#0056D6',
-      weight: 2,
-      dashArray: '6, 8',
+      weight: 0,
+      fillColor: '#0056D6',
+      fillOpacity: 0.11,
+      interactive: false
+    }).addTo(map);
+
+    // 2. Mid metropolitan coverage (incorporating Potsdam, Falkensee, Teltow, Blankenfelde)
+    L.circle(overlayCenter, {
+      radius: 35000,
+      color: '#3b82f6',
+      weight: 0,
       fillColor: '#3b82f6',
-      fillOpacity: 0.12
+      fillOpacity: 0.08,
+      interactive: false
+    }).addTo(map);
+
+    // 3. Extended Brandenburg outer halo (incorporating Oranienburg, Bernau, Königs Wusterhausen, Werder)
+    L.circle(overlayCenter, {
+      radius: 55000,
+      color: '#3b82f6',
+      weight: 0,
+      fillColor: '#3b82f6',
+      fillOpacity: 0.04,
+      interactive: false
+    }).addTo(map);
+
+    // 4. Elegant outer dashed boundary representing standard operational radius (incorporating Eberswalde, Luckenwalde)
+    L.circle(overlayCenter, {
+      radius: 62000,
+      color: '#0056D6',
+      weight: 1.5,
+      dashArray: '6, 10',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.015,
+      interactive: false
     }).addTo(map);
 
     const isDe = language === 'de';
+    const markers: { [key: string]: L.Marker } = {};
 
+    // 1. Add Berlin district markers
     BERLIN_DISTRICTS.forEach((district) => {
       const isHQ = district.nameDe.includes('Pankow');
       
       const markerHtml = `
         <div class="relative flex items-center justify-center">
           <span class="animate-ping absolute inline-flex h-6 w-6 rounded-full ${isHQ ? 'bg-[#0056D6]' : 'bg-sky-400'} opacity-60"></span>
-          <div class="relative rounded-full h-5.5 w-5.5 ${isHQ ? 'bg-[#0056D6]' : 'bg-sky-500'} hover:scale-110 active:scale-95 transition-all duration-150 shadow-md flex items-center justify-center text-white text-[9px] font-black border border-white">
+          <div class="relative rounded-full h-5.5 w-5.5 ${isHQ ? 'bg-[#0056D6]' : 'bg-sky-500'} hover:scale-110 active:scale-95 transition-all duration-150 shadow-md flex items-center justify-center text-white text-[9px] font-black border border-white animate-fade-in">
             ${isHQ ? '★' : 'E'}
           </div>
         </div>
@@ -192,7 +311,7 @@ export default function Contact() {
             <span>${isDe ? district.nameDe : district.nameEn}</span>
             ${isHQ ? `<span class="bg-blue-100 text-[8px] font-black px-1.5 py-0.5 rounded ml-2 text-[#0056D6] uppercase">HQ</span>` : ''}
           </div>
-          <p class="text-gray-650 dark:text-gray-200 leading-relaxed font-semibold mb-2">
+          <p class="text-gray-650 dark:text-gray-200 leading-relaxed font-semibold mb-2 text-[11px]">
             ${isDe ? district.infoDe : district.infoEn}
           </p>
           <div class="flex items-center gap-1.5 text-[10px] text-emerald-700 font-extrabold">
@@ -202,14 +321,63 @@ export default function Contact() {
         </div>
       `;
 
-      L.marker(district.coords, { icon: customIcon })
+      const m = L.marker(district.coords, { icon: customIcon })
         .addTo(map)
         .bindPopup(popupHtml, {
           closeButton: false,
           className: 'premium-leaflet-popup'
         });
+
+      markers[district.nameDe] = m;
     });
 
+    // 2. Add Brandenburg city markers for the surrounding expansion cities
+    BRANDENBURG_CITIES.forEach((city) => {
+      const cityMarkerHtml = `
+        <div class="relative flex items-center justify-center">
+          <span class="absolute inline-flex h-3.5 w-3.5 rounded-full bg-blue-400 opacity-20"></span>
+          <div class="relative rounded-full h-3.5 w-3.5 bg-white hover:scale-115 transition-all duration-150 shadow-xs flex items-center justify-center text-[#0056D6] text-[8px] font-black border-2 border-[#0056D6]">
+            •
+          </div>
+        </div>
+      `;
+
+      const cityIcon = L.divIcon({
+        html: cityMarkerHtml,
+        className: 'custom-leaflet-marker-brandenburg',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+
+      const cityPopupHtml = `
+        <div style="font-family: inherit;" class="p-1 text-left text-xs min-w-[200px]">
+          <div class="font-bold text-slate-800 border-b border-gray-150 pb-1 mb-1.5 uppercase tracking-wider text-[10px] flex justify-between items-center">
+            <span>${isDe ? city.nameDe : city.nameEn}</span>
+            <span class="bg-blue-50 text-[7px] font-black px-1.5 py-0.5 rounded ml-2 text-[#0056D6] uppercase border border-blue-100">
+              ${isDe ? 'Region' : 'Region'}
+            </span>
+          </div>
+          <p class="text-slate-650 leading-relaxed font-semibold mb-2 text-[11px]">
+            ${isDe ? city.infoDe : city.infoEn}
+          </p>
+          <div class="flex items-center gap-1 text-[9px] text-blue-700 font-extrabold">
+            <span>✓</span>
+            <span>${isDe ? 'Service-Erweiterung' : 'Service Expansion'}</span>
+          </div>
+        </div>
+      `;
+
+      const m = L.marker(city.coords, { icon: cityIcon })
+        .addTo(map)
+        .bindPopup(cityPopupHtml, {
+          closeButton: false,
+          className: 'premium-leaflet-popup'
+        });
+
+      markers[city.nameDe] = m;
+    });
+
+    markersRef.current = markers;
     mapInstanceRef.current = map;
 
     return () => {
@@ -372,30 +540,52 @@ export default function Contact() {
           {/* Map */}
           <div className="bg-white rounded-3xl overflow-hidden border border-blue-50 shadow-md flex flex-col p-2 gap-2 text-left">
             <div className="text-xs font-black text-blue-900 px-2 pt-1.5 flex justify-between items-center">
-              <span>{language === 'de' ? '📍 UNSER EINSATZGEBIET (BERLIN)' : '📍 OUR SERVICE TERRITORY (BERLIN)'}</span>
+              <span>{language === 'de' ? '📍 UNSER EINSATZGEBIET (BERLIN & UMGEBUNG)' : '📍 OUR SERVICE TERRITORY (BERLIN & REGION)'}</span>
               <span className="text-[9px] bg-blue-100 text-[#0056D6] px-2 py-0.5 rounded-full uppercase tracking-widest font-black">
                 {language === 'de' ? 'Aktiv' : 'Active'}
               </span>
             </div>
             
-            <div className="aspect-video w-full rounded-2xl overflow-hidden relative border border-blue-50/50">
+            <div className="h-[380px] md:h-[490px] w-full rounded-2xl overflow-hidden relative border border-blue-50/50">
               <div ref={mapContainerRef} className="w-full h-full relative z-0" />
             </div>
 
             {/* Quick stats / District Legend below the map */}
-            <div className="px-2 pb-1.5">
-              <span className="text-[10px] text-gray-500 font-bold block mb-1">
-                {language === 'de' ? 'Einsatzbereiche in ganz Berlin (anklicken für Infos):' : 'Active care regions (click for details):'}
-              </span>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {BERLIN_DISTRICTS.map((d) => (
-                  <span 
-                    key={d.nameDe} 
-                    className="bg-[#F0F7FF] text-[#0056D6] text-[10px] uppercase font-bold px-2 py-1 rounded-lg border border-blue-100/40"
-                  >
-                    {language === 'de' ? d.nameDe.split(' / ')[0] : d.nameEn.split(' / ')[0]}
-                  </span>
-                ))}
+            <div className="px-2 pb-1.5 flex flex-col gap-3">
+              <div>
+                <span className="text-[10px] text-gray-500 font-bold block mb-1">
+                  {language === 'de' ? 'Einsatzbereiche in ganz Berlin (anklicken zum Fokussieren):' : 'Active care regions (click to focus map):'}
+                </span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {BERLIN_DISTRICTS.map((d) => (
+                    <button 
+                      key={d.nameDe} 
+                      type="button"
+                      onClick={() => handleDistrictClick(d.coords, d.nameDe)}
+                      className="bg-[#F0F7FF] hover:bg-blue-100 hover:text-blue-800 text-[#0056D6] text-[10px] uppercase font-black px-2.5 py-1.5 rounded-lg border border-blue-100/40 cursor-pointer transition duration-150 hover:scale-102 active:scale-98 text-left"
+                    >
+                      {language === 'de' ? d.nameDe.split(' / ')[0] : d.nameEn.split(' / ')[0]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-2.5">
+                <span className="text-[10px] text-slate-500 font-bold block mb-1">
+                  {language === 'de' ? 'Erweitertes Einsatzgebiet Brandenburg (anklicken zum Fokussieren):' : 'Extended Service Area Brandenburg (click to focus map):'}
+                </span>
+                <div className="flex flex-wrap gap-1.5 mt-1">
+                  {BRANDENBURG_CITIES.map((c) => (
+                    <button 
+                      key={c.nameDe} 
+                      type="button"
+                      onClick={() => handleDistrictClick(c.coords, c.nameDe)}
+                      className="bg-[#F2FDF5] hover:bg-emerald-100 hover:text-emerald-800 text-emerald-700 text-[10px] uppercase font-black px-2.5 py-1.5 rounded-lg border border-emerald-100/40 cursor-pointer transition duration-150 hover:scale-102 active:scale-98 text-left"
+                    >
+                      {c.nameDe}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

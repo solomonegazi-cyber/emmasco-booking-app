@@ -43,9 +43,9 @@ export function triggerBrowserNotification(payload: NotificationPayload) {
     try {
       const options: NotificationOptions = {
         body: payload.body,
-        icon: payload.icon || 'https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png',
+        icon: payload.icon || '/logo.png',
         tag: payload.tag || 'emmasco-status',
-        badge: 'https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png',
+        badge: '/logo.png',
         requireInteraction: false,
         silent: false,
         data: payload.data
@@ -106,7 +106,7 @@ export function sendBookingStatusNotification(
   triggerBrowserNotification({
     title,
     body,
-    icon: 'https://emmascoreinigungsteam.de/wp-content/uploads/2026/07/favicon-512.png',
+    icon: '/logo.png',
     tag: `booking-status-${status}`,
     data: {
       url: window.location.origin + '/customer-dashboard'

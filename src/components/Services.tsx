@@ -448,33 +448,49 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
                 center: {
                   x: 0,
                   opacity: 1,
+                  transition: {
+                    x: { type: "spring", stiffness: 350, damping: 32 },
+                    opacity: { duration: 0.25 },
+                    staggerChildren: 0.08,
+                    delayChildren: 0.05
+                  }
                 },
                 exit: (dir: number) => ({
                   x: dir * -120,
                   opacity: 0,
+                  transition: {
+                    x: { type: "spring", stiffness: 350, damping: 32 },
+                    opacity: { duration: 0.25 }
+                  }
                 })
               }}
               initial="enter"
-              animate="center"
+              whileInView="center"
+              viewport={{ once: true, margin: "-40px" }}
               exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 350, damping: 32 },
-                opacity: { duration: 0.25 }
-              }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left"
             >
               <AnimatePresence mode="popLayout">
-                {filteredServices.map((service) => (
+                {filteredServices.map((service, index) => (
                   <motion.div
                     layout
-                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -20 }}
-                    whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
-                    transition={{ 
-                      duration: 0.4, 
-                      ease: [0.16, 1, 0.3, 1]
+                    custom={index}
+                    variants={{
+                      enter: { opacity: 0, y: 35, scale: 0.96 },
+                      center: (idx: number) => ({ 
+                        opacity: 1, 
+                        y: 0, 
+                        scale: 1,
+                        transition: {
+                          type: "spring",
+                          stiffness: 110,
+                          damping: 16,
+                          delay: idx * 0.06
+                        }
+                      }),
+                      exit: { opacity: 0, scale: 0.96, y: -25, transition: { duration: 0.2 } }
                     }}
+                    whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
                     key={service.id}
                     id={`service-detail-card-${service.id}`}
                     className="bg-white border border-blue-50 hover:border-blue-101 rounded-3xl p-6 shadow-[0_8px_20px_rgba(0,86,214,0.03)] hover:shadow-[0_15px_30px_rgba(0,86,214,0.08)] flex flex-col justify-between relative overflow-hidden group"
@@ -533,22 +549,45 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
                     </div>
 
                     <div className="mt-8 pt-4 border-t border-slate-100 flex flex-col gap-4">
-                      <div className="flex justify-between items-center bg-[#F6FAFF] p-4 rounded-2xl border border-blue-101/40">
-                        <div>
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                            {language === 'de' ? 'Verrechnung' : 'Hourly Rate'}
-                          </span>
-                          <span className="text-sm font-extrabold text-[#0056D6]">{service.price}</span>
+                      {/* Professional Quotation Section inside a subtle light-blue information box */}
+                      <div className="bg-blue-50/70 border border-blue-100/80 p-4 rounded-2xl text-xs flex flex-col gap-1.5 shadow-2xs">
+                        <div className="flex items-center gap-1.5 text-[#0056D6] font-black uppercase text-[10px] tracking-wider">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#0056D6] animate-pulse"></span>
+                          {language === 'de' ? 'Individuelles Angebot' : 'Quotation'}
                         </div>
-                        <div className="text-right">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">
-                            {language === 'de' ? 'Pflegegrad' : 'Care Level'}
-                          </span>
-                          <span className="text-xs font-extrabold text-green-700">
-                            {language === 'de' ? '100% Kasse' : '100% Covered'}
-                          </span>
-                        </div>
+                        <p className="text-slate-650 font-semibold leading-relaxed text-[11px]">
+                          {language === 'de' 
+                            ? 'Jeder Kunde hat einzigartige Anforderungen. Wir erstellen ein persönliches Angebot basierend auf Ihren gewünschten Leistungen, der Objektgröße, dem Pflegebedarf und der Häufigkeit des Services.'
+                            : 'Every client has unique requirements. We prepare a personalised quotation based on your requested services, property size, care needs and frequency of service.'}
+                        </p>
                       </div>
+
+                      {/* Direct Billing Eligibility Badges (Extremely High Visibility) */}
+                      {(service.id === 'haushaltshilfe' || service.id === 'einkaufshilfe' || service.id === 'alltagsbegleitung' || service.id === 'angehoerige') ? (
+                        <div className="bg-emerald-50/80 border border-emerald-100 p-3 rounded-xl text-left flex items-start gap-2">
+                          <span className="text-sm mt-0.5">🛡️</span>
+                          <div>
+                            <span className="text-[9px] font-black text-emerald-800 uppercase tracking-widest block">
+                              {language === 'de' ? 'Pflegekasse Abrechnung' : 'Care Fund Approved'}
+                            </span>
+                            <span className="text-xs font-bold text-emerald-950">
+                              {language === 'de' ? '100% abrechenbar (§ 45a SGB XI)' : '100% Direct Billing eligible'}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-slate-50 border border-slate-150 p-3 rounded-xl text-left flex items-start gap-2">
+                          <span className="text-sm mt-0.5">💼</span>
+                          <div>
+                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">
+                              {language === 'de' ? 'Abrechnungsart' : 'Billing Type'}
+                            </span>
+                            <span className="text-xs font-bold text-slate-800">
+                              {language === 'de' ? 'Bargeldlose Überweisung / SEPA' : 'Cashless Bank Transfer / SEPA'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
 
                       <div className="grid grid-cols-2 gap-2">
                         <button
@@ -600,6 +639,127 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
               )}
             </motion.div>
           </AnimatePresence>
+        </div>
+
+        {/* Transparent Pricing & Cashless Payments Info Section */}
+        <div className="max-w-4xl mx-auto px-4 mt-16">
+          <div className="bg-white border border-blue-50 p-6 md:p-10 rounded-3xl shadow-[0_8px_30px_rgba(0,86,214,0.02)] flex flex-col gap-6 text-left relative overflow-hidden">
+            {/* Subtle Accent Layer */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-[#0056D6]" />
+            
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div className="p-3 bg-blue-50 rounded-2xl text-[#0056D6]">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg md:text-xl font-black text-slate-900 leading-tight">
+                  {language === 'de' ? 'Transparente Preisgestaltung & bargeldlose Zahlung' : 'Transparent Pricing & Cashless Payments'}
+                </h2>
+                <p className="text-[10px] font-black text-slate-400 mt-0.5 tracking-wider uppercase">
+                  Emmasco ReinigungsTeam UG (haftungsbeschränkt)
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 text-xs md:text-sm leading-relaxed text-slate-650 font-semibold">
+              {/* Left Column: Quotation info & Direct Billing */}
+              <div className="flex flex-col gap-4">
+                <p>
+                  {language === 'de'
+                    ? 'Bei der Emmasco ReinigungsTeam UG erhält jeder Kunde ein individuelles Angebot, das auf seine persönlichen Anforderungen abgestimmt ist. Dies garantiert eine transparente Preisgestaltung ohne versteckte Kosten.'
+                    : 'At Emmasco ReinigungsTeam UG, every customer receives an individual quotation based on their personal requirements. This ensures transparent pricing with no hidden costs.'}
+                </p>
+                
+                <div className="bg-emerald-55/30 border border-emerald-100/70 p-4 rounded-2xl flex flex-col gap-2">
+                  <span className="font-extrabold text-emerald-900 text-[10px] uppercase tracking-wider block">
+                    {language === 'de' ? 'Direktabrechnung mit Leistungsträgern:' : 'Direct Billing Options:'}
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-emerald-800 font-bold">
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500">•</span>
+                      <span>{language === 'de' ? 'Pflegekasse (§ 45a SGB XI Entlastungsbetrag)' : 'Long-Term Care Insurance (Pflegekasse)'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500">•</span>
+                      <span>{language === 'de' ? 'Krankenkasse (Haushaltshilfe § 38 SGB V)' : 'Health Insurance (Krankenkasse)'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500">•</span>
+                      <span>{language === 'de' ? 'Unfallversicherung (§ 39 SGB VII)' : 'Accident Insurance (Unfallversicherung)'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-500">•</span>
+                      <span>{language === 'de' ? 'Berufsgenossenschaften' : 'Berufsgenossenschaften'}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <p className="text-[11px] text-slate-500">
+                  {language === 'de'
+                    ? 'Privatkunden erhalten vor Beginn der Arbeiten einen persönlichen Kostenvoranschlag.'
+                    : 'Private customers receive a personalised quotation before work begins.'}
+                </p>
+              </div>
+
+              {/* Right Column: Cashless policy & methods */}
+              <div className="flex flex-col gap-4">
+                <p>
+                  {language === 'de'
+                    ? 'Um sichere, transparente und ordnungsgemäß dokumentierte Geschäftstransaktionen zu gewährleisten, akzeptiert die Emmasco ReinigungsTeam UG Zahlungen ausschließlich über rückverfolgbare, bargeldlose Zahlungsmethoden.'
+                    : 'To ensure secure, transparent and properly documented business transactions, Emmasco ReinigungsTeam UG accepts payments exclusively through traceable cashless payment methods.'}
+                </p>
+
+                <div className="bg-blue-50/50 border border-blue-100/50 p-4 rounded-2xl flex flex-col gap-2">
+                  <span className="font-extrabold text-blue-900 text-[10px] uppercase tracking-wider block">
+                    {language === 'de' ? 'Zugelassene Zahlungsmethoden:' : 'Traceable Cashless Methods:'}
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-blue-800 font-bold">
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span>
+                      <span>{language === 'de' ? 'Banküberweisung (auf Rechnung)' : 'Bank Transfer (by invoice)'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span>
+                      <span>{language === 'de' ? 'SEPA-Lastschriftverfahren' : 'SEPA Direct Debit'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span>
+                      <span>{language === 'de' ? 'Direktabrechnung mit zugelassenen Kassen' : 'Direct Billing to Approved Institutions'}</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500">•</span>
+                      <span>{language === 'de' ? 'Andere autorisierte elektronische Zahlungen' : 'Other authorised electronic payment methods'}</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-red-50 border border-red-100/80 px-4 py-2.5 rounded-xl text-xs font-bold text-red-800 flex items-center gap-2 mt-auto">
+                  <span>⚠️</span>
+                  <span>{language === 'de' ? 'Wir akzeptieren keine Barzahlungen.' : 'We do not accept cash payments.'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust Badges Row (Requirement 6) */}
+            <div className="mt-6 pt-6 border-t border-slate-100 flex flex-wrap justify-center items-center gap-4 text-xs font-bold text-slate-700">
+              <div className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-150 rounded-xl shadow-2xs">
+                <span className="text-emerald-600 font-bold">✓</span>
+                <span>{language === 'de' ? 'Individuelle Angebote' : 'Personalised Quotations'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-150 rounded-xl shadow-2xs">
+                <span className="text-emerald-600 font-bold">✓</span>
+                <span>{language === 'de' ? 'Direktabrechnung möglich' : 'Direct Billing Available'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-150 rounded-xl shadow-2xs">
+                <span className="text-emerald-600 font-bold">✓</span>
+                <span>{language === 'de' ? 'Vollständig versichert' : 'Fully Insured'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-50 border border-slate-150 rounded-xl shadow-2xs">
+                <span className="text-emerald-600 font-bold">✓</span>
+                <span>{language === 'de' ? 'Ausschließlich bargeldlose Zahlung' : 'Cashless Payments Only'}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
       </section>
@@ -677,20 +837,39 @@ export default function Services({ onSelectServiceAndBook, preselectedServiceId,
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="bg-[#F6FAFF] border border-blue-50 p-3 rounded-xl text-left">
-                  <span className="text-[10px] text-gray-400 uppercase font-black block">
-                    {language === 'de' ? 'Stundensatz Privat' : 'Private Hourly Rate'}
-                  </span>
-                  <span className="text-sm font-extrabold text-blue-900">{selectedServiceDetail.price}</span>
+              <div className="flex flex-col gap-3 pt-2">
+                {/* Quotation Information Box inside Modal */}
+                <div className="bg-blue-50/70 border border-blue-100/80 p-4 rounded-2xl text-xs flex flex-col gap-1.5 shadow-2xs text-left">
+                  <div className="flex items-center gap-1.5 text-[#0056D6] font-black uppercase text-[10px] tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#0056D6] animate-pulse"></span>
+                    {language === 'de' ? 'Individuelles Angebot' : 'Quotation'}
+                  </div>
+                  <p className="text-slate-650 font-semibold leading-relaxed text-[11px]">
+                    {language === 'de' 
+                      ? 'Jeder Kunde hat einzigartige Anforderungen. Wir erstellen ein persönliches Angebot basierend auf Ihren gewünschten Leistungen, der Objektgröße, dem Pflegebedarf und der Häufigkeit des Services.'
+                      : 'Every client has unique requirements. We prepare a personalised quotation based on your requested services, property size, care needs and frequency of service.'}
+                  </p>
                 </div>
-                <div className="bg-[#F6FAFF] border border-blue-50 p-3 rounded-xl text-left">
-                  <span className="text-[10px] text-gray-400 uppercase font-black block">
-                    {language === 'de' ? 'Anfahrtspauschale' : 'Travel Expenses'}
-                  </span>
-                  <span className="text-sm font-extrabold text-blue-900">
-                    {language === 'de' ? 'Inklusive in Berlin' : 'Free within Berlin'}
-                  </span>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#F6FAFF] border border-blue-50 p-3 rounded-xl text-left">
+                    <span className="text-[10px] text-gray-400 uppercase font-black block">
+                      {language === 'de' ? 'Abrechnungs-Typ' : 'Billing Basis'}
+                    </span>
+                    <span className="text-xs font-extrabold text-blue-900">
+                      {(selectedServiceDetail.id === 'haushaltshilfe' || selectedServiceDetail.id === 'einkaufshilfe' || selectedServiceDetail.id === 'alltagsbegleitung' || selectedServiceDetail.id === 'angehoerige') 
+                        ? (language === 'de' ? 'Pflegekasse (§45a)' : 'Care Fund (§45a)')
+                        : (language === 'de' ? 'Angebot / Kasse' : 'Quotation / Insurance')}
+                    </span>
+                  </div>
+                  <div className="bg-[#F6FAFF] border border-blue-50 p-3 rounded-xl text-left">
+                    <span className="text-[10px] text-gray-400 uppercase font-black block">
+                      {language === 'de' ? 'Anfahrtspauschale' : 'Travel Expenses'}
+                    </span>
+                    <span className="text-xs font-extrabold text-blue-900">
+                      {language === 'de' ? 'Inklusive in Berlin' : 'Free within Berlin'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

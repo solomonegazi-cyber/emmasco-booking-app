@@ -68,8 +68,8 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'services.badge': 'Hunderte glückliche Haushalte in Berlin',
     'services.title': 'Unsere Leistungen im Überblick',
     'services.subtitle': 'Hauseigene Qualitätsgarantie für Ihre Zufriedenheit.',
-    'services.rate_label': 'Verrechnungssatz',
-    'services.details_btn': 'Details & Preise',
+    'services.rate_label': 'Abrechnung & Preis',
+    'services.details_btn': 'Kostenloses Angebot anfordern',
     'services.popular_badge': 'Beliebt',
 
     // Why Us
@@ -377,8 +377,8 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'services.badge': 'Hundreds of Happy Households in Berlin',
     'services.title': 'Our Services at a Glance',
     'services.subtitle': 'In-house quality guarantee for your satisfaction.',
-    'services.rate_label': 'Billing rate',
-    'services.details_btn': 'Details & Prices',
+    'services.rate_label': 'Billing & Price',
+    'services.details_btn': 'Request a Free Quote',
     'services.popular_badge': 'Popular',
 
     // Why Us
@@ -652,7 +652,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'haushalt',
       description: 'Unterstützung beim Aufräumen, Spülen, Wäsche bügeln und der allgemeinen Organisation Ihres Zuhauses.',
       detailedDescription: 'Unser Haushaltspflegedienst sorgt für Struktur und Glanz in Ihren vier Wänden. Wir übernehmen das Bettenbeziehen, die Wäschepflege, Bügelarbeiten sowie allgemeine Reinigungs- und Aufräumarbeiten. Abrechenbar direkt über die Pflegekasse dank §45a SGB XI Anerkennung.',
-      price: 'Abrechnung über Pflegekasse (ab 29,90 € / Std.)',
+      price: 'Abrechnung über Pflegekasse (§45a SGB XI / Entlastungsbetrag)',
       priceValue: 29.90,
       iconName: 'Home',
       isPopular: true
@@ -663,7 +663,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'reinigung',
       description: 'Regelmäßige, professionelle Reinigung Ihrer Wohnräume für ein stets frisches und hygienisches Wohngefühl.',
       detailedDescription: 'Wir reinigen Böden, Oberflächen, Sanitäranlagen und Küchen gründlich und im gewünschten Intervall (wöchentlich, zweiwöchentlich). Für ein staubfreies und glänzendes Zuhause mit Premium-Anspruch.',
-      price: 'ab 34,90 € / Std.',
+      price: 'Individuelles Angebot',
       priceValue: 34.90,
       iconName: 'Sparkles',
       isPopular: false
@@ -674,7 +674,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'haushalt',
       description: 'Einkaufen von Lebensmitteln, Holen von Medikamenten und Erledigung wichtiger Besorgungen des Alltags.',
       detailedDescription: 'Wir planen mit Ihnen den Wocheneinkauf, kaufen frische Lebensmittel, holen Ihre Rezepte sowie Medikamente aus der Apotheke und bringen alles sicher zu Ihnen nach Hause. Gerne begleiten wir Sie auch beim Einkauf.',
-      price: 'Abrechnung über Pflegekasse (ab 28,50 € / Std.)',
+      price: 'Abrechnung über Pflegekasse (§45a SGB XI / Entlastungsbetrag)',
       priceValue: 28.50,
       iconName: 'ShoppingCart',
       isPopular: false
@@ -685,7 +685,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'begleitung',
       description: 'Herzliche Gesellschaft, Begleitung zu Arztterminen, Spaziergänge und gemeinsame Freizeitgestaltung.',
       detailedDescription: 'Alltagsbegleitung mit viel Empathie und Geduld. Wir lesen vor, führen anregende Gespräche, machen Spaziergänge an der frischen Luft oder begleiten Sie sicher zu Ihren Arzt- und Behördenterminen. Gut für Geist und Seele.',
-      price: 'Abrechnung über Kasse möglich (ab 29,00 € / Std.)',
+      price: 'Abrechnung über Pflegekasse möglich (§45a SGB XI)',
       priceValue: 29.05,
       iconName: 'HeartHandshake',
       isPopular: true
@@ -696,7 +696,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'begleitung',
       description: 'Zuverlässige stundenweise Betreuung Ihres Liebsten, damit pflegende Angehörige sich beruhigt Auszeiten nehmen können.',
       detailedDescription: 'Pflege und Alltagsbetreuung erfordern viel Kraft. Wir übernehmen zuverlässig stundenweise die Alltagsbegleitung und Hauswirtschaft vor Ort, damit Sie als pflegender Angehöriger neue Energie tanken, eigenen Terminen nachgehen oder Freizeit genießen können.',
-      price: 'Abrechnung über Entlastungsbetrag (ab 31,50 € / Std.)',
+      price: 'Abrechnung über Entlastungsbetrag (§45a SGB XI)',
       priceValue: 31.50,
       iconName: 'UserCheck',
       isPopular: false
@@ -707,7 +707,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'zusatz',
       description: 'Streifenfreier Glanz für Ihre Fenster, Rahmen und Glasflächen im privaten sowie gewerblichen Bereich.',
       detailedDescription: 'Unsere professionelle Glasreinigung reinigt Fenster, Fensterbänke, Rahmen und anspruchsvolle Glasfronten ohne Schlieren. Wir bringen alle benötigten Reinigungsmaterialien mit und arbeiten schnell wie gründlich.',
-      price: 'Auf Anfrage (Festpreise für Wohnungen)',
+      price: 'Individuelles Angebot auf Anfrage',
       priceValue: 45.00,
       iconName: 'GlassWater',
       isPopular: false
@@ -718,7 +718,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'zusatz',
       description: 'Professionelle Reinigung von Büros, Kanzleien und Gewerbeflächen für ein produktives Arbeitsklima.',
       detailedDescription: 'Sorgen Sie für einen glänzenden Eindruck bei Ihren Kunden und Mitarbeitern. Wir reinigen Schreibtische, Konferenzräume, sanitäre Anlagen und Küchenflächen diskret, pünktlich und nach zertifizierten Hygienestandards.',
-      price: 'ab 39,90 € / Std. (Netto)',
+      price: 'Individuelles Angebot',
       priceValue: 39.90,
       iconName: 'Briefcase',
       isPopular: false
@@ -729,7 +729,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'reinigung',
       description: 'Intensive Grundreinigung bis in die kleinsten Winkel, ideal für Ein- oder Auszüge und Jahreszeitenwechsel.',
       detailedDescription: 'Unser Deep-Cleaning-Service befreit Ihr gesamtes Zuhause von hartnäckigem Schmutz, Kalk und Fettablagerungen. Wir säubern hinter Heizkörpern, im Ofen, entkalken die Dusche fachmännisch und bringen jeden Winkel zum Glänzen.',
-      price: 'ab 44,95 € / Std.',
+      price: 'Individuelles Angebot',
       priceValue: 44.95,
       iconName: 'ShieldAlert',
       isPopular: false
@@ -742,7 +742,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'haushalt',
       description: 'Assistance with tidying up, doing dishes, ironing laundry, and general organization of your home.',
       detailedDescription: 'Our domestic care service keeps your house structured and clean. We take care of changing bed sheets, laundry service, ironing, as well as general cleaning and organizing. Bills can be sent directly to the care fund due to official §45a SGB XI licensing.',
-      price: 'Billing via Care Fund (from €29.90 / hr)',
+      price: 'Billing via Care Fund (§45a SGB XI / Relief Budget)',
       priceValue: 29.90,
       iconName: 'Home',
       isPopular: true
@@ -753,7 +753,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'reinigung',
       description: 'Regular professional cleaning of your living spaces for a constantly fresh and hygienic home feel.',
       detailedDescription: 'We clean floors, surfaces, bathrooms, and kitchens thoroughly at your desired interval (weekly, bi-weekly) to provide a dust-free and clean living sanctuary for premium clients.',
-      price: 'from €34.90 / hr',
+      price: 'Personalised Quotation',
       priceValue: 34.90,
       iconName: 'Sparkles',
       isPopular: false
@@ -764,7 +764,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'haushalt',
       description: 'Sourcing groceries, picking up medical prescriptions, and managing vital everyday chores.',
       detailedDescription: 'We plan weekly grocery lists together, shop for fresh produce, retrieve your medication prescriptions from pharmacies, and bring everything securely home. We can also accompany you on the chore trip.',
-      price: 'Billing via Care Fund (from €28.50 / hr)',
+      price: 'Billing via Care Fund (§45a SGB XI / Relief Budget)',
       priceValue: 28.50,
       iconName: 'ShoppingCart',
       isPopular: false
@@ -775,7 +775,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'begleitung',
       description: 'Warm companionship, accompaniment to medical appointments, walks, and shared hobbies.',
       detailedDescription: 'Everyday companion support served with high empathy and patience. We read, lead energetic conversations, schedule walks in nature, or accompany you to visit doctors and public agencies. Stimulating for both mind and spirit.',
-      price: 'Care Fund billing eligible (from €29.00 / hr)',
+      price: 'Care Fund billing eligible (§45a SGB XI)',
       priceValue: 29.00,
       iconName: 'HeartHandshake',
       isPopular: true
@@ -786,7 +786,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'begleitung',
       description: 'Reliable hourly companionship for your loved one, allowing caregiving relatives to take well-earned breaks.',
       detailedDescription: 'Caring for family is exhaustive. We step in on an hourly basis to take over domestic support and companionship on site, giving family relatives breathing space to recharge, manage errands, and enjoy free hours.',
-      price: 'Billing via Relief budget (from €31.50 / hr)',
+      price: 'Billing via Relief budget (§45a SGB XI)',
       priceValue: 31.50,
       iconName: 'UserCheck',
       isPopular: false
@@ -797,7 +797,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'zusatz',
       description: 'Streak-free shine for windows, frames, and glass facades for private and corporate sectors.',
       detailedDescription: 'Our expert glass sanitation cleans windows, borders, window sills, and fragile glass facades completely streak-free. We bundle all cleaning supplies and operate fast and reliably.',
-      price: 'On request (fixed flats for apartments)',
+      price: 'Personalised Quotation on Request',
       priceValue: 45.00,
       iconName: 'GlassWater',
       isPopular: false
@@ -808,7 +808,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'zusatz',
       description: 'Professional cleaning of offices, law firms, and commercial facilities for a clean workplace mood.',
       detailedDescription: 'Form a pristine impression for clients and employees. We clean desks, meeting rooms, break rooms, kitchens, and restrooms precisely, quietly, and using top hygienic standards.',
-      price: 'from €39.90 / hr (Net)',
+      price: 'Personalised Quotation',
       priceValue: 39.90,
       iconName: 'Briefcase',
       isPopular: false
@@ -819,7 +819,7 @@ const LOCALIZED_SERVICES: Record<Language, Service[]> = {
       category: 'reinigung',
       description: 'Intense basic cleaning down to the smallest corner, ideal for moving in/out or seasonal resets.',
       detailedDescription: 'Our deep cleaning package liberates your home from tough stains, lime calcium buildup, and hidden grease. We clean behind heaters, inside ovens, descale glass showers, and polish every single corner.',
-      price: 'from €44.95 / hr',
+      price: 'Personalised Quotation',
       priceValue: 44.95,
       iconName: 'ShieldAlert',
       isPopular: false
@@ -1124,7 +1124,7 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
     {
       name: 'Emma Osei',
       role: 'Gründerin & Geschäftsführerin',
-      bio: 'Mit über 15 Jahren Erfahrung in Hospitality und Pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
+      bio: 'Mit über 15 Jahren Erfahrung in Hospitality und pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
     },
     {

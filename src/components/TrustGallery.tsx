@@ -41,7 +41,7 @@ const TRUST_ITEMS: GalleryItem[] = [
     roleEn: 'Founder & Managing Director',
     shortDescDe: 'Über 15 Jahre Branchenerfahrung. Koordiniert das Team mit Herz, Empathie und absolutem Qualitätsfokus.',
     shortDescEn: 'Over 15 years of industry experience. Coordinates the team with heart, empathy and absolute quality focus.',
-    longDescDe: 'Emma gründete das Emmasco Reinigungsteam, um haushaltsnahe Unterstützung mit familiärer Nestwärme zu vereinen. Als ausgebildete Hauswirtschaftsleiterin und Expertin für Pflege-Entlastungsleistungen (§45a SGB XI) berät sie Berliner Familien auch persönlich bei der Kassenabrechnung.',
+    longDescDe: 'Emma gründete das Emmasco Reinigungsteam, um haushaltsnahe Unterstützung mit familiärer Nestwärme zu vereinen. Als ausgebildete Hauswirtschaftsleiterin und expertin für Pflege-Entlastungsleistungen (§45a SGB XI) berät sie Berliner Familien auch persönlich bei der Kassenabrechnung.',
     longDescEn: 'Emma founded the Emmasco Cleaning Team to combine household assistance with familial warmth. As a qualified home economics manager and expert in care relief services (§45a SGB XI), she also personally advises Berlin families on health insurance billing.',
     certificationDe: 'Zertifizierte Pflegeberaterin & Hauswirtschaftsleiterin',
     certificationEn: 'Certified Care Consultant & Housekeeping Manager',

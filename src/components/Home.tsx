@@ -12,9 +12,11 @@ import {
 import { GALLERY_ITEMS } from '../data';
 import { useLanguage } from '../LanguageContext';
 import TrustGallery from './TrustGallery';
+import { motion } from 'motion/react';
 
 // Dynamic asset path resolver that bypasses typescript module declaration limits
 const heroImage = new URL('../assets/images/caregiver_helping_elderly_1781598992140.jpg', import.meta.url).href;
+const founderImage = new URL('../assets/images/founder_portrait_1784068713580.jpg', import.meta.url).href;
 
 interface HomeProps {
   setCurrentPage: (page: string) => void;

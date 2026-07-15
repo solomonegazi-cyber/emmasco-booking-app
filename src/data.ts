@@ -12,7 +12,7 @@ export const SERVICES: Service[] = [
     category: 'haushalt',
     description: 'Unterstützung beim Aufräumen, Spülen, Wäsche bügeln und der allgemeinen Organisation Ihres Zuhauses.',
     detailedDescription: 'Unser Haushaltspflegedienst sorgt für Struktur und Glanz in Ihren vier Wänden. Wir übernehmen das Bettenbeziehen, die Wäschepflege, Bügelarbeiten sowie allgemeine Reinigungs- und Aufräumarbeiten. Abrechenbar direkt über die Pflegekasse dank §45a SGB XI Anerkennung.',
-    price: 'Abrechnung über Pflegekasse (ab 29,90 € / Std.)',
+    price: 'Abrechnung über Pflegekasse (§45a SGB XI / Entlastungsbetrag)',
     priceValue: 29.90,
     iconName: 'Home',
     isPopular: true
@@ -23,7 +23,7 @@ export const SERVICES: Service[] = [
     category: 'reinigung',
     description: 'Regelmäßige, professionelle Reinigung Ihrer Wohnräume für ein stets frisches und hygienisches Wohngefühl.',
     detailedDescription: 'Wir reinigen Böden, Oberflächen, Sanitäranlagen und Küchen gründlich und im gewünschten Intervall (wöchentlich, zweiwöchentlich). Für ein staubfreies und glänzendes Zuhause mit Premium-Anspruch.',
-    price: 'ab 34,90 € / Std.',
+    price: 'Individuelles Angebot',
     priceValue: 34.90,
     iconName: 'Sparkles',
     isPopular: false
@@ -34,7 +34,7 @@ export const SERVICES: Service[] = [
     category: 'haushalt',
     description: 'Einkaufen von Lebensmitteln, Holen von Medikamenten und Erledigung wichtiger Besorgungen des Alltags.',
     detailedDescription: 'Wir planen mit Ihnen den Wocheneinkauf, kaufen frische Lebensmittel, holen Ihre Rezepte sowie Medikamente aus der Apotheke und bringen alles sicher zu Ihnen nach Hause. Gerne begleiten wir Sie auch beim Einkauf.',
-    price: 'Abrechnung über Pflegekasse (ab 28,50 € / Std.)',
+    price: 'Abrechnung über Pflegekasse (§45a SGB XI / Entlastungsbetrag)',
     priceValue: 28.50,
     iconName: 'ShoppingCart',
     isPopular: false
@@ -45,7 +45,7 @@ export const SERVICES: Service[] = [
     category: 'begleitung',
     description: 'Herzliche Gesellschaft, Begleitung zu Arztterminen, Spaziergänge und gemeinsame Freizeitgestaltung.',
     detailedDescription: 'Alltagsbegleitung mit viel Empathie und Geduld. Wir lesen vor, führen anregende Gespräche, machen Spaziergänge an der frischen Luft oder begleiten Sie sicher zu Ihren Arzt- und Behördenterminen. Gut für Geist und Seele.',
-    price: 'Abrechnung über Kasse möglich (ab 29,00 € / Std.)',
+    price: 'Abrechnung über Pflegekasse möglich (§45a SGB XI)',
     priceValue: 29.00,
     iconName: 'HeartHandshake',
     isPopular: true
@@ -56,7 +56,7 @@ export const SERVICES: Service[] = [
     category: 'begleitung',
     description: 'Zuverlässige stundenweise Betreuung Ihres Liebsten, damit pflegende Angehörige sich beruhigt Auszeiten nehmen können.',
     detailedDescription: 'Pflege und Alltagsbetreuung erfordern viel Kraft. Wir übernehmen zuverlässig stundenweise die Alltagsbegleitung und Hauswirtschaft vor Ort, damit Sie als pflegender Angehöriger neue Energie tanken, eigenen Terminen nachgehen oder Freizeit genießen können.',
-    price: 'Abrechnung über Entlastungsbetrag (ab 31,50 € / Std.)',
+    price: 'Abrechnung über Entlastungsbetrag (§45a SGB XI)',
     priceValue: 31.50,
     iconName: 'UserCheck',
     isPopular: false
@@ -67,7 +67,7 @@ export const SERVICES: Service[] = [
     category: 'zusatz',
     description: 'Streifenfreier Glanz für Ihre Fenster, Rahmen und Glasflächen im privaten sowie gewerblichen Bereich.',
     detailedDescription: 'Unsere professionelle Glasreinigung reinigt Fenster, Fensterbänke, Rahmen und anspruchsvolle Glasfronten ohne Schlieren. Wir bringen alle benötigten Reinigungsmaterialien mit und arbeiten schnell wie gründlich.',
-    price: 'Auf Anfrage (Festpreise für Wohnungen)',
+    price: 'Individuelles Angebot auf Anfrage',
     priceValue: 45.00,
     iconName: 'GlassWater',
     isPopular: false
@@ -78,7 +78,7 @@ export const SERVICES: Service[] = [
     category: 'zusatz',
     description: 'Professionelle Reinigung von Büros, Kanzleien und Gewerbeflächen für ein produktives Arbeitsklima.',
     detailedDescription: 'Sorgen Sie für einen glänzenden Eindruck bei Ihren Kunden und Mitarbeitern. Wir reinigen Schreibtische, Konferenzräume, sanitäre Anlagen und Küchenflächen diskret, pünktlich und nach zertifizierten Hygienestandards.',
-    price: 'ab 39,90 € / Std. (Netto)',
+    price: 'Individuelles Angebot',
     priceValue: 39.90,
     iconName: 'Briefcase',
     isPopular: false
@@ -89,7 +89,7 @@ export const SERVICES: Service[] = [
     category: 'reinigung',
     description: 'Intensive Grundreinigung bis in die kleinsten Winkel, ideal für Ein- oder Auszüge und Jahreszeitenwechsel.',
     detailedDescription: 'Unser Deep-Cleaning-Service befreit Ihr gesamtes Zuhause von hartnäckigem Schmutz, Kalk und Fettablagerungen. Wir säubern hinter Heizkörpern, im Ofen, entkalken die Dusche fachmännisch und bringen jeden Winkel zum Glänzen.',
-    price: 'ab 44,95 € / Std.',
+    price: 'Individuelles Angebot',
     priceValue: 44.95,
     iconName: 'ShieldAlert',
     isPopular: false
