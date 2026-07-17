@@ -150,6 +150,13 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'about.team_subtitle': 'Kompetente Profis mit Herzblut sorgen für Ihre optimale Unterstützung im Berliner Großstadtdschungel.',
     'about.timeline_badge': 'Chronik',
     'about.timeline_title': 'Unser bisheriger Meilensteinweg',
+    'about.founder_badge': 'Unsere Gründergeschichte',
+    'about.founder_title': 'Die Geschichte unseres Gründers',
+    'about.founder_heading': 'Mehr als ein Reinigungsdienst — Eine Geschichte der Fürsorge',
+    'about.founder_p1': 'Mein Name ist Emmanuel Isodje, und ich habe das Emmasco ReinigungsTeam UG im Mai 2025 gegründet – nur wenige Tage nach dem Tod meiner geliebten Mutter im Alter von 93 Jahren.',
+    'about.founder_p2': 'In den letzten Tagen ihres Lebens wurde meine Mutter schwer krank. Diese schwierige und emotionale Zeit hat mir gezeigt, wie wertvoll es ist, fürsorgliche Menschen in der Nähe zu haben – Menschen, die praktische Unterstützung, Trost und Gesellschaft bieten, wenn jeder Augenblick zählt. In diesen intensiven Tagen der Trauer und des Nachdenkens wurde der Grundstein für das Emmasco ReinigungsTeam gelegt.',
+    'about.founder_p3': 'Mir wurde klar, dass ein sauberes, ordentliches und hygienisches Zuhause nicht nur eine Frage der Ästhetik ist – es geht darum, Seelenfrieden zu schenken, die Würde zu bewahren und unseren Lieben einen sicheren Rückzugsort zu bieten. Wir sind mehr als nur ein Reinigungsdienst; wir sind ein engagierter Partner, der Familien in ganz Berlin Fürsorge, Wärme und professionelle Zuverlässigkeit bringt.',
+    'about.founder_p4': 'Jedes Mitglied unseres Teams ist sorgfältig geprüft und teilt unsere Mission, Ihr Zuhause mit demselben Respekt und derselben liebevollen Fürsorge zu behandeln, die wir unseren eigenen Familien entgegenbringen würden. Wir sind stolz darauf, Ihnen zu dienen und Ihnen dabei zu helfen, Ihre Unabhängigkeit und Ihren Komfort zu bewahren.',
 
     // Services Page Specific
     'services.page.banner_badge': 'Ausführliches Leistungsportfolio',
@@ -459,6 +466,13 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'about.team_subtitle': 'Competent professionals supporting you in everyday Berlin hustle with full hearts.',
     'about.timeline_badge': 'Chronology',
     'about.timeline_title': 'Our Milestone Journey',
+    'about.founder_badge': 'Our Founder\'s Story',
+    'about.founder_title': 'Our Founder\'s Story',
+    'about.founder_heading': 'More Than a Cleaning Service — A Story of Care',
+    'about.founder_p1': 'My name is Emmanuel Isodje, and I founded Emmasco ReinigungsTeam UG in May 2025—just a few days after my beloved mother passed away at the age of 93.',
+    'about.founder_p2': 'During the final days of her life, my mother became seriously ill. This difficult and emotional time showed me how valuable it is to have caring people nearby—people who offer practical support, comfort and companionship when every moment matters. It was during these intense days of sorrow and reflection that the seed for Emmasco ReinigungsTeam was planted.',
+    'about.founder_p3': 'I realized that keeping a clean, tidy, and hygienic home is not just about aesthetics—it is about restoring peace of mind, preserving dignity, and providing a safe sanctuary for our loved ones. We are more than just a cleaning service; we are a dedicated partner committed to bringing care, warmth, and professional reliability to families throughout Berlin.',
+    'about.founder_p4': 'Every member of our team is fully vetted and shares this core mission of treating your home with the same respect and tender care that we would show to our own families. We are proud to serve you and help you maintain your independence and comfort.',
 
     // Services Page Specific
     'services.page.banner_badge': 'Detailed Portfolio',
@@ -982,7 +996,7 @@ const LOCALIZED_BLOG_ARTICLES: Record<Language, BlogArticle[]> = {
       title: 'Gesundes Altern: Alltagsunterstützung und seelische Gesundheit',
       category: 'Health',
       excerpt: 'Soziale Isolation ist im Alter ein großes Risiko. Wie Alltagsbegleitung nicht nur das Leben leichter, sondern auch glücklicher macht.',
-      content: `Einsamkeit und körperliche Einschränkungen belasten viele Senioren. Häufig ziehen sie sich zurück, was die geistige Fitness und seelische Balance beeinträchtigen kann. Die haushaltsnahe Dienstleistung und Alltagsbegleitung nach § 45a SGB XI setzt genau hier an und bietet weit mehr als nur praktische Hilfe.
+      content: `Einsamkeit und körperliche Einschränkungen belasten many Senioren. Häufig ziehen sie sich zurück, was die geistige Fitness und seelische Balance beeinträchtigen kann. Die haushaltsnahe Dienstleistung und Alltagsbegleitung nach § 45a SGB XI setzt genau hier an und bietet weit mehr als nur praktische Hilfe.
   
   ### Brücke gegen Einsamkeit
   Eine herzliche Alltagsbegleitung bringt Struktur und Freude. Durch gemeinsame Gespräche bei einer Tasse Kaffee, das gemeinsame Backen oder Spaziergänge im Park wird das Gehirn angeregt, die Stimmung steigt, und Depression im Alter kann aktiv vorgebeugt werden.

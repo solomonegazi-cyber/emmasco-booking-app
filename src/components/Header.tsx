@@ -159,11 +159,10 @@ export default function Header({
             className="flex items-center select-none text-left cursor-pointer transition transform hover:opacity-95"
             id="header-logo-btn"
           >
-            <img 
-              src="https://emmascoreinigungsteam.de/wp-content/uploads/2026/06/cropped-emmascoreinigungsteam-logo-200x89.png" 
-              alt="ERT EMMASCO REINIGUNGSTEAM Logo" 
-              className="h-[42px] md:h-[56px] w-auto object-contain bg-transparent"
-              referrerPolicy="no-referrer"
+            <img
+              src="/logo.png"
+              alt="ERT EMMASCO REINIGUNGSTEAM Logo"
+              className="h-[42px] md:h-[56px] w-auto object-contain"
             />
           </button>
 

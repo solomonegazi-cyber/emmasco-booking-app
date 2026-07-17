@@ -321,21 +321,21 @@ export const GALLERY_ITEMS = [
     id: 'gal1',
     title: 'Badezimmer Grundreinigung',
     desc: 'Beseitigung von extremen Kalkablagerungen und Fugen-Verschmutzungen.',
-    before: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=40&w=400', // soapy bath / dry wall
-    after: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=40&w=400' // clean shiny kitchen / bath
+    before: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=40&w=400',
+    after: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=40&w=400'
   },
   {
     id: 'gal2',
     title: 'Unterhaltsreinigung Wohnzimmer',
     desc: 'Staubfreie Vitrinen und streifenfreie Holzböden nach Profi-Wischtechnik.',
-    before: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=40&w=400', // messy interior
-    after: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=40&w=400' // tidy bright interior
+    before: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&q=40&w=400',
+    after: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=40&w=400'
   },
   {
     id: 'gal3',
     title: 'Fenster- & Glasreinigung',
     desc: 'Spiegelblanke Scheiben und tadellos gesäuberte Rahmen außen.',
-    before: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=40&w=400', // dusty window reflection
-    after: 'https://images.unsplash.com/photo-1549558549-415fa4fc37eb?auto=format&fit=crop&q=40&w=400' // clear window
+    before: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=40&w=400',
+    after: 'https://images.unsplash.com/photo-1549558549-415fa4fc37eb?auto=format&fit=crop&q=40&w=400'
   }
 ];

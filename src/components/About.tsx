@@ -6,6 +6,9 @@
 import React from 'react';
 import { ShieldCheck, Heart, Award, Eye, Rocket, Check } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
+import { motion } from 'motion/react';
+
+const founderPortrait = new URL('../assets/images/founder_portrait_1784068713580.jpg', import.meta.url).href;
 
 export default function About() {
   const { language, t, teamMembers, timelineEvents, companyValues } = useLanguage();
@@ -107,6 +110,192 @@ export default function About() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Our Founder's Story Section */}
+      <section className="bg-white py-20 border-t border-blue-50 overflow-hidden text-left">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start"
+          >
+            {/* Left Column: Portrait */}
+            <div className="lg:col-span-5 flex justify-center lg:justify-start">
+              <div className="relative w-full max-w-[450px] rounded-2xl overflow-hidden shadow-[0_12px_30px_rgba(0,0,0,0.08)] bg-slate-50 border border-slate-100">
+                <img
+                  src={founderPortrait}
+                  alt="Emmanuel Isodje"
+                  className="w-full h-auto object-contain rounded-2xl select-none"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Story Content */}
+            <div className="lg:col-span-7 flex flex-col gap-6 min-h-fit">
+              <div className="flex flex-col gap-2">
+                <span className="text-blue-600 font-extrabold uppercase text-xs tracking-widest bg-blue-50 px-3 py-1 rounded-full self-start">
+                  {t('about.founder_badge')}
+                </span>
+                <h2 className="text-3xl md:text-4xl font-black text-blue-950 tracking-tight leading-tight">
+                  {t('about.founder_heading')}
+                </h2>
+              </div>
+
+              {language === 'de' ? (
+                <div className="space-y-6 text-slate-700 text-sm md:text-base leading-8 font-semibold w-full break-words">
+                  <p>
+                    Mein Name ist <strong className="text-base md:text-lg font-extrabold text-blue-950">Emmanuel Isodje</strong>, und ich habe das Emmasco ReinigungsTeam UG im Mai 2025 gegründet – nur wenige Tage nach dem Tod meiner geliebten Mutter im Alter von 93 Jahren.
+                  </p>
+                  <p>
+                    In den letzten Tagen ihres Lebens wurde meine Mutter schwer krank. Diese schwierige und emotionale Zeit hat mir gezeigt, wie wertvoll es ist, fürsorgliche Menschen in der Nähe zu haben – Menschen, die praktische Unterstützung, Trost und Gesellschaft bieten, wenn alltägliche Aufgaben zu einer Überlastung werden. Meine Familie stand an ihrer Seite und pflegte sie, bis sie friedlich einschlief.
+                  </p>
+                  <p>
+                    Diese Erfahrung inspirierte mich dazu, die Emmasco ReinigungsTeam UG zu gründen. Ich wollte ein Unternehmen schaffen, das Menschen in ihrem eigenen Zuhause mit derselben Empathie, demselben Respekt und derselben Hingabe unterstützt, die meine Familie meiner Mutter entgegengebracht hat.
+                  </p>
+                  <p>
+                    Für uns sind Sie niemals einfach nur ein Kunde. Sie sind ein Mensch, der es verdient, sich in seinem eigenen Zuhause wohl, respektiert und gut unterstützt zu fühlen. Unser freundliches Team freut sich darauf, Sie bei alltäglichen Haushaltsaufgaben zu entlasten, damit Sie mehr Lebensqualität, Unabhängigkeit und Seelenfrieden genießen können.
+                  </p>
+                  <div>
+                    <p className="font-extrabold text-blue-950 mb-3 text-base">Wir unterstützen mit Stolz:</p>
+                    <ul className="space-y-3 pl-1 font-semibold text-slate-700">
+                      <li className="flex items-start gap-3">
+                        <span className="text-blue-600 mt-1 select-none font-bold">✓</span>
+                        <span>Menschen mit Pflegegrad 1–5 über den monatlichen Entlastungsbetrag.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-blue-600 mt-1 select-none font-bold">✓</span>
+                        <span>Schwangere und Familien im Rahmen der Haushaltshilfe nach § 38 SGB V.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-blue-600 mt-1 select-none font-bold">✓</span>
+                        <span>Anspruchsberechtigte auf Haushaltshilfe nach § 39 SGB VII.</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="text-blue-600 mt-1 select-none font-bold">✓</span>
+                        <span>Privatkunden, die eine verlässliche Unterstützung im Haushalt suchen.</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <p>
+                    Wir kooperieren mit Krankenkassen, Pflegekassen, Unfallversicherungsträgern und Berufsgenossenschaften. Bei vorliegender Bewilligung können wir direkt mit dem zuständigen Kostenträger abrechnen.
+                  </p>
+                  <p>
+                    Jeder Kunde erhält unabhängig vom Umfang der gewünschten Leistung denselben Respekt, dieselbe Freundlichkeit und Professionalität.
+                  </p>
+                  <p>
+                    Vielen Dank für Ihr Vertrauen in die Emmasco ReinigungsTeam UG.
+                  </p>
+                  <div className="pt-6 border-t border-blue-50/70 mt-8">
+                    <p className="text-sm text-slate-500 font-bold">Herzliche Grüße,</p>
+                    <p className="text-base md:text-lg font-black text-blue-950 mt-1">Emmanuel Isodje</p>
+                    <p className="text-xs md:text-sm text-slate-500 font-bold">Gründer & Geschäftsführer</p>
+                    <p className="text-xs md:text-sm text-slate-400 font-semibold">Emmasco ReinigungsTeam UG (haftungsbeschränkt)</p>
+                  </div>
+                </div>
+              ) : (
+                <div
+  className="
+    space-y-6
+    text-slate-700
+    text-sm
+    md:text-base
+    leading-8
+    font-semibold
+    max-h-[700px]
+    overflow-y-auto
+    pr-4
+    scrollbar-thin
+    scrollbar-thumb-blue-300
+    scrollbar-track-transparent
+  "
+>
+  <p>
+    My name is <strong className="font-extrabold text-blue-950">Emmanuel Isodje</strong>, and I founded Emmasco ReinigungsTeam UG in May 2025—just a few days after my beloved mother passed away at the age of 93.
+  </p>
+
+  <p>
+    During the final days of her life, my mother became seriously ill. This difficult and emotional time showed me how valuable it is to have caring people nearby—people who offer practical support, comfort and companionship when everyday tasks become overwhelming. My family stood by her side and cared for her until she peacefully passed away.
+  </p>
+
+  <p>
+    That experience inspired me to establish Emmasco ReinigungsTeam UG. I wanted to create a company that would support people in their own homes with the same compassion, respect and dedication that my family showed my mother.
+  </p>
+
+  <p>
+    For us, you are never simply a customer. You are a person who deserves to feel comfortable, respected and well supported in your own home. Our friendly team is pleased to assist you with household tasks so that you can enjoy greater comfort, independence and peace of mind.
+  </p>
+
+  <div>
+    <h4 className="font-extrabold text-blue-950 text-lg mb-4">
+      We support:
+    </h4>
+
+    <ul className="space-y-4">
+
+      <li className="flex items-start gap-3">
+        <span className="text-blue-600 font-bold mt-1">✓</span>
+        <span>People with Pflegegrad 1–5 through the Entlastungsbetrag of €131 per month.</span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <span className="text-blue-600 font-bold mt-1">✓</span>
+        <span>Expectant mothers and families with newborn babies through household assistance under § 38 SGB V.</span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <span className="text-blue-600 font-bold mt-1">✓</span>
+        <span>People entitled to household assistance under statutory accident insurance pursuant to § 39 SGB VII.</span>
+      </li>
+
+      <li className="flex items-start gap-3">
+        <span className="text-blue-600 font-bold mt-1">✓</span>
+        <span>Private customers who need reliable help in their homes.</span>
+      </li>
+
+    </ul>
+  </div>
+
+  <p>
+    We cooperate with health insurance funds, long-term care insurance funds, accident insurance funds and employers’ liability insurance associations. Where approval and the necessary requirements are in place, we can bill the responsible institution directly—helping to reduce paperwork and giving you one less thing to worry about.
+  </p>
+
+  <p>
+    Within the approved or agreed service hours, we carefully provide the household assistance that best meets your individual needs. We listen to you, respect your wishes and do our very best to make everyday life at home easier.
+  </p>
+
+  <p>
+    Thank you for placing your trust in Emmasco ReinigungsTeam UG. It is our privilege to be there for you when you need a helping hand.
+  </p>
+
+  <div className="pt-8 mt-8 border-t border-blue-100">
+
+    <p className="text-slate-500 font-bold">
+      Warm regards,
+    </p>
+
+    <p className="text-xl font-black text-blue-950 mt-2">
+      Emmanuel Isodje
+    </p>
+
+    <p className="text-sm font-bold text-slate-600">
+      Founder and Managing Director
+    </p>
+
+    <p className="text-sm text-slate-500">
+      Emmasco ReinigungsTeam UG (haftungsbeschränkt)
+    </p>
+
+  </div>
+
+</div>
+              )}
+            </div>
+          </motion.div>
         </div>
       </section>
 
