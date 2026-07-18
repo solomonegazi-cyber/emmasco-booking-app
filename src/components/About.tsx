@@ -36,38 +36,10 @@ export default function About() {
       {/* Story, Mission & Vision */}
       <section className="max-w-7xl mx-auto px-4 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         
-        {/* Left column: Story */}
-        <div className="lg:col-span-7 bg-white p-8 md:p-10 rounded-3xl border border-blue-50 shadow-sm text-left flex flex-col gap-6">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-blue-900 tracking-tight">
-            {t('about.story_title')}
-          </h2>
-          
-          <div className="space-y-4 text-gray-600 text-sm md:text-base leading-relaxed font-semibold">
-            <p>
-              {t('about.story_p1')}
-            </p>
-            <p>
-              {t('about.story_p2')}
-            </p>
-            <p>
-              <em>{t('about.story_p3')}</em>
-            </p>
-            <p>
-              {t('about.story_p4')}
-            </p>
-          </div>
-
-          {/* Core visual quote */}
-          <div className="border-l-4 border-blue-600 bg-blue-50/50 p-5 rounded-r-2xl mt-4">
-            <blockquote className="italic text-gray-700 font-bold text-sm">
-              {t('about.quote_text')}
-            </blockquote>
-            <span className="block text-xs font-black text-blue-900 mt-2">— {t('about.quote_author')}</span>
-          </div>
-        </div>
+        
 
         {/* Right column: Mission & Vision Cards */}
-        <div className="lg:col-span-5 flex flex-col gap-6 font-semibold">
+<div className="lg:col-span-12 max-w-5xl mx-auto flex flex-col gap-6 font-semibold">
           
           {/* Mission */}
           <div className="bg-white p-6 md:p-8 rounded-3xl border border-blue-50 shadow-sm text-left flex items-start gap-4 font-semibold">
