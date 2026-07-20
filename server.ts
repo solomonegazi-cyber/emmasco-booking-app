@@ -582,15 +582,41 @@ async function startServer() {
   app.post('/api/auth/login', (req, res) => {
     try {
       const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ error: 'Incorrect email or password.', errorDe: 'E-Mail oder Passwort falsch.' });
-      }
 
-      const users = readUsers();
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (!user) {
-        return res.status(401).json({ error: 'Incorrect email or password.', errorDe: 'E-Mail oder Passwort falsch.' });
-      }
+console.log("===== LOGIN DEBUG =====");
+console.log("Email entered:", email);
+console.log("Password entered:", password);
+
+if (!email || !password) {
+  return res.status(400).json({
+    error: 'Incorrect email or password.',
+    errorDe: 'E-Mail oder Passwort falsch.'
+  });
+}
+
+// Read users from database
+const users = readUsers();
+
+// Find the user
+const user = users.find(
+  u => u.email.toLowerCase() === email.toLowerCase()
+);
+
+console.log("User found:", !!user);
+
+if (user) {
+  console.log("Stored password:", user.password);
+  console.log("Stored passwordHash:", (user as any).passwordHash);
+}
+
+console.log("=======================");
+
+if (!user) {
+  return res.status(401).json({
+    error: 'Incorrect email or password.',
+    errorDe: 'E-Mail oder Passwort falsch.'
+  });
+}
 
       const storedPassword = user.password || (user as any).passwordHash;
       if (storedPassword !== password) {
