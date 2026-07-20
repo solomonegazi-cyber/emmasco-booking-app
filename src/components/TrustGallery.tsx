@@ -35,8 +35,8 @@ const TRUST_ITEMS: GalleryItem[] = [
   {
     id: 'team-emma',
     category: 'team',
-    nameDe: 'Emma Osei',
-    nameEn: 'Emma Osei',
+    nameDe: 'Emmanuel Isodje',
+    nameEn: 'Emmanuel Isodje',
     roleDe: 'Gründerin & Geschäftsführerin',
     roleEn: 'Founder & Managing Director',
     shortDescDe: 'Über 15 Jahre Branchenerfahrung. Koordiniert das Team mit Herz, Empathie und absolutem Qualitätsfokus.',

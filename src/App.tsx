@@ -776,12 +776,8 @@ export default function App() {
                     onTabChange={handleCustomerTabChange}
                     initialAuthMode={customerAuthMode}
                     onAuthModeChange={(mode) => {
-                      setCustomerAuthMode(mode);
-                      const targetPath = mode === 'forgot' ? '/forgot-password' : mode === 'reset' ? '/reset-password' : `/${mode}`;
-                      if (window.location.pathname !== targetPath) {
-                        window.history.pushState({}, '', targetPath);
-                      }
-                    }}
+  setCustomerAuthMode(mode);
+}}
                   />
                 )}
               </ErrorBoundary>

@@ -93,7 +93,7 @@ function emmasco_ajax_contact_handler() {
     $admin_email = get_option( 'admin_email' );
     $mail_title  = sprintf( '[EMMASCO Kontakt] %s - %s', $subject, $name );
     $mail_body   = sprintf(
-        "Hallo Emma Osei,\n\neine neue Kontaktanfrage wurde gesendet:\n\n" .
+        "Hallo Emmanuel Isodje,\n\neine neue Kontaktanfrage wurde gesendet:\n\n" .
         "Name: %s\nE-Mail: %s\nTelefon: %s\nBetreff: %s\n\nNachricht:\n%s\n\n" .
         "In Anfragen verwalten: %s\n\nBeste Grüße,\nEMMASCO Web-Integrator",
         $name, $email, $phone, $subject, $message,

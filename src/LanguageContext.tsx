@@ -99,7 +99,7 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     // Quality quote
     'quote.badge': 'Qualitätsversprechen',
     'quote.text': '"Bei EMMASCO geht es nicht nur um saubere Böden, sondern darum, Lebensqualität und Würde im eigenen Heim zu wahren. Jeder unserer Mitarbeiter durchläuft ein gründliches Auswahlverfahren und verinnerlicht unsere Werte."',
-    'quote.author': '— Emma Osei, Gründerin',
+    'quote.author': '— Emmanuel Isodje, Gründerin',
 
     // Results / Gallery
     'gallery.badge': 'Sichtbarer Erfolg',
@@ -129,9 +129,9 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'about.title': 'Wer wir sind & Was uns antreibt',
     'about.subtitle': 'Lernen Sie das EMMASCO Reinigungsteam kennen. Wir bringen Glanz in Ihr Haus und Herzlichkeit in Ihren Alltag.',
     'about.story_title': 'Unsere Geschichte: Pflege & Reinigung vereint',
-    'about.story_p1': 'Die Idee hinter dem EMMASCO Reinigungsteam entstand direkt in Berlin aus einem ganz persönlichen Bedürfnis heraus. Die Gründerin Emma Osei erlebte im eigenen Familienkreis, wie schwer es für pflegebedürftige Angehörige ist, den Haushalt eigenständig zu führen und gleichzeitig qualifizierte, herzliche Unterstützung zu finden.',
+    'about.story_p1': 'Die Idee hinter dem EMMASCO Reinigungsteam entstand direkt in Berlin aus einem ganz persönlichen Bedürfnis heraus. Die Gründerin Emmanuel Isodje erlebte im eigenen Familienkreis, wie schwer es für pflegebedürftige Angehörige ist, den Haushalt eigenständig zu führen und gleichzeitig qualifizierte, herzliche Unterstützung zu finden.',
     'about.story_p2': 'Oftmals gab es entweder reine Reinigungsfirmen, denen das Gespür für Senioren fehlte, oder klassische Pflegedienste, bei denen die gemütliche Zuwendung im Alltag und die sorgfältige Reinigung der Wohnung aus Zeitnot zu kurz kamen.',
-    'about.story_p3': '"Wir wollten diese Lücke schließen," berichtet Emma Osei. "Jeder Mensch hat es verdient, in einem glänzenden, frischen Zuhause zu leben und gleichzeitig eine Begleitung an der Seite zu haben, die mit echter Empathie zuhört, spazieren geht und im Alltag hilft."',
+    'about.story_p3': '"Wir wollten diese Lücke schließen," berichtet Emmanuel Isodje. "Jeder Mensch hat es verdient, in einem glänzenden, frischen Zuhause zu leben und gleichzeitig eine Begleitung an der Seite zu haben, die mit echter Empathie zuhört, spazieren geht und im Alltag hilft."',
     'about.story_p4': 'Heute ist EMMASCO ein staatlich geprüfter und anerkannter Dienstleister im Rahmen von § 45a SGB XI mit Sitz in Prenzlauer Berg, engagierten Mitarbeitern und über 500 zufriedenen Stammkunden in ganz Berlin.',
     'about.quote_text': '"Für uns ist Ihre Wohnung nicht einfach nur eine Adresse. Es ist Ihr schützender Lebensraum, in dem Respekt, Sauberkeit und Fröhlichkeit regieren sollten."',
     'about.quote_author': '— Das EMMASCO-Leitbild',
@@ -415,7 +415,7 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     // Quality quote
     'quote.badge': 'Quality Promise',
     'quote.text': '"At EMMASCO, it is not just about clean floors, but about preserving quality of life and dignity in one\'s own home. Each of our employees undergoes a thorough selection process and internalizes our values."',
-    'quote.author': '— Emma Osei, Founder',
+    'quote.author': '— Emmanuel Isodje, Founder',
 
     // Results / Gallery
     'gallery.badge': 'Visible Success',
@@ -445,9 +445,9 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'about.title': 'Who We Are & What Drives Us',
     'about.subtitle': 'Get to know the EMMASCO cleaning team. We bring shine to your home and warmth to your daily life.',
     'about.story_title': 'Our Story: Compounded Care & Quality Cleaning',
-    'about.story_p1': 'The idea behind the EMMASCO cleaning team was born in Berlin from a highly personal need. The founder Emma Osei experienced within her own family how difficult it is for relatives in need of care to run a household independently and at the same time find qualified, warm help.',
+    'about.story_p1': 'The idea behind the EMMASCO cleaning team was born in Berlin from a highly personal need. The founder Emmanuel Isodje experienced within her own family how difficult it is for relatives in need of care to run a household independently and at the same time find qualified, warm help.',
     'about.story_p2': 'Often there were either pure cleaning agencies that lacked empathy for seniors, or classic nursing care services that neglected everyday help and household keeping due to severe lack of time.',
-    'about.story_p3': '"We wanted to close this gap," Emma Osei explains. "Every person deserves to live in a clear, fresh home, while having a companion who listens with true empathy, goes for walks, and helps in everyday tasks."',
+    'about.story_p3': '"We wanted to close this gap," Emmanuel Isodje explains. "Every person deserves to live in a clear, fresh home, while having a companion who listens with true empathy, goes for walks, and helps in everyday tasks."',
     'about.story_p4': 'Today, EMMASCO is a state-certified caregiver and household services agency under SGB XI §45a with head offices in Berlin Prenzlauer Berg, dedicated employees, and over 500 happy loyal clients in Berlin.',
     'about.quote_text': '"For us, your apartment is not just an address. It is your protected living sanctuary where respect, cleanliness, and happiness should reign."',
     'about.quote_author': '— The EMMASCO Philosophy',
@@ -985,7 +985,7 @@ const LOCALIZED_BLOG_ARTICLES: Record<Language, BlogArticle[]> = {
   Nutzen Sie für Glasflächen spezielle, gewebte Glastücher, um Streifenbildung zu vermeiden. Für Fett in der Küche eignen sich gröbere Fasern mit biologischem Fettlöser.
   
   Sollten Sie keine Zeit oder Kraft dafür finden, buchen Sie einfach unser **Deep Cleaning** Team. Wir übernehmen den kompletten Frühjahrsputz für Sie!`,
-      author: 'Emma Osei, Geschäftsführung',
+      author: 'Emmanuel Isodje, Geschäftsführung',
       date: '10. Mai 2026',
       readTime: '4 Min. Lesezeit',
       image: 'https://picsum.photos/seed/cleaning1/600/400',
@@ -1059,7 +1059,7 @@ const LOCALIZED_BLOG_ARTICLES: Record<Language, BlogArticle[]> = {
   Incorporate woven microfiber towels exclusively for glass fronts to avoid streaks. Use coarser weaves with organic grease-dissolving sprays in the kitchen.
   
   If you lack time or dynamic energy, simply order our **Deep Cleaning** team. We process complete household resets for you!`,
-      author: 'Emma Osei, Executive Officer',
+      author: 'Emmanuel Isodje, Executive Officer',
       date: 'May 10, 2026',
       readTime: '4 min. read',
       image: 'https://picsum.photos/seed/cleaning1/600/400',
@@ -1116,7 +1116,7 @@ const LOCALIZED_BLOG_ARTICLES: Record<Language, BlogArticle[]> = {
 
 const LOCALIZED_TIMELINE_EVENTS: Record<Language, Array<{ year: string; title: string; text: string }>> = {
   de: [
-    { year: '2021', title: 'Gründung in Berlin', text: 'Gründung des Emmasco Reinigungsteams durch Gründerin Emma Osei in Berlin-Pankow, zunächst spezialisiert auf anspruchsvolle Privatwohnungsreinigung.' },
+    { year: '2021', title: 'Gründung in Berlin', text: 'Gründung des Emmasco Reinigungsteams durch Gründerin Emmanuel Isodje in Berlin-Pankow, zunächst spezialisiert auf anspruchsvolle Privatwohnungsreinigung.' },
     { year: '2022', title: 'Präqualifizierung & Kassen-Zertifikat', text: 'Erfolgreiche staatliche Anerkennung nach § 45a SGB XI. Damit können unsere Kunden die Leistungen über den Entlastungsbetrag direkt mit den Pflegekassen abrechnen.' },
     { year: '2023', title: 'Eröffnung Büro Prenzlauer Berg', text: 'Einzug in unser modernes Büro an der lebendigen Schönhauser Allee 163, Berlin-Prenzlauer Berg für eine bessere Erreichbarkeit und Koordination.' },
     { year: '2024', title: 'Erweiterung Alltagsbegleitung', text: 'Aufbau eines eigenen Bereichs für Senioren- und Alltagsbegleitung mit qualifizierten Alltagsbegleitern zur Förderung seelischer und sozialer Gesundheit.' },
@@ -1124,7 +1124,7 @@ const LOCALIZED_TIMELINE_EVENTS: Record<Language, Array<{ year: string; title: s
     { year: '2026', title: 'Über 500 aktive Kunden', text: 'Etablierung als eine der führenden, familiengeführten Haushaltshilfen- und Reinigungsagenturen im Berliner Norden.' }
   ],
   en: [
-    { year: '2021', title: 'Founded in Berlin', text: 'Establishment of EMMASCO Cleaning Team by Emma Osei in Berlin-Pankow, initially focusing on high-end private flat cleaning.' },
+    { year: '2021', title: 'Founded in Berlin', text: 'Establishment of EMMASCO Cleaning Team by Emmanuel Isodje in Berlin-Pankow, initially focusing on high-end private flat cleaning.' },
     { year: '2022', title: 'State License & Care Fund Registry', text: 'Obtained official German certification according to SGB XI §45a, allowing clients to refund their domestic aid directly with public health care funds.' },
     { year: '2023', title: 'Prenzlauer Berg Corporate Offices', text: 'Relocated into our current physical headquarters at Schönhauser Allee 163, Berlin-Prenzlauer Berg to secure optimal team logistics.' },
     { year: '2024', title: 'Expanded Everyday Companionship', text: 'Inaugurated a dedicated caregiver division with SGB certified companions supporting elderly citizens suffering from urban isolation.' },
@@ -1136,7 +1136,7 @@ const LOCALIZED_TIMELINE_EVENTS: Record<Language, Array<{ year: string; title: s
 const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: string; bio: string; image: string }>> = {
   de: [
     {
-      name: 'Emma Osei',
+      name: 'Emmanuel Isodje',
       role: 'Gründerin & Geschäftsführerin',
       bio: 'Mit über 15 Jahren Erfahrung in Hospitality und pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
@@ -1156,7 +1156,7 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
   ],
   en: [
     {
-      name: 'Emma Osei',
+      name: 'Emmanuel Isodje',
       role: 'Founder & CEO',
       bio: 'Leveraging over 15 years in hospitality and family welfare, she built EMMASCO to link housekeeping services with genuine emotional empathy.',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'

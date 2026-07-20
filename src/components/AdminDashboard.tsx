@@ -142,7 +142,7 @@ export default function AdminDashboard({
       category: newArticleCategory,
       excerpt: newArticleExcerpt || newArticleContent.substring(0, 100) + '...',
       content: newArticleContent,
-      author: 'Emma Osei, Geschäftsführung',
+      author: 'Emmanuel Isodje, Geschäftsführung',
       date: new Date().toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }),
       readTime: '4 Min. Lesezeit',
       image: 'https://picsum.photos/seed/blogadd/600/400',

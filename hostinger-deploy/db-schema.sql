@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `blog_posts` (
   `category` VARCHAR(50) NOT NULL,
   `excerpt` TEXT NOT NULL,
   `content` LONGTEXT NOT NULL,
-  `author` VARCHAR(100) DEFAULT 'Emma Osei',
+  `author` VARCHAR(100) DEFAULT 'Emmanuel Isodje',
   `image_url` VARCHAR(255) DEFAULT NULL,
   `tags` VARCHAR(255) DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP

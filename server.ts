@@ -3,6 +3,9 @@ import path from 'path';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
 import { createServer as createViteServer } from 'vite';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Type definitions matching client models
 interface BookingRecord {

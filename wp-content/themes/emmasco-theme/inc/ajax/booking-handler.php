@@ -164,7 +164,7 @@ function emmasco_ajax_book_handler() {
     
     // Escape contexts and build plain text email
     $body = sprintf(
-        "Hallo Emma Osei,\n\neine neue Buchungsanfrage von unserer Webseite ist eingegangen:\n\n" .
+        "Hallo Emmanuel Isodje,\n\neine neue Buchungsanfrage von unserer Webseite ist eingegangen:\n\n" .
         "Kunde: %s\nE-Mail: %s\nTelefonnummer: %s\nAdresse: %s\nDienstleistung: %s\n" .
         "Wunschtermin: %s um %s\nNetto-Schätzung: %s EUR\n\nSpezielle Wünsche:\n%s\n\n" .
         "Diese Buchung verwalten: %s\n\nBeste Grüße,\nEMMASCO Web-Integrator",

@@ -210,7 +210,7 @@ export default function DocumentPortal({
   const [authError, setAuthError] = useState<string | null>(null);
   const [typedCode, setTypedCode] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
-  const [devCodeHint, setDevCodeHint] = useState<string>('');
+  
   const [successResetMsg, setSuccessResetMsg] = useState<string>('');
 
   // Invitation fields
@@ -475,7 +475,7 @@ export default function DocumentPortal({
     e.preventDefault();
     setAuthError(null);
     setSuccessResetMsg('');
-    setDevCodeHint('');
+    
     if (!emailInput) {
       setAuthError(t('Bitte geben Sie Ihre E-Mail an.', 'Please provide your email.'));
       return;
@@ -492,9 +492,7 @@ export default function DocumentPortal({
       if (response.ok) {
         setAuthMode('reset');
         setSuccessResetMsg(t('Sicherheitscode zum Zurücksetzen wurde versendet.', 'Reset security code has been sent.'));
-        if (result.tempCode) {
-          setDevCodeHint(`[TEST ENVIRONMENT HINT] Reset Code: ${result.tempCode}`);
-        }
+        
       } else {
         setAuthError(result.error || t('Zurücksetzen fehlgeschlagen.', 'Reset failed.'));
       }
@@ -528,7 +526,7 @@ export default function DocumentPortal({
       if (response.ok) {
         setSuccessResetMsg(t('Passwort erfolgreich zurückgesetzt! Bitte loggen Sie sich ein.', 'Password successfully reset! Please sign in.'));
         setAuthMode('login');
-        setDevCodeHint('');
+        
         setTypedCode('');
         setNewPassword('');
       } else {
@@ -1210,11 +1208,7 @@ export default function DocumentPortal({
                 </div>
               )}
 
-              {devCodeHint && (
-                <div className="p-2.5 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-lg font-mono text-[10px] break-all leading-relaxed select-all">
-                  {devCodeHint}
-                </div>
-              )}
+              
 
               <button 
                 id="submit-reset-button"

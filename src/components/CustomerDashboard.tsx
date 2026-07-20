@@ -144,7 +144,7 @@ export default function CustomerDashboard({
   const [authError, setAuthError] = useState('');
   const [authSuccess, setAuthSuccess] = useState('');
   const [needsVerificationEmail, setNeedsVerificationEmail] = useState('');
-  const [devCodeHint, setDevCodeHint] = useState('');
+  
 
   // Active Tab state inside customer dashboard
   // "bookings" | "documents" | "profile" | "support"
@@ -274,7 +274,7 @@ export default function CustomerDashboard({
     e.preventDefault();
     setAuthError('');
     setAuthSuccess('');
-    setDevCodeHint('');
+    
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -289,11 +289,12 @@ export default function CustomerDashboard({
       } else if (response.status === 403 && result.needsVerification) {
         // Needs verification setup code input
         setNeedsVerificationEmail(authEmail);
-        setAuthMode('verify');
-        setAuthError(language === 'de' ? 'E-Mail-Adresse ist noch nicht verifiziert.' : 'Email address is not verified yet.');
-        if (result.tempCode) {
-          setDevCodeHint(`[TEST ENVIRONMENT HINT] Verification Code: ${result.tempCode}`);
-        }
+setAuthMode('verify');
+setAuthError(
+  language === 'de'
+    ? 'E-Mail-Adresse ist noch nicht verifiziert.'
+    : 'Email address is not verified yet.'
+);
       } else {
         const msg = language === 'de' ? 'E-Mail oder Passwort falsch.' : 'Incorrect email or password.';
         setAuthError(msg);
@@ -306,11 +307,10 @@ export default function CustomerDashboard({
 
   // Auth Handler: REGISTER Account Creation
   const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAuthError('');
-    setAuthSuccess('');
-    setDevCodeHint('');
-    clearRegistrationError();
+  e.preventDefault();
+  setAuthError('');
+  setAuthSuccess('');
+  clearRegistrationError();
 
     console.log('[REGISTRATION] Form submitted. Email:', authEmail, 'Name:', authName);
 
@@ -359,10 +359,7 @@ export default function CustomerDashboard({
         setNeedsVerificationEmail(registeredEmail);
         setAuthSuccess(language === 'de' ? 'Registrierung erfasst! Ein 6-stelliger Verifizierungscode wurde gesendet.' : 'Registration received! A 6-digit verification code has been sent.');
         
-        if (result.tempCode) {
-          console.log('[REGISTRATION SUCCESS] devCodeHint found in response:', result.tempCode);
-          setDevCodeHint(`[TEST ENVIRONMENT HINT] Verification Code: ${result.tempCode}`);
-        }
+        
         
         // Save to localStorage so verification page has fallback
         console.log('[REGISTRATION SUCCESS] Saving pending verification email to localStorage:', registeredEmail);
@@ -413,7 +410,7 @@ export default function CustomerDashboard({
       if (response.ok && result.success) {
         setAuthSuccess('Verifizierung erfolgreich! Sie können sich jetzt anmelden.');
         setAuthMode('login');
-        setDevCodeHint('');
+        
         // Autofill password credentials
         setTypedCode('');
       } else {
@@ -429,7 +426,7 @@ export default function CustomerDashboard({
     e.preventDefault();
     setAuthError('');
     setAuthSuccess('');
-    setDevCodeHint('');
+    
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
@@ -443,9 +440,7 @@ export default function CustomerDashboard({
         setNeedsVerificationEmail(authEmail);
         setAuthMode('reset');
         setAuthSuccess('Sicherheitscode zum Zurücksetzen wurde versendet.');
-        if (result.tempCode) {
-          setDevCodeHint(`[TEST ENVIRONMENT HINT] Reset Code: ${result.tempCode}`);
-        }
+        
       } else {
         setAuthError(result.error || 'Zurücksetzen fehlgeschlagen.');
       }
@@ -475,7 +470,7 @@ export default function CustomerDashboard({
       if (response.ok) {
         setAuthSuccess('Passwort erfolgreich zurückgesetzt! Bitte loggen Sie sich ein.');
         setAuthMode('login');
-        setDevCodeHint('');
+        
         setTypedCode('');
         setNewPassword('');
       } else {
@@ -1274,11 +1269,7 @@ export default function CustomerDashboard({
               </div>
             )}
 
-            {devCodeHint && (
-              <div key="dev-code-hint" className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 text-yellow-800 font-mono text-[10px] break-all leading-normal animate-fade-in">
-                <strong>{devCodeHint}</strong>
-              </div>
-            )}
+            
           </div>
 
           {/* Render exactly one active form dynamically */}

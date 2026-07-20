@@ -638,7 +638,7 @@ get_header();
                     </div>
                 </div>
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-white">
-                    <span>Emma Osei</span>
+                    <span>Emmanuel Isodje</span>
                     <a href="#booking-anchor" class="text-[#0056D6] hover:underline flex items-center gap-1">Read <i data-lucide="arrow-right" class="w-3 h-3"></i></a>
                 </div>
             </div>

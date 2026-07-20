@@ -167,7 +167,7 @@ $customer_body = "
             <strong>Einsatzort:</strong> $address<br />
         </div>
         <p>Unsere Mitarbeiter prüfen die Kapazitäten für diesen Tag. Wir rufen Sie in Kürze zurück, um die Zuweisung Ihrer Wunsch-Hilfskraft abzuschließen.</p>
-        <p>Mit herzlichen Grüßen,<br /><strong>Ihre Emma Osei</strong><br />Inhaberin des Emmasco Reinigungsteams</p>
+        <p>Mit herzlichen Grüßen,<br /><strong>Ihr Emmanuel Isodje</strong><br />Inhaberin des Emmasco Reinigungsteams</p>
     </div>
 </body>
 </html>

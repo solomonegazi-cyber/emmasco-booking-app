@@ -194,7 +194,7 @@ window.generateWpInvoicePdf = function (invData) {
 
     // Signatures
     doc.setFont('helvetica', 'italic');
-    doc.text('Emma Osei, Geschäftsführung', 15, 245);
+    doc.text('Emmanuel Isodje, Geschäftsführung', 15, 245);
     doc.line(15, 241, 75, 241);
 
     doc.save(`invoice_${invData.invoiceNo}.pdf`);

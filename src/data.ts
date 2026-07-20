@@ -177,7 +177,7 @@ Sprühen Sie Kalklöser im Bad auf und lassen Sie ihn mindestens 10 Minuten arbe
 Nutzen Sie für Glasflächen spezielle, gewebte Glastücher, um Streifenbildung zu vermeiden. Für Fett in der Küche eignen sich gröbere Fasern mit biologischem Fettlöser.
 
 Sollten Sie keine Zeit oder Kraft dafür finden, buchen Sie einfach unser **Deep Cleaning** Team. Wir übernehmen den kompletten Frühjahrsputz für Sie!`,
-    author: 'Emma Osei, Geschäftsführung',
+    author: 'Emmanuel Isodje, Geschäftsführung',
     date: '10. Mai 2026',
     readTime: '4 Min. Lesezeit',
     image: 'https://picsum.photos/seed/cleaning1/600/400',
@@ -232,7 +232,7 @@ Unsere Haushaltshilfen achten bei der täglichen Wäscheversorgung in unseren Ku
 ];
 
 export const TIMELINE_EVENTS = [
-  { year: '2021', title: 'Gründung in Berlin', text: 'Gründung des Emmasco Reinigungsteams durch Gründerin Emma Osei in Berlin-Pankow, zunächst spezialisiert auf anspruchsvolle Privatwohnungsreinigung.' },
+  { year: '2021', title: 'Gründung in Berlin', text: 'Gründung des Emmasco Reinigungsteams durch Gründerin Emmanuel Isodje in Berlin-Pankow, zunächst spezialisiert auf anspruchsvolle Privatwohnungsreinigung.' },
   { year: '2022', title: 'Präqualifizierung & Kassen-Zertifikat', text: 'Erfolgreiche staatliche Anerkennung nach § 45a SGB XI. Damit können unsere Kunden die Leistungen über den Entlastungsbetrag direkt mit den Pflegekassen abrechnen.' },
   { year: '2023', title: 'Eröffnung Büro Prenzlauer Berg', text: 'Einzug in unser modernes Büro an der lebendigen Schönhauser Allee 163, Berlin-Prenzlauer Berg für eine bessere Erreichbarkeit und Koordination.' },
   { year: '2024', title: 'Erweiterung Alltagsbegleitung', text: 'Aufbau eines eigenen Bereichs für Senioren- und Alltagsbegleitung mit qualifizierten Alltagsbegleitern zur Förderung seelischer und sozialer Gesundheit.' },
@@ -242,7 +242,7 @@ export const TIMELINE_EVENTS = [
 
 export const TEAM_MEMBERS = [
   {
-    name: 'Emma Osei',
+    name: 'Emmanuel Isodje',
     role: 'Gründerin & Geschäftsführerin',
     bio: 'Mit über 15 Jahren Erfahrung in Hospitality und Pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
     image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
