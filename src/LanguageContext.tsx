@@ -5,6 +5,9 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service, Testimonial, FAQItem, BlogArticle } from './types';
+import founderPhoto from './assets/images/founder_portrait_1784068713580.jpg';
+import adenikePhoto from './assets/images/adenike-adeshina.png';
+import juliaPhoto from './assets/images/julia-rozanski.png';
 
 type Language = 'de' | 'en';
 
@@ -454,7 +457,7 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     'about.mission_title': 'Our Mission',
     'about.mission_text': ' Is to make everyday life easier by providing reliable, respectful and compassionate household support—helping every client feel comfortable, cared for and at home.',
     'about.vision_title': 'Our Vision',
-    'about.vision_text': 'is a future where everyone can enjoy a clean, comfortable home and live with dignity, independence and peace of mind.',
+    'about.vision_text': 'Is a future where everyone can enjoy a clean, comfortable home and live with dignity, independence and peace of mind.',
     'about.cert_title': 'Official Care Fund License',
     'about.cert_text': 'Approved and registered under Berlin municipal laws. We bill care relief packages (§45a SGB XI) for all levels directly through state-certified Care Insurance procedures.',
     'about.cert_num': '■ License Number: BE-SGB11-45A-2022',
@@ -1137,21 +1140,21 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
   de: [
     {
       name: 'Emmanuel Isodje',
-      role: 'Gründerin & Geschäftsführerin',
+      role: 'Gründer & Geschäftsführer',
       bio: 'Mit über 15 Jahren Erfahrung in Hospitality und pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
+      image: '/src/assets/images/founder_portrait_1784068713580.jpg'
     },
     {
-      name: 'Marcus Becker',
-      role: 'Leiter Alltagsbegleitung',
-      bio: 'Ausgebildeter Alltagsbegleiter nach § 45b. Er koordiniert unsere Angebote für Senioren und pflegt engen Kontakt zu den Pflegekassen.',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200'
+      name: 'Adenike Adeshina',
+  role: 'Leiterin Tagesunterstützung',
+  bio: 'Adenike leitet unsere täglichen Unterstützungsdienste und sorgt dafür, dass jeder Kunde zuverlässige Hilfe und persönliche Betreuung erhält.',
+  image: '/src/assets/images/adenike-adeshina.png'
     },
     {
-      name: 'Gabriele Nowak',
-      role: 'Bereichsleiterin Hauswirtschaft',
-      bio: 'Sie leitet die Qualitätssicherung der Reinigungsangebote an und sorgt dafür, dass unser Team modernste, schonende Reinigungsmethoden einsetzt.',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200'
+      name: 'Julia Rozanski',
+  role: 'Leiterin Kunden-Haushaltsservice',
+  bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
+  image: '/src/assets/images/julia-rozanski.png'
     }
   ],
   en: [
@@ -1159,19 +1162,19 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
       name: 'Emmanuel Isodje',
       role: 'Founder & CEO',
       bio: 'Leveraging over 15 years in hospitality and family welfare, she built EMMASCO to link housekeeping services with genuine emotional empathy.',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
+      image: '/src/assets/images/founder_portrait_1784068713580.jpg'
     },
     {
-      name: 'Marcus Becker',
-      role: 'Director of Companionship',
-      bio: 'Registered companion worker under SGB §45b. He aligns senior plans and manages direct invoices with care insurance funds.',
-      image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200'
+      name: 'Adenike Adeshina',
+  role: 'Leiterin Tagesunterstützung',
+  bio: 'Adenike leitet unsere täglichen Unterstützungsdienste und sorgt dafür, dass jeder Kunde zuverlässige Hilfe und persönliche Betreuung erhält.',
+  image: '/src/assets/images/adenike-adeshina.png'
     },
     {
-      name: 'Gabriele Nowak',
-      role: 'Head of Domestic Keeping',
-      bio: 'Ensures quality control operations across all homes and introduces eco-friendly cleaning techniques to the staff.',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200'
+      name: 'Julia Rozanski',
+  role: 'Leiterin Kunden-Haushaltsservice',
+  bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
+  image: '/src/assets/images/julia-rozanski.png'
     }
   ]
 };

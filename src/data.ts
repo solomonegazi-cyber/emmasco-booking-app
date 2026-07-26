@@ -245,19 +245,19 @@ export const TEAM_MEMBERS = [
     name: 'Emmanuel Isodje',
     role: 'Gründerin & Geschäftsführerin',
     bio: 'Mit über 15 Jahren Erfahrung in Hospitality und Pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200&h=200'
+    image: '/assets/images/founder_portrait_1784068713580.jpg'
   },
   {
-    name: 'Marcus Becker',
-    role: 'Leiter Alltagsbegleitung',
-    bio: 'Ausgebildeter Alltagsbegleiter nach § 45b. Er koordiniert unsere Angebote für Senioren und pflegt engen Kontakt zu den Pflegekassen.',
-    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200'
+    name: 'Adenike Adeshina',
+    role: 'Leiterin Alltagsbegleitung',
+    bio: 'Führt unser Team für Alltagsbegleitung mit Professionalität, Herzlichkeit und einem hohen Anspruch an Qualität sowie persönlicher Betreuung.',
+    image: '/src/assets/images/adenike-adeshina.png'
   },
   {
-    name: 'Gabriele Nowak',
-    role: 'Bereichsleiterin Hauswirtschaft',
-    bio: 'Sie leitet die Qualitätssicherung der Reinigungsangebote an und sorgt dafür, dass unser Team modernste, schonende Reinigungsmethoden einsetzt.',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200'
+    name: 'Julia Rozanski',
+    role: 'Leiterin Housekeeping',
+    bio: 'Verantwortet sämtliche Housekeeping-Abläufe und gewährleistet höchste Qualitätsstandards sowie eine ausgezeichnete Betreuung unserer Kunden.',
+    image: '/src/assets/images/julia-rozanski.png'
   }
 ];
 

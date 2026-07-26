@@ -2451,11 +2451,25 @@ if (!user) {
         todayBookings: bookings.filter(b => b.date === new Date().toISOString().split('T')[0]).length,
         activeCustomers: users.filter(u => (u as any).role === 'Customer' || !(u as any).role).length,
         staffOnline: users.filter(u => (u as any).role === 'Staff' && (u as any).status === 'Approved').length,
-        revenue: bookings.filter(b => b.status === 'completed').reduce((sum, b) => sum + (b.totalPrice || 0), 0),
-        pendingPayments: bookings.filter(b => b.status !== 'completed' && b.status !== 'cancelled').reduce((sum, b) => sum + (b.totalPrice || 0), 0),
+        revenue: bookings
+  .filter((b: BookingRecord) => b.status === 'completed')
+  .reduce((sum: number, b: BookingRecord) => sum + (b.totalPrice || 0), 0),
+
+pendingPayments: bookings
+  .filter((b: BookingRecord) => b.status !== 'completed' && b.status !== 'cancelled')
+  .reduce((sum: number, b: BookingRecord) => sum + (b.totalPrice || 0), 0),
         completedJobs: bookings.filter(b => b.status === 'completed').length,
         cancellationRate: bookings.length > 0 ? Math.round((bookings.filter(b => b.status === 'cancelled').length / bookings.length) * 100) : 0,
-        customerSatisfaction: reviews.length > 0 ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)) : 4.8,
+        customerSatisfaction: reviews.length > 0
+  ? Number(
+      (
+        reviews.reduce(
+          (sum: number, r: any) => sum + r.rating,
+          0
+        ) / reviews.length
+      ).toFixed(1)
+    )
+  : 4.8,
         monthlyRevenue,
         topServices
       };
