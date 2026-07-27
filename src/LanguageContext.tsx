@@ -6,8 +6,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Service, Testimonial, FAQItem, BlogArticle } from './types';
 import founderPhoto from './assets/images/founder_portrait_1784068713580.jpg';
-import adenikePhoto from './assets/images/adenike-adeshina.png';
-import juliaPhoto from './assets/images/julia-rozanski.png';
+import adenikePhoto from './public/images/adenike-adeshina.png';
+import juliaPhoto from './public/images/julia-rozanski.png';
 
 type Language = 'de' | 'en';
 
@@ -1142,19 +1142,19 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
       name: 'Emmanuel Isodje',
       role: 'Gründer & Geschäftsführer',
       bio: 'Mit über 15 Jahren Erfahrung in Hospitality und pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
-      image: '/src/assets/images/founder_portrait_1784068713580.jpg'
+      image: '/images/founderPhoto.jpg'
     },
     {
       name: 'Adenike Adeshina',
   role: 'Leiterin Tagesunterstützung',
   bio: 'Adenike leitet unsere täglichen Unterstützungsdienste und sorgt dafür, dass jeder Kunde zuverlässige Hilfe und persönliche Betreuung erhält.',
-  image: '/src/assets/images/adenike-adeshina.png'
+  image: '/images/adenike-adeshina.png'
     },
     {
       name: 'Julia Rozanski',
   role: 'Leiterin Kunden-Haushaltsservice',
   bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
-  image: '/src/assets/images/julia-rozanski.png'
+  image: '/images/julia-rozanski.png'
     }
   ],
   en: [
@@ -1162,19 +1162,19 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
       name: 'Emmanuel Isodje',
       role: 'Founder & CEO',
       bio: 'Leveraging over 15 years in hospitality and family welfare, she built EMMASCO to link housekeeping services with genuine emotional empathy.',
-      image: '/src/assets/images/founder_portrait_1784068713580.jpg'
+      image: '/images/founderPhoto.jpg'
     },
     {
       name: 'Adenike Adeshina',
   role: 'Leiterin Tagesunterstützung',
   bio: 'Adenike leitet unsere täglichen Unterstützungsdienste und sorgt dafür, dass jeder Kunde zuverlässige Hilfe und persönliche Betreuung erhält.',
-  image: '/src/assets/images/adenike-adeshina.png'
+  image: '/images/adenike-adeshina.png'
     },
     {
       name: 'Julia Rozanski',
   role: 'Leiterin Kunden-Haushaltsservice',
   bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
-  image: '/src/assets/images/julia-rozanski.png'
+  image: '/images/julia-rozanski.png'
     }
   ]
 };
