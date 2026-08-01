@@ -8,6 +8,7 @@ import { Service, Testimonial, FAQItem, BlogArticle } from './types';
 import founderPhoto from './assets/images/founder_portrait_1784068713580.jpg';
 import adenikePhoto from './public/images/adenike-adeshina.png';
 import juliaPhoto from './public/images/julia-rozanski.png';
+import folashadePhoto from './public/images/folashade-koleosho.png';
 
 type Language = 'de' | 'en';
 
@@ -1155,7 +1156,13 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
   role: 'Leiterin Kunden-Haushaltsservice',
   bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
   image: '/images/julia-rozanski.png'
-    }
+    },
+    {
+  name: 'Folashade Olubukola Koleosho',
+  role: 'Pflegefachkraft & Fallmanagerin',
+  bio: 'Folashade überwacht die Servicequalität, unterstützt unser Team und stellt sicher, dass jeder Kunde eine zuverlässige, professionelle und einfühlsame Betreuung erhält.',
+  image: '/images/folashade-olubukola-koleosho.png'
+}
   ],
   en: [
     {
@@ -1175,7 +1182,14 @@ const LOCALIZED_TEAM_MEMBERS: Record<Language, Array<{ name: string; role: strin
   role: 'Leiterin Kunden-Haushaltsservice',
   bio: 'Julia überwacht sämtliche Haushaltsdienstleistungen und stellt höchste Sauberkeits- und Qualitätsstandards sicher.',
   image: '/images/julia-rozanski.png'
-    }
+    },
+    
+  {
+  name: 'Folashade Olubukola Koleosho',
+  role: 'Pflegefachkraft & Fallmanagerin',
+  bio: 'Folashade überwacht die Servicequalität, unterstützt unser Team und stellt sicher, dass jeder Kunde eine zuverlässige, professionelle und einfühlsame Betreuung erhält.',
+  image: '/images/folashade-olubukola-koleosho.png'
+}
   ]
 };
 

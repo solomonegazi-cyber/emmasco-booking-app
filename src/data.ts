@@ -245,19 +245,26 @@ export const TEAM_MEMBERS = [
     name: 'Emmanuel Isodje',
     role: 'Gründerin & Geschäftsführerin',
     bio: 'Mit über 15 Jahren Erfahrung in Hospitality und Pflege gründete sie EMMASCO, um haushaltsnahe Hilfe mit echter familiärer Empathie zu verknüpfen.',
-    image: '/assets/images/founder_portrait_1784068713580.jpg'
+    image: '/images/founderPhoto.jpg'
   },
   {
     name: 'Adenike Adeshina',
     role: 'Leiterin Alltagsbegleitung',
     bio: 'Führt unser Team für Alltagsbegleitung mit Professionalität, Herzlichkeit und einem hohen Anspruch an Qualität sowie persönlicher Betreuung.',
-    image: '/src/assets/images/adenike-adeshina.png'
+    image: '/images/adenike-adeshina.png'
   },
   {
     name: 'Julia Rozanski',
     role: 'Leiterin Housekeeping',
     bio: 'Verantwortet sämtliche Housekeeping-Abläufe und gewährleistet höchste Qualitätsstandards sowie eine ausgezeichnete Betreuung unserer Kunden.',
-    image: '/src/assets/images/julia-rozanski.png'
+    image: '/images/julia-rozanski.png'
+  },
+   
+  {
+    name: 'Folashade Olubukola Koleosho',
+    role: 'Pflegefachkraft & Fallmanagerin',
+    bio: 'Überwacht die Servicequalität, unterstützt unser Team und stellt sicher, dass jeder Kunde eine zuverlässige, professionelle und einfühlsame Betreuung erhält.',
+    image: '/images/folashade-olubukola-koleosho.png'
   }
 ];
 

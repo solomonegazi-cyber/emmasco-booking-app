@@ -96,6 +96,46 @@ const TRUST_ITEMS: GalleryItem[] = [
     specsEn: ['Specialist in Natural Stone & Marble', 'Certified for Disinfection Standards', '99% Customer Satisfaction Rating']
   },
   {
+  id: 'team-folashade',
+  category: 'team',
+
+  nameDe: 'Folashade Olubukola Koleosho',
+  nameEn: 'Mrs. Folashade Olubukola Koleosho',
+
+  roleDe: 'Pflegefachkraft & Fallmanagerin',
+  roleEn: 'Nursing Specialist & Case Facilitator',
+
+  shortDescDe: 'Überwacht die Servicequalität, unterstützt unser Team und sorgt für eine zuverlässige und einfühlsame Betreuung jedes Kunden.',
+  shortDescEn: 'Oversees service quality, supports our team, and ensures every client receives reliable, compassionate care.',
+
+  longDescDe: 'Folashade Olubukola Koleosho ist als Pflegefachkraft und Fallmanagerin für die Sicherstellung einer hochwertigen Betreuung verantwortlich. Sie begleitet die Einsatzplanung, unterstützt unsere Mitarbeitenden und stellt sicher, dass jede Kundin und jeder Kunde eine professionelle, respektvolle und individuelle Unterstützung erhält.',
+
+  longDescEn: 'Mrs. Folashade Olubukola Koleosho serves as Nursing Specialist and Case Facilitator at Emmasco Reinigungsteam. She oversees service quality, supports the care team, coordinates client cases, and ensures every client receives professional, reliable, and compassionate assistance tailored to their individual needs.',
+
+  certificationDe: 'Pflegekoordination & Qualitätsmanagement',
+  certificationEn: 'Nursing Coordination & Quality Management',
+
+  badgeDe: 'Pflege',
+  badgeEn: 'Care',
+
+  imageUrl: '/images/folashade-olubukola-koleosho.png',
+
+  tipDe: 'Mit Fürsorge, Respekt und Professionalität schaffen wir Vertrauen und Lebensqualität.',
+  tipEn: 'Compassion, respect and professionalism are the foundation of exceptional care.',
+
+  specsDe: [
+    'Pflegekoordination',
+    'Fallmanagement',
+    'Qualitätssicherung'
+  ],
+
+  specsEn: [
+    'Care Coordination',
+    'Case Facilitation',
+    'Quality Assurance'
+  ]
+},
+ {
     id: 'equip-hepa',
     category: 'equipment',
     nameDe: 'HEPA-14 Profi-Rückensauger',

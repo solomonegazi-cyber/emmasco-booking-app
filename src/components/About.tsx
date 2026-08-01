@@ -300,56 +300,61 @@ export default function About() {
           </div>
 
         </div>
-      </section>
+</section>
 
-      {/* Dynamic Team Members Grid */}
-      <section className="py-16 bg-white text-left">
-        <div className="max-w-7xl mx-auto px-4">
-          
-          <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2 mb-12">
-            <span className="text-blue-600 font-extrabold uppercase text-xs tracking-widest bg-blue-50 px-3 py-1 rounded-full">
-              {t('about.team_badge')}
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-blue-900">
-              {t('about.team_title')}
-            </h2>
-            <p className="text-gray-500 text-sm font-semibold">
-              {t('about.team_subtitle')}
-            </p>
+{/* Dynamic Team Members Grid */}
+<section className="py-16 bg-white text-left">
+  <div className="max-w-7xl mx-auto px-4">
+
+    <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2 mb-12">
+      <span className="text-blue-600 font-extrabold uppercase text-xs tracking-widest bg-blue-50 px-3 py-1 rounded-full">
+        {t('about.team_badge')}
+      </span>
+
+      <h2 className="text-3xl md:text-4xl font-extrabold text-blue-900">
+        {t('about.team_title')}
+      </h2>
+
+      <p className="text-gray-500 text-sm font-semibold">
+        {t('about.team_subtitle')}
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {teamMembers.map((member, i) => (
+        <div
+          key={i}
+          className="bg-[#F6FAFF] rounded-2xl overflow-hidden border border-blue-50 shadow-sm flex flex-col items-center p-6 text-center hover:shadow-md transition-all duration-300"
+        >
+          <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative mb-4">
+            <img
+              src={member.image}
+              alt={member.name}
+              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+            />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {teamMembers.map((member, i) => (
-              <div 
-                key={i} 
-                className="bg-[#F6FAFF] rounded-2xl overflow-hidden border border-blue-50 shadow-sm flex flex-col items-center p-6 text-center hover:shadow-md transition-all duration-300"
-              >
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-md relative mb-4">
-                  <img 
-                    src={member.image} 
-                    alt={member.name} 
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                
-                <h3 className="font-extrabold text-blue-950 text-lg">{member.name}</h3>
-                <span className="text-xs font-black text-blue-600 uppercase tracking-widest block mb-3">
-                  {member.role}
-                </span>
-                
-                <p className="text-xs text-gray-500 leading-relaxed font-semibold">
-                  {member.bio}
-                </p>
-              </div>
-            ))}
-          </div>
+          <h3 className="font-extrabold text-blue-950 text-lg">
+            {member.name}
+          </h3>
 
+          <span className="text-xs font-black text-blue-600 uppercase tracking-widest block mb-3">
+            {member.role}
+          </span>
+
+          <p className="text-xs text-gray-500 leading-relaxed font-semibold">
+            {member.bio}
+          </p>
         </div>
-      </section>
+      ))}
+    </div>
 
-      {/* History Timeline Component */}
-      <section className="py-16 bg-[#F6FAFF] text-left">
+  </div>
+</section>
+
+{/* Company Timeline */}
+<section className="py-16 bg-[#F8FBFF]">
         <div className="max-w-4xl mx-auto px-4">
           
           <div className="text-center max-w-2xl mx-auto flex flex-col items-center gap-2 mb-12">
