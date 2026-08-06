@@ -369,7 +369,7 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     // Hero / Home Main
     'hero.badge': 'State-approved according to § 45a SGB XI',
     'hero.title_part1': 'Everyday Support, ',
-    'hero.title_part2': 'you can truly rely on',
+    'hero.title_part2': 'You Can Trust',
     'hero.subtitle': 'Household services and everyday companionship with heart and reliability. Maintain your independence in your own home.',
     'hero.button_call': 'Call Us',
     'hero.button_consult': 'Free Consultation',
